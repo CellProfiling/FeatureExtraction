@@ -1,0 +1,152 @@
+We wish to pay attribute and to acknowledge to the following open-code files and its contributors.
+All files are located in TAC\open_code_lib\ with  '_TACWrapper' extension (without the ')
+_________________________________
+1. File: hungarianlinker.m
+Description: Simple multiple particle tracker with gap closing
+Copyright: Jean-Yves Tinevez, 2012 
+E-mail:jeanyves.tinevez@gmail.com
+Downloaded from- http://www.mathworks.com/matlabcentral/fileexchange/34040-simple-tracker/content/SimpleTracker/hungarianlinker.m 
+_________________________________
+2. File: kmeans.m
+Description: kmeans image segmentation
+Author: Jose Vicente Manjon Herrera , 2005
+Email: jmanjon@fis.upv.es
+Downloaded from - http://www.mathworks.com.au/matlabcentral/fileexchange/8379-kmeans-image-segmentation
+_________________________________
+3. File: Munkres.m
+Description: Munkres' Assignment Algorithm, Modified for Rectangular Matrices
+Reference: http://csclab.murraystate.edu/bob.pilgrim/445/munkres.html
+Copyright: version 2.3 by Yi Cao at Cranfield University on 11th September 2011
+Downloaded from- http://www.mathworks.com/matlabcentral/fileexchange/20652-hungarian-algorithm-for-linear-assignment-problems-v2-3
+_________________________________
+4. File: ANGLE_DEG_2D.m
+Description: Matlab function that returns the angle swept out between two rays in 2D
+Copyright: John Burkardt, 2010
+Downloaded from- http://people.sc.fsu.edu/~jburkardt/f_src/dutch/dutch.f90
+ _________________________________
+5. File:vol3d.m
+Description: 3-d volume (voxel) rendering 
+Copyright: Joe Conti, 2004, Improvements by Oliver Woodford, 2011 
+Downloaded from- http://www.mathworks.com/matlabcentral/fileexchange/22940-vol3d-v2/content/vol3d.m
+ _________________________________
+6. File: track_crocker (based on track.m)
+Description: Constructs n-dimensional trajectories from a scrambled list of particle coordinates determined at discrete times
+ Copyright: John C. Crocker, 2007
+Downloaded from- ttp://glinda.lrsm.upenn.edu/~weeks/idl
+ _________________________________
+7. File: timebar.m
+Description: Progress bar with estimated time remaining
+Copyright: Chad English, 2002
+E-mail: cenglish@myrealbox.com Downloaded from- http://www.mathworks.com/matlabcentral/fileexchange/1255-timebar
+_________________________________
+8. File: speaker.m (based on tts.m)
+Description: text-to-speech, speech synthesis, tts, let Matlab speak
+Copyright: Siyi Deng, 2007
+Downloaded from- http://www.mathworks.com/matlabcentral/fileexchange/18091-text-to-speech) 
+ _________________________________
+9. File: Noisecomp.m
+Description: Function for denoising an image using FFT
+Reference: Peter Kovesi, "Phase Preserving Denoising of Images". 
+ The Australian Pattern Recognition Society Conference: DICTA'99. 
+ December 1999. Perth WA. pp 212-217
+Copyright (c) 1998-2000 Peter Kovesi, School of Computer Science & Software Engineering, The University of Western Australia
+E-mail: http://www.csse.uwa.edu.au/
+Downloaded from- http://www.cs.uwa.edu.au/pub/robvis/papers/pk/denoise.ps.gz.
+_________________________________ 
+10. File: Canny.m
+Description: Canny edge detection 
+Copyright (c) 2003 Peter Kovesi, School of Computer Science & Software Engineering, The University of Western Australia
+E-mail: http://www.csse.uwa.edu.au/
+Downloaded from- http://www.csse.uwa.edu.au/~pk/research/matlabfns/Spatial/canny.m
+ _________________________________
+11. File: nhist.m
+Description: featured plot histograms
+Copyright: Jonathan Lansey, 2009 
+ E-mail: Lansey@gmail.com
+Downloaded from- http://www.mathworks.com/matlabcentral/fileexchange/27388-plot-and-compare-nice-histograms-by-default
+_________________________________
+12. File: Magnify.m (based on magnifyrecttofig.m)
+Description: Opened new magnified image
+Copyright: Andrew Diamond, EnVision Systems LLC 2005. Based on Joe Conti work, 2004
+Downloaded from- http://www.mathworks.com/matlabcentral/fileexchange/7286-magnifyrecttofig 
+ _________________________________
+13. File: Level_Set_Evolution.m
+Description: level set method for object segmentation 
+Reference: "Level Set Evolution Without Re-initialization: A New Variational Formulation",  in Proceedings of CVPR'05, vol. 1, pp. 430-436.
+Copyright: Chunming Li 
+E-mail: li_chunming@hotmail.com
+Downloaded from- URL: http://www.engr.uconn.edu/~cmli/
+ _________________________________
+14-16. File: smoothn.m
+Description: Robust spline smoothing for 1-D to N-D data
+Reference: Garcia D, Robust smoothing of gridded data in one and higher dimensions  with missing values. Computational Statistics & Data Analysis, 2010 
+Copyright: Damien Garcia, 2011
+ Downloaded from- http://www.biomecardio.com/matlab/smoothn.html
+Supporting files: 
+IDCTN.m, N-D inverse discrete cosine transform.
+DCTN.m, N-D discrete cosine transform.
+Reference for supporting files: Narasimha M. et al, On the computation of the discrete cosine
+ transform, IEEE Trans Comm, 26, 6, 1978, pp 934-936.
+_________________________________
+17. File: houghcircles.m
+Description: detects multiple disks (coins) in an image using Hough Transform.
+Copyright (c), Yuan-Liang Tang 2009
+ Associate Professor
+ Department of Information Management
+ Chaoyang University of Technology
+ Taichung, Taiwan
+E-mail: http://www.cyut.edu.tw/~yltang
+ Downloaded from -http://www.mathworks.com/matlabcentral/fileexchange/22543-detects-multiple-disks-coins-in-an-image-using-hough-transform
+_________________________________
+18. File: getjframe.m
+Description: retrieves the current figure (gcf)'s underlying Java frame,
+Copyright: Yair Altman, 2011
+E-mail: altmany@gmail.com
+ Downloaded from - http://www.mathworks.com/matlabcentral/fileexchange/15830-getjframe-retrieves-a-figures-underlying-java-frame
+_________________________________
+19. File: bresenham.m
+Description: Generate a line profile of a 2d image using Bresenham's algorithm
+Reference: http://en.wikipedia.org/wiki/Bresenham's_line_algorithm
+Copyright: Narupon Chattrapiban, 2006
+Downloaded from - http://www.mathworks.com/matlabcentral/fileexchange/12939-bresenhams-line
+_________________________________
+20. File: distinguishable_colors.m
+Description: generates a set of colors which are distinguishable by reference to the "Lab" color space, which more closely matches human color perception than RGB
+Copyright: 2010 by Timothy E. Holy
+Downloaded from - http://www.mathworks.com/matlabcentral/fileexchange/29702-generate-maximally-perceptually-distinct-colors
+ _________________________________
+21. File: Imrotate2.m (based on IMROTATE.m)
+Description: Rotate image, allowing for a non-black FILL.
+Copyright: Copyright 1992-2004 The MathWorks, Inc., Modified by Daniel Drucker, 2004
+_________________________________
+22. File: dscatter.m
+Description: creates a scatter plot coloured by density
+Reference: Paul H. C. Eilers and Jelle J. Goeman, Enhancing scatterplots with smoothed densities, Bioinformatics, 004; 20: 623 - 628.
+Copyright 2003-2004 The MathWorks, Inc. Written by Robert Henson.
+Downloaded from - http://www.mathworks.com/matlabcentral/fileexchange/8430-flow-cytometry-data-reader-and-visualization
+_________________________________ 
+23. File: drlse_edge.m
+Description: edge-based active contour
+Reference:  C. Li, C. Xu, C. Gui, M. D. Fox, "Distance Regularized Level Set Evolution and Its Application to Image Segmentation", 
+  IEEE Trans. Image Processing, vol. 19 (12), pp.3243-3254, 2010.
+Mutat Res, 2011, 711(1-2):49-60. 
+Copyright: Chunming Li, 2011
+E-mail:  lchunming@gmail.com, li_chunming@hotmail.com
+Downloaded from -  http://www.engr.uconn.edu/~cmli/
+
+  
+  
+_________________________________ _________________________________ 
+24. File: TGI_Objects.mexw32, TGI_Objects.mexw64
+Description: run a path of low intensity pixels to separate between cells where they contact
+Reference: gammaH2AX foci as a measure of DNA damage: a computational approach to automatic analysis, Ivashkevich A.N., Martin O.A., Smith A.J., Redon C.E., Bonner W.M., Martin R.F., Lobachevsky P.N., 
+Mutat Res, 2011, 711(1-2):49-60. 
+Copyright: Pavel Lobachevsky, 2011
+E-mail: pavel.lobachevsky@petermac.org
+ 
+
+
+
+
+
+

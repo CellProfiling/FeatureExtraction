@@ -1,0 +1,58 @@
+% =========================================================
+% A guid to add new function in TAC_Measurments_Module: (in case I will forget myself :)):
+% Example 1:
+% ---
+% 1. the function: for this exmaple we want a function that gives the
+% polarisation of the protein disribution: Get_Cell_Polarisation.
+ 
+% 2. The type : the type will be type 2 for this function : can be ploted
+% vs other parameters.
+
+ 
+% 3. add 'Polarisation' to define the plot list in the next functions:
+%  function popup1_Callback(hObject, eventdata, handles), 
+%     function popup2_Callback(hObject, eventdata, handles) [if needed]
+% parental_num_Callback(hObject, eventdata, handles) 
+%  Set_TAC_Measurments_Module_Settings(hObject, eventdata, handles,TAC_Measurments_Module_Settings) 
+% Div_Cells_Callback(hObject, eventdata, handles) [if needed]
+
+
+%4. to add the function called from cell, population, dividing at 
+%   function Go_Callback(hObject, eventdata, handles) 
+%  because we have type 2 function:
+% if findstr(str,'Dividing- Polarisation')==1 %18
+%  Dividing_plot_function(handles,n,D1,D2,Vs,'Polarisation') ;
+% end
+% if findstr(str,'Population- Polarisation')==1  %19
+%  Population_plot_function(handles,'Polarisation',Vs,n) ; 
+%  end 
+%   if findstr(str,'Cell- Polarisation')==1 %19
+% Cell_plot_function(handles,n,'Polarisation',Vs) ;
+%  end 
+
+
+
+% 5.  add the sub-call:
+% at Cell_plot_function(handles,n,str_in,Vs) :
+% if strfind(Vs,'Polarisation')>1  
+% X=Get_Cell_Polarisation(handles,n,Vs) ;
+%  Vs_X='Polarisation';
+%  end
+%  at Population_plot_function(handles,'Polarisation',Vs,n) ; :
+% if findstr(Vs,'Polarisation')
+%  X=Get_Cell_Polarisation(handles,jj,Vs) ; 
+% end
+% at Dividing_plot_function(handles,n,D1,D2,Vs,'Polarisation'):
+%  if findstr(Vs,'Polarisation')
+% X=Get_Cell_Polarisation(handles,start_frame,Vs) ; 
+%  end
+
+%   6. create Get_Cell_Polarisation(handles,start_frame,Vs) ; 
+%  function [Data_out]=Get_Cell_Polarisation(handles,n,Vs)   
+% Data=Get_Cell_stack(handles,n,Vs) ; Data_out=[];
+% for ii=1:size(Data,2)
+%   temp =Data(ii).cdata;
+%   temp=temp(temp>0);
+% Data_out(jj)=(max(temp)-min(temp))/median(temp) ; 
+% end
+% 7. edit the file red_plotguide
