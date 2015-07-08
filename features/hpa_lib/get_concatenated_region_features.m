@@ -32,11 +32,11 @@ function [features, feature_names, feature_computation_time, cell_regions , nuc_
   if nargout > 2
     feature_computation_time = 0; 
   end
-  
+  disp('segmenting fields') 
   [cell_regions, nuc_regions] = segmentFields(image_path, mask_path, base_naming_convention,resolution);
 %   figure;imshow(label2rgb(bwlabel(cell_regions)));
 %   figure;imshow(label2rgb(bwlabel(nuc_regions)));
-  
+  disp('getting nuclear region feats')
   nucstats_seg = regionprops(bwlabel(nuc_regions),'Centroid','BoundingBox');
   
   if use_segmentation_suffix_in_list
@@ -59,7 +59,7 @@ function [features, feature_names, feature_computation_time, cell_regions , nuc_
     ; '/total_dapi'}
 
   number_feature_sets = length(feature_set_directories)
-
+  disp('setting naming conventions')
   feature_set_naming_conventions = repmat({base_naming_convention}, size(feature_set_directories));
   feature_set_naming_conventions = repmat({base_naming_convention}, size(feature_set_directories));
   feature_set_naming_conventions{2}.protein_channel = base_naming_convention.nuclear_channel;
@@ -99,6 +99,7 @@ function [features, feature_names, feature_computation_time, cell_regions , nuc_
 		feature_set_subdirectory = storage_path
 		%image_path
 		%mask_path
+    disp(['calculating features on set index ', num2str(feature_set_index),'.'])
     calcRegionFeat(image_path, mask_path, feature_set_subdirectory, ...
                    feature_set_naming_conventions{feature_set_index}, ...
                    feature_set_feature_names{feature_set_index}, ...
@@ -130,7 +131,7 @@ function [features, feature_names, feature_computation_time, cell_regions , nuc_
     %whos feature*
     
   end
-  
+  disp('making feature matrix') 
   %features
   features = cell2mat(features);
   %whos feature*

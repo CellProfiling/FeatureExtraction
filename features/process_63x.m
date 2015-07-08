@@ -87,8 +87,8 @@ if(step2)
     %label_subdirectories{index}
     %image_subdirectory
     %storage_subdirectory
-    
-    try
+    disp('In 63x code')
+    %try
         [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
         regions_results     =   cell2mat(label_features);
         
@@ -120,12 +120,12 @@ if(step2)
             exit(exit_code);
         end
         
-    catch
+    %catch
         cell_feat = 0;
         exit_code = 1;
         disp('Segmentation error occuring during feature extraction 63x/40x');
         exit(exit_code);
-    end
+    %end
 end
 
 
