@@ -64,7 +64,6 @@ if ~exist('fsetnames','var') || isempty(fsetnames)
   fsetnames = original_fsetnames; 
 end
 
-
 datasettype = 'Region';
 % $$$ if ~exist(['./data/features/' lower(datasettype) '/'],'dir')
 % $$$    mkdir(['./data/features/' lower(datasettype) '/']);
@@ -141,13 +140,17 @@ rootdir_(ind) = '_';
 
 uout = unixfind( rootdir, filetype, greparg);
 readlist = listmatlabformat( uout);
+%DPS - add fix if the parent dir is not the directory where the images are since unixfind.m performs recursive searches
+[folder,file,exttype] = fileparts(readlist{1})
+rootdir = [folder,filesep]
+rootdir_ = strrep(rootdir,'/','_')
 
-uout_nuc = findreplacestring(uout, naming_convention.protein_channel, naming_convention.nuclear_channel);
-uout_tub = findreplacestring(uout, naming_convention.protein_channel, naming_convention.tubulin_channel);
-uout_er = findreplacestring(uout, naming_convention.protein_channel, naming_convention.er_channel);
-readlist_nuc = listmatlabformat( uout_nuc);
-readlist_tub = listmatlabformat( uout_tub);
-readlist_er = listmatlabformat( uout_er);
+uout_nuc = findreplacestring(uout, naming_convention.protein_channel, naming_convention.nuclear_channel)
+uout_tub = findreplacestring(uout, naming_convention.protein_channel, naming_convention.tubulin_channel)
+uout_er = findreplacestring(uout, naming_convention.protein_channel, naming_convention.er_channel)
+readlist_nuc = listmatlabformat( uout_nuc)
+readlist_tub = listmatlabformat( uout_tub)
+readlist_er = listmatlabformat( uout_er)
 
 
 
@@ -158,9 +161,12 @@ mout = findreplacestring( mout, '/', '_');
 mout = findreplacestring( mout, '.tif', '.png');
 %mout = findreplacestring( mout, rootdir_, ['./data/masks/']);
 maskdir_ = [maskdir '/']
+mout
+rootdir_
+maskdir_
 mout = findreplacestring( mout, rootdir_, maskdir_);
-readlist_mask = listmatlabformat( mout);
-
+readlist_mask = listmatlabformat( mout)'
+readlist'
 
 cleanobject.channel_path = [];
 cleanobject.channel = [];
@@ -240,7 +246,6 @@ for i=1:length(readlist)
         tubfieldstruct.channel_path = readlist_tub{i};
         erfieldstruct.channel_path = readlist_er{i};
         maskfieldstruct.channel_path = readlist_mask{i};
-
         maskAllChannels
         
         %imagesc(protfieldstruct.channel);pause;

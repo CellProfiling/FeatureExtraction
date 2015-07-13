@@ -73,14 +73,17 @@ end
 filetype = 'tif';
 
 %greparg = '| grep green';
-greparg = ['| grep ', naming_convention.protein_channel];
+greparg = ['| grep ', naming_convention.protein_channel]
 
 ind = find(readdir=='/');
 readdir_ = readdir;
 readdir_(ind) = '_';
-
 uout = unixfind( readdir, filetype, greparg);
 readlist = listmatlabformat( uout);
+
+%adjust readdir in case it's not right
+[readdir,filename,exttype] = fileparts(readlist{1});
+readdir_ = strrep(readdir,'/','_');
 
 uout_nuc = findreplacestring(uout, naming_convention.protein_channel, naming_convention.nuclear_channel);
 uout_tub = findreplacestring(uout, naming_convention.protein_channel, naming_convention.tubulin_channel);
@@ -99,17 +102,21 @@ readlist_er = listmatlabformat( uout_er);
 % $$$ readlist_tub = listmatlabformat( uout_tub);
 % $$$ readlist_er = listmatlabformat( uout_er);
 
-
+uout
 mout = uout;
+mout
 mout = findreplacestring( mout, naming_convention.protein_channel, naming_convention.segmentation_suffix);
 %mout = findreplacestring( uout, '/', '_');
-mout = findreplacestring( mout, '/', '_');
+%mout = findreplacestring( mout, '/', '_');
 writedir_ = [writedir '/']
-mout = findreplacestring( mout, readdir_,writedir_);
+%readdir_
+%mout
+%mout = findreplacestring( mout, readdir_,writedir_);
+mout = strrep(mout,readdir,writedir);
 mout = findreplacestring( mout, '.tif','.png');
 
 writelist = listmatlabformat( mout);
-writelist
+writelist'
 mkdir(writedir,'/tmp')
 for i=1:length(readlist)
 %    i
@@ -133,6 +140,7 @@ for i=1:length(readlist)
     [regions, nucseeds] = segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE);
 
     % saving results
+    disp(['writing image ',writelist{i}])
     imwrite( regions, writelist{i});
 
     fclose(fid);

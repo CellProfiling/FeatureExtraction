@@ -13,7 +13,7 @@ end
 
 step1   = true;
 step2   = true;
-step3   = true;
+step3   = false;%true;
 
 warning('off', 'MATLAB:MKDIR:DirectoryExists');
 warning('off', 'Images:imfeature:obsoleteFunction');
@@ -26,10 +26,15 @@ extention_ab    = '_green.tif';
 extention_mtub  = '_red.tif';
 extention_er    = strcat('_', color, '.tif');
 
-list_ab     = rdir_list(char([in_folder,'/*','/*',extention_ab]));
-list_dapi   = rdir_list(char([in_folder,'/*','/*',extention_dapi]));
-list_mtub   = rdir_list(char([in_folder,'/*','/*',extention_mtub]));
-list_er     = rdir_list(char([in_folder,'/*','/*',extention_er]));
+list_ab     = rdir_list(char([in_folder,'/*',extention_ab]));
+list_dapi   = rdir_list(char([in_folder,'/*',extention_dapi]));
+list_mtub   = rdir_list(char([in_folder,'/*',extention_mtub]));
+list_er     = rdir_list(char([in_folder,'/*',extention_er]));
+
+%list_ab     = rdir_list(char([in_folder,'/*','/*',extention_ab]));
+%list_dapi   = rdir_list(char([in_folder,'/*','/*',extention_dapi]));
+%list_mtub   = rdir_list(char([in_folder,'/*','/*',extention_mtub]));
+%list_er     = rdir_list(char([in_folder,'/*','/*',extention_er]));
 
 
 %% Init
@@ -47,10 +52,11 @@ if(step1)
     diary([filename '/' 'log' date_text ...
         '_' n '.txt']);
     
-    padnumb = 0; % Offset for directory brousing and data analysis
+    padnumb = 2; % Offset for directory brousing and data analysis
     
     label_subdirectories = cell(1,1);
-    
+    dirlist.name
+    %breaking = breakme 
     for i=1:length(label_subdirectories)
         label_subdirectories{i} = dirlist(i+padnumb).name;
     end
@@ -80,8 +86,10 @@ if(step2)
     base_naming_convention.segmentation_suffix = base_naming_convention.protein_channel;
         
     index  = 1;
-    
-    image_subdirectory      = [image_path, '/', (label_subdirectories{index}), filesep];
+   
+    label_subdirectories 
+    image_subdirectory      = [image_path, '/', (label_subdirectories{index}), filesep]
+    image_path
     %storage_subdirectory    = [processed_path, (label_subdirectories{index}), filesep];
     storage_subdirectory    = processed_path;
     %label_subdirectories{index}
@@ -95,25 +103,41 @@ if(step2)
         % read cell (x,y) centers and bounding box values
         
         dir_png         = dir([storage_subdirectory,'/*.png']);
-        bw_seg          = imread([storage_subdirectory,'/',char(dir_png(1).name)]);
-        nucstats_seg    = regionprops(bwlabel(bw_seg,4),'Centroid','BoundingBox','Area');
+        
+	%%%DPS 2015/07/09 - I don't understand how this ever worked without a for loop unless they were running on one image at a time. I am changing now
+	position_stats = zeros(size(regions_results,1),7);
+	currstart = 1;
+	for i = 1:length(dir_png)
+	%bw_seg          = imread([storage_subdirectory,'/',char(dir_png(1).name)]);
+        bw_seg = imread([storage_subdirectory,'/',char(dir_png(i).name)]);
+	nucstats_seg    = regionprops(bwlabel(bw_seg,4),'Centroid','BoundingBox','Area');
         
         if(length(nucstats_seg)>0)
             
-            num_cells = size(regions_results);
-            num_cells = num_cells(1,1);
-            position_stats(1:num_cells,1)      =   [nucstats_seg(1:num_cells).Area]';
-            position_stats(1:num_cells,2:3)    =   reshape([nucstats_seg(1:num_cells).Centroid],2,num_cells)';
-            position_stats(1:num_cells,4:7)    =   reshape([nucstats_seg(1:num_cells).BoundingBox],4,num_cells)';
+            %num_cells = size(regions_results);
+            %num_cells = num_cells(1,1);
+            num_cells = length(nucstats_seg);
+	    %position_stats(1:num_cells,1) = [nucstats_seg(1:num_cells).Area]';
+	    position_stats(currstart:currstart+num_cells-1,1)      =   [nucstats_seg.Area]';
+            position_stats(currstart:currstart+num_cells-1,2:3)    =   reshape([nucstats_seg(1:num_cells).Centroid],2,num_cells)';
+            position_stats(currstart:currstart+num_cells-1,4:7)    =   reshape([nucstats_seg(1:num_cells).BoundingBox],4,num_cells)';
             
             time_so_far = toc(start_time);
-            
+            currstart = currstart+num_cells;
             %size(regions_results)
             %size(position_stats)
+	
+	else
+	    warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
+	end
+	end
+
+	if sum(position_stats(:))>0
             cell_feat  = [position_stats regions_results];
             csvwrite([out_folder,'/','features.csv'], [position_stats regions_results]);
             
         else
+	    breaking = breakme
             cell_feat = 0;
             exit_code = 1;
             disp('Segmentation error occuring during feature extraction 63x/40x');
@@ -121,10 +145,10 @@ if(step2)
         end
         
     %catch
-        cell_feat = 0;
-        exit_code = 1;
-        disp('Segmentation error occuring during feature extraction 63x/40x');
-        exit(exit_code);
+        %cell_feat = 0;
+        %exit_code = 1;
+        %disp('Segmentation error occuring during feature extraction 63x/40x');
+        %exit(exit_code);
     %end
 end
 
@@ -132,7 +156,7 @@ end
 %% create segmentation masks 
 
 if(step3)
-    
+   %%%DPS 2015-07-09  Not sure where I is supposed to be coming from without a for loop!  
     % Read images
     
     im_dapi     =   imread(list_dapi(i).name);
@@ -168,3 +192,5 @@ if(step3)
     % previously analysed (if multiple ABs are included or if analysis is 
     % run at the plate level)  
 end
+
+exit(exit_code);

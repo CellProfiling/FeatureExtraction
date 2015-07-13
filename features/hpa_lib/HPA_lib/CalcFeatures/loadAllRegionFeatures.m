@@ -75,8 +75,7 @@ staining = staining(tmpidx);
 staining = cellfun(@(x) x(x(2)),staining,'UniformOutput',false); %%
 staining = cell2mat(staining); %%
 
-ulist = listunixformat( imagelist);
-
+ulist = listunixformat( imagelist)
 
 
 original_featsets = {...
@@ -152,16 +151,16 @@ encount = cumsum(numfeats);
 stcount = [1 encount(1:end-1)+1];
 
 for i=1:length(featsets)
-    tmplist = findreplacestring( ulist, '/','_');
-    rootdirtmp = findreplacestring( rootdir, '/','_');
-    tmplist = findreplacestring( tmplist, rootdirtmp, readdir);
+    tmplist = findreplacestring( ulist, '/','_')
+    rootdirtmp = findreplacestring( rootdir, '/','_')
+    tmplist = findreplacestring( tmplist, rootdirtmp, readdir)
 % $$$     flists{i} = findreplacestring( tmplist, '.tif', ['_' featsets{i} '.mat']);
     feature_set_suffix = ['_', featsets{i}];
 % $$$     if ~strcmpi(channel_as_protein, 'protein')
 % $$$       feature_set_suffix = [feature_set_suffix, '_', channel_as_protein, '-focus'];
 % $$$     end
     flists{i} = findreplacestring( tmplist, '.tif', [feature_set_suffix, '.mat']);
-    featlists{i} = listmatlabformat( flists{i})';
+    featlists{i} = listmatlabformat( flists{i})'
 end
 %keyboard
 
@@ -180,6 +179,8 @@ counter = 1;
 %fwrite(fiddle,char(10));
 
 disp( length(imagelist));
+featlists
+featlists{1}{1}
 for i=1:length(imagelist)
     allnames = [];
     allslfnames = [];
