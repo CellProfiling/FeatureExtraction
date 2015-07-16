@@ -75,7 +75,7 @@ staining = staining(tmpidx);
 staining = cellfun(@(x) x(x(2)),staining,'UniformOutput',false); %%
 staining = cell2mat(staining); %%
 
-ulist = listunixformat( imagelist)
+% ulist = listunixformat( imagelist)
 
 
 original_featsets = {...
@@ -150,17 +150,27 @@ datasettype = 'Region';
 encount = cumsum(numfeats);
 stcount = [1 encount(1:end-1)+1];
 
+%Devin P. Sullivan - 2015, 07, 14 - adding for loop for this to get the
+%list. This is not super efficient, but is worth the hit
+tmplist = cell(length(imagelist),1);
+for i = 1:length(imagelist)
+    [origfolder,tmplist{i},ext] = fileparts(imagelist{i});
+end
+
+
+
 for i=1:length(featsets)
-    tmplist = findreplacestring( ulist, '/','_')
-    rootdirtmp = findreplacestring( rootdir, '/','_')
-    tmplist = findreplacestring( tmplist, rootdirtmp, readdir)
+%     tmplist = findreplacestring( ulist, '/','_')
+%     rootdirtmp = findreplacestring( rootdir, '/','_')
+%     tmplist = findreplacestring( tmplist, rootdirtmp, readdir)
 % $$$     flists{i} = findreplacestring( tmplist, '.tif', ['_' featsets{i} '.mat']);
     feature_set_suffix = ['_', featsets{i}];
 % $$$     if ~strcmpi(channel_as_protein, 'protein')
 % $$$       feature_set_suffix = [feature_set_suffix, '_', channel_as_protein, '-focus'];
 % $$$     end
-    flists{i} = findreplacestring( tmplist, '.tif', [feature_set_suffix, '.mat']);
-    featlists{i} = listmatlabformat( flists{i})'
+%     flists{i} = findreplacestring( tmplist, '.tif', [feature_set_suffix, '.mat']);
+%     featlists{i} = listmatlabformat( flists{i})'
+    featlists{i} = strcat(readdir,tmplist,feature_set_suffix,'.mat');
 end
 %keyboard
 
@@ -250,7 +260,12 @@ cellabels = allcellids(ind);
 specificity = allspecificity(ind);
 staining = allstaining(ind);
 
-
+%If there was no class label found 
+if all(cellfun(@isempty,classlabels))
+    warning('No class labels found! Setting all classlabels to "default"')
+    classlabels{1} = 'default';
+end
+    
 [classes Icl classlabels] = unique(classlabels);
 [proteins Ipr protlabels] = unique(antibodyids);
 

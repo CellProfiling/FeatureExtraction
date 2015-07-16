@@ -135,7 +135,23 @@ for i=1:length(readlist)
     fid = fopen(tmpfile,'w');
 
     nucim = imread(strtrim(readlist_nuc{i}));
-    cellim = imread(strtrim(readlist_er{i}));
+    
+    %Devin S. 2015,07,13 - Added voronoi segmentation when ER channel is
+    %not present. This is for Peter Thul's golgi project
+    %Checks both whether the path has been left blank or if the
+    %'blank_channels' option has been specified
+    if ~isfield(naming_convention,'blank_channels')
+        naming_convention.blank_channels = {};
+    end
+    if ~isempty(naming_convention.er_channel) && ~any(strcmpi(naming_convention.blank_channels,'er'))
+        cellim = imread(strtrim(readlist_er{i}));
+    else
+        warning(['No ER naming convention given.',...
+            ' If you wish to use MT for segmentation please specify this',...
+            ' path in the naming_convention.er_channel.\n',...
+            'Otherwise defaulting to Voronoi segmentation using nuclei'])
+        cellim = [];
+    end
 
     [regions, nucseeds] = segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE);
 

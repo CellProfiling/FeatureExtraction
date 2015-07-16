@@ -56,9 +56,16 @@ if(step1)
     
     label_subdirectories = cell(1,1);
     dirlist.name
+    currind = 1;
     %breaking = breakme 
-    for i=1:length(label_subdirectories)
-        label_subdirectories{i} = dirlist(i+padnumb).name;
+    for i=1:length(dirlist)
+%         currdir = dirlist(i+padnumb).name;
+        currdir = dirlist(i).name;
+        if any(strcmpi(currdir,{'.','..','.DS_Store'}))
+            continue
+        end
+        label_subdirectories{currind} = currdir;
+        currind = currind+1;
     end
     
     label_names = label_subdirectories;
@@ -82,6 +89,7 @@ if(step2)
     base_naming_convention.nuclear_channel  = extention_dapi;
     base_naming_convention.tubulin_channel  = extention_mtub;
     base_naming_convention.er_channel       = extention_er;
+    base_naming_convention.blank_channels = {'er'};
     
     base_naming_convention.segmentation_suffix = base_naming_convention.protein_channel;
         
@@ -193,4 +201,4 @@ if(step3)
     % run at the plate level)  
 end
 
-exit(exit_code);
+% exit(exit_code);
