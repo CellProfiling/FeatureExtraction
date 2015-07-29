@@ -220,6 +220,10 @@ for i=1:length(imagelist)
           warning('featsets{j} = %s, size(feats) = [%d, %d], numfeats should be %d\n', featsets{j}, size(feats), feature_length_dictionary.(featsets{j}))
         end
         
+        if sum(isnan(feats(:)))>0
+            nansfound = 1
+        end
+        
         if size(feats,1)~=size(features,1)
             features = repmat(features, [size(feats,1) 1]);
         end

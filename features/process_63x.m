@@ -89,14 +89,20 @@ if(step2)
     base_naming_convention.nuclear_channel  = extention_dapi;
     base_naming_convention.tubulin_channel  = extention_mtub;
     base_naming_convention.er_channel       = extention_er;
-    base_naming_convention.blank_channels = {'er'};
+    base_naming_convention.blank_channels = {};
     
     base_naming_convention.segmentation_suffix = base_naming_convention.protein_channel;
         
     index  = 1;
    
     label_subdirectories 
-    image_subdirectory      = [image_path, '/', (label_subdirectories{index}), filesep]
+    image_subdirectory      = [image_path, filesep, (label_subdirectories{index}), filesep]
+    
+    %DPS - 28,07,2015  Adding support for direct parent directories rather
+    %than directories of directories 
+    if ~isdir(image_subdirectory)
+        image_subdirectory = [image_path, filesep];
+    end
     image_path
     %storage_subdirectory    = [processed_path, (label_subdirectories{index}), filesep];
     storage_subdirectory    = processed_path;

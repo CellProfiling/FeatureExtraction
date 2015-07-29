@@ -16,6 +16,12 @@ if(IMAGEPIXELSIZE==0.1)
     nucim_p = bwmorph((fgs),'open',2);
 end
 
+%check if the cellim is actually empty or even just a bit of noise
+if quantile(cellim(:),0.999)==0
+    warning('Cell image given is less that 0.1% non-zero pixels. Using voronoi segmentation.')
+    cellim = [];
+end
+
 % process cell image
 %Devin S. 2015,07,13 - Added support for voronoi segmentation
 if ~isempty(cellim)

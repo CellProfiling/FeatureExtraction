@@ -144,7 +144,10 @@ switch fsetnames{zed}
 
  case 'nonObjFluor'
     if optimize
-      thresholdProteinChannel
+      %DPS 29,07,2015 - changed thresholdProteinChannel to function rather
+      %than script for sanity
+      protstruct = thresholdProteinChannel(protstruct,optimize,protein_channel_blank);
+      %thresholdProteinChannel
     else
       loadNucleusChannel; loadMicrotubuleChannel; loadERChannel;
 
@@ -192,7 +195,10 @@ switch fsetnames{zed}
   case 'obj'
     loadNucleusChannel
 
-    thresholdProteinChannel;  thresholdNucleusChannel;
+    %DPS 29,07,2015 - changed to function for sanity and variable tracking
+    %thresholdProteinChannel;  thresholdNucleusChannel;
+    protstruct = thresholdProteinChannel(protstruct,optimize,protein_channel_blank);
+    thresholdNucleusChannel;
 
     protobjs = protstruct.channel_objectsizes;
     largeprotobjs = protstruct.channel_large_objectsizes;
@@ -232,7 +238,10 @@ switch fsetnames{zed}
   case 'objRegion'
     loadNucleusChannel
 
-    thresholdProteinChannel;  thresholdNucleusChannel;
+     %DPS 29,07,2015 - changed to function for sanity and variable tracking
+    %thresholdProteinChannel;  thresholdNucleusChannel;
+    protstruct = thresholdProteinChannel(protstruct,optimize,protein_channel_blank);
+    thresholdNucleusChannel;
 
 % $$$     [names, feats, slfnames] = ml_imgfeatures( protstruct.channel_fg, nucstruct.channel_fg);
 % $$$ 

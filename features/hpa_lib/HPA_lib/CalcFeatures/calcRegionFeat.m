@@ -40,6 +40,8 @@ function calcRegionFeat(rootdir, maskdir, writedir, naming_convention, fsetnames
 % feature computation, not just as with channel_as_protein.
 % 2011-12-28 tebuck: channel_as_protein is redundant, removing.
 % 2011-12-30 tebuck: saving computation_time per feature file.
+% 2015-07-28 dpsullivan: switched maskAllChannels from script to function
+% to better document what's going on
 
 
 original_fsetnames = {...
@@ -161,12 +163,12 @@ mout = findreplacestring( mout, '/', '_');
 mout = findreplacestring( mout, '.tif', '.png');
 %mout = findreplacestring( mout, rootdir_, ['./data/masks/']);
 maskdir_ = [maskdir '/']
-mout
-rootdir_
-maskdir_
+% mout
+% rootdir_
+% maskdir_
 mout = findreplacestring( mout, rootdir_, maskdir_);
 readlist_mask = listmatlabformat( mout)'
-readlist'
+% readlist'
 
 cleanobject.channel_path = [];
 cleanobject.channel = [];
@@ -184,6 +186,10 @@ cleanobject.downsampled2x_mthr = [];
 cleanobject.downsampled2x_fg = [];
 cleanobject.downsampled2x_objectsizes = [];
 cleanobject.downsampled4x = [];
+%DPS - 28,07,2015 Adding field to track if the channel is empty for when we
+%are reading it in (see maskAllChannels.m)
+cleanobject.isempty = [];
+
 DSF = 2;
 mkdir(rootdir,'/tmp')
 for i=1:length(readlist)
@@ -212,6 +218,25 @@ for i=1:length(readlist)
     maskfieldstruct = cleanobject;
     
     readlist{i}
+    
+    %DPS 28,07,2015 - Moved to outer for loop.
+    protfieldstruct.channel_path = readlist{i};
+    nucfieldstruct.channel_path = readlist_nuc{i};
+    tubfieldstruct.channel_path = readlist_tub{i};
+    erfieldstruct.channel_path = readlist_er{i};
+    maskfieldstruct.channel_path = readlist_mask{i};
+    %DPS 28,07,2015 - switched to function to document what's happening
+    %I hate invisible variable passing!
+    %maskAllChannels
+    [protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct]...
+        = maskAllChannels(protfieldstruct,nucfieldstruct,...
+        tubfieldstruct,erfieldstruct,maskfieldstruct);
+    
+    %DPS 28,07,2015 - update the blank image fields
+    protein_channel_blank = protfieldstruct.isempty;
+    nuclear_channel_blank = nucfieldstruct.isempty;
+    tubulin_channel_blank = tubfieldstruct.isempty;
+    er_channel_blank = erfieldstruct.isempty;
 
     for zed = 1:length(fsetnames)
 % $$$         mout = findreplacestring( readlist{i}, '/', '_');
@@ -241,12 +266,25 @@ for i=1:length(readlist)
         
         start_time = tic;
 
-        protfieldstruct.channel_path = readlist{i};
-        nucfieldstruct.channel_path = readlist_nuc{i};
-        tubfieldstruct.channel_path = readlist_tub{i};
-        erfieldstruct.channel_path = readlist_er{i};
-        maskfieldstruct.channel_path = readlist_mask{i};
-        maskAllChannels
+        %DPS 28,07,2015 - no reason that this should be inside this inner
+        %for loop. Moving to outer for loop.
+%         protfieldstruct.channel_path = readlist{i};
+%         nucfieldstruct.channel_path = readlist_nuc{i};
+%         tubfieldstruct.channel_path = readlist_tub{i};
+%         erfieldstruct.channel_path = readlist_er{i};
+%         maskfieldstruct.channel_path = readlist_mask{i};
+%         %DPS 28,07,2015 - switched to function to document what's happening
+%         %I hate invisible variable passing! 
+%         %maskAllChannels
+%         [protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct]...
+%             = maskAllChannels(protfieldstruct,nucfieldstruct,...
+%             tubfieldstruct,erfieldstruct,maskfieldstruct);
+%         
+%         %DPS 28,07,2015 - update the blank image fields 
+%         protein_channel_blank = protfieldstruct.isempty;
+%         nuclear_channel_blank = nucfieldstruct.isempty;
+%         tubulin_channel_blank = tubfieldstruct.isempty;
+%         er_channel_blank = erfieldstruct.isempty;
         
         %imagesc(protfieldstruct.channel);pause;
         
@@ -268,17 +306,52 @@ for i=1:length(readlist)
             tubstruct.channel = tubfieldstruct.channel_regions{j};
             erstruct.channel = erfieldstruct.channel_regions{j};
 
+            %DPS 28,07,2015 - check each channel in turn to see if there is
+            %fluorescent signal in our current region. If not, we will
+            %expect to get NaNs and should probably throw this image out.
+            if max(protstruct.channel(:))==0
+                warning(['No protein fluorescence in region ',num2str(j),' for ',readlist{i}])
+            end
+            if max(nucstruct.channel(:))==0
+                warning(['No nuclear fluorescence in region ',num2str(j),' for ',readlist{i}])
+            end
+
+            if max(tubstruct.channel(:))==0
+                warning(['No tubulin fluorescence in region ',num2str(j),' for ',readlist{i}])
+            end
+
+            if max(erstruct.channel(:))==0
+                warning(['No ER fluorescence in region ',num2str(j),' for ',readlist{i}])
+            end
+
+
             if nuclear_channel_blank
               nucstruct.channel = nucstruct.channel * 0; 
+              %also update the cell array of blank channels
+              if ~any(strcmpi(naming_convention.blank_channels,'nuclear'))
+                 naming_convention.blank_channels = [naming_convention.blank_channels,{'nuclear'}];
+              end
             end
             if tubulin_channel_blank
               tubstruct.channel = tubstruct.channel * 0; 
+              %also update the cell array of blank channels
+              if ~any(strcmpi(naming_convention.blank_channels,'tubulin'))
+                 naming_convention.blank_channels = [naming_convention.blank_channels,{'tubulin'}];
+              end
             end
             if er_channel_blank
               erstruct.channel = erstruct.channel * 0; 
+              %also update the cell array of blank channels
+              if ~any(strcmpi(naming_convention.blank_channels,'er'))
+                 naming_convention.blank_channels = [naming_convention.blank_channels,{'er'}];
+              end
             end
             if protein_channel_blank
               protstruct.channel = protstruct.channel * 0; 
+              %also update the cell array of blank channels
+              if ~any(strcmpi(naming_convention.blank_channels,'protein'))
+                 naming_convention.blank_channels = [naming_convention.blank_channels,{'protein'}];
+              end
             end
 
             commonScriptCalculateSet
