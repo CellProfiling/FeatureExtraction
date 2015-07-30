@@ -89,7 +89,7 @@ if(step2)
     base_naming_convention.nuclear_channel  = extention_dapi;
     base_naming_convention.tubulin_channel  = extention_mtub;
     base_naming_convention.er_channel       = extention_er;
-    base_naming_convention.blank_channels = {'er'};
+    base_naming_convention.blank_channels = {};
     
     base_naming_convention.segmentation_suffix = base_naming_convention.protein_channel;
         
