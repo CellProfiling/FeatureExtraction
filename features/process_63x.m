@@ -114,6 +114,19 @@ if(step2)
         
 	%%%DPS 2015/07/09 - I don't understand how this ever worked without a for loop unless they were running on one image at a time. I am changing now
 	position_stats = zeros(size(regions_results,1),7);
+    %DPS 30,07,2015 - Adding variable to track variable names; 7 position
+    %stats are calculated
+    pos_stats_names = cell(1,7);
+    %area
+    pos_stats_names{1} = 'position_stats:Area';
+    %center of mass location
+    pos_stats_names{2} = 'position_stats:Centroid_x';
+    pos_stats_names{3} = 'position_stats:Centroid_y';
+    %bounding box
+    pos_stats_names{4} = 'position_stats:BoundingBox_ulx';
+    pos_stats_names{5} = 'position_stats:BoundingBox_uly';
+    pos_stats_names{6} = 'position_stats:BoundingBox_wx';
+    pos_stats_names{7} = 'position_stats:BoundingBox_wy';
 	currstart = 1;
 	for i = 1:length(dir_png)
 	%bw_seg          = imread([storage_subdirectory,'/',char(dir_png(1).name)]);
@@ -142,6 +155,10 @@ if(step2)
 
 	if sum(position_stats(:))>0
             cell_feat  = [position_stats regions_results];
+            %DPS 30,07,2015 - added feature name save and concatenation of
+            %position stats to feature names 
+            feature_names = [pos_stats_names feature_names];
+            save([out_folder,filesep,'feature_names.mat'],'feature_names');
             csvwrite([out_folder,'/','features.csv'], [position_stats regions_results]);
             
         else
