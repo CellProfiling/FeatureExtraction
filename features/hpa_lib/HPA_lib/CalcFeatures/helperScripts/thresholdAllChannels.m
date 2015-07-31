@@ -1,5 +1,5 @@
 
-thresholdProteinChannel
+protstruct = thresholdProteinChannel(protstruct,optimize,protein_channel_blank);
 
 thresholdNucleusChannel
 

@@ -16,7 +16,13 @@ area_ref = sum(obj_ref(:));
 overlap = obj_prot & obj_ref;
 areaOverlap = sum(overlap(:));
 
+%DPS 29,07,2015 - added warning for when no objects are present.
+if area_prot==0
+    warning('No objects in filtered protein channel. intersect_area_to_prot_area and prot_nuc_pixel_distance_to_prot_area will be NaN.')
+end
+
 intersect_area_to_prot_area = areaOverlap / area_prot;
+
 intersect_area_to_ref_area = areaOverlap / area_ref;
 
 intersect_inten_to_prot_inten = sum(prot(obj_ref)) / sum(prot(:));
