@@ -99,8 +99,8 @@ if isempty(protstruct.channel_thr)
     tmp_bwl = bwlabel(tmp_bw, 4);
     
     %DPS 29,07,2015 - changed based on matlab suggestion to use less memory
-%     tmp_props = regionprops(tmp_bwl,'Area');
-    tmp_props = regionprops(logical(tmp_bwl),'Area');
+    tmp_props = regionprops(tmp_bwl,'Area');
+%     tmp_props = regionprops(logical(tmp_bwl),'Area');
     tmp_stats = zeros(length(tmp_props),1);
     for j = 1:length(tmp_props)
         tmp_stats(j,:) = tmp_props(j).Area;
@@ -113,8 +113,8 @@ if isempty(protstruct.channel_thr)
     tmp_bwl = bwlabel(protstruct.channel_mfg>0, 4);
     
     %DPS 29,07,2015 - changed based on matlab suggestion to use less memory
-%     tmp_props = regionprops(tmp_bwl,'Area');
-    tmp_props = regionprops(logical(tmp_bwl),'Area');
+    tmp_props = regionprops(tmp_bwl,'Area');
+%     tmp_props = regionprops(logical(tmp_bwl),'Area');
     tmp_stats = zeros(length(tmp_props),1);
     for j = 1:length(tmp_props)
         tmp_stats(j,:) = tmp_props(j).Area;
@@ -134,8 +134,8 @@ if isempty(protstruct.channel_thr)
     tmp_bwl = bwlabel(tmp_bw, 4);
     
       %DPS 29,07,2015 - changed based on matlab suggestion to use less memory
-%     tmp_props = regionprops(tmp_bwl,'Area');
-    tmp_props = regionprops(logical(tmp_bwl),'Area');
+    tmp_props = regionprops(tmp_bwl,'Area');
+%     tmp_props = regionprops(logical(tmp_bwl),'Area');
     tmp_stats = zeros(length(tmp_props),1);
     for j = 1:length(tmp_props)
         tmp_stats(j,:) = tmp_props(j).Area;
