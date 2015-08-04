@@ -1,9 +1,49 @@
-function [cell_feat, exit_code] = process_63x(in_folder,out_folder,resolution, color)
+function [cell_feat, exit_code] = process_63x(in_folder,out_folder,resolution,color,extensions)
+%
+%
+%Written by: Elton Date-unknown
+%
+%Edited by: (dd,mm,yy)
+%Devin P Sullivan 04,08,2015 - added 'extensions' input
 
 addpath(genpath('./hpa_lib'),'-begin');
 addpath(genpath('./adaptive_watersheed_seg'),'-begin');
 
 exit_code   = 0;
+
+%DPS 04,08,2015 - added 'extensions' field so that we can handle multiple
+%file-naming conventions. This should not break the former pipeline
+if nargin<5 || isempty(extensions)
+    fprintf(['You have not passed an "extensions" variable or full list of colors. We will assume you are using the HPA production channels.\n ',...
+        'please make sure your files are names accordingly:\n',...
+        '1."*_blue.tif" - nucleus \n 2."*_green.tif" - protein of interest \n',...
+        '3."*_red.tif" - microtubules \n lastly, the "color" variable is used as the segmentation channel usually "yellow" corresponding to er \n'])
+    extention_dapi  = '_blue.tif';
+    extention_ab    = '_green.tif';
+    extention_mtub  = '_red.tif';
+    %For historical reasons 'color' is separate and we are trying to make
+    %the script such that it breaks nothing in the current pipeline 
+    extention_er    = strcat('_', color, '.tif');
+elseif iscell(color)
+    %if someone has passed a cell array of color, process it
+    fprintf(['You have passed a cell array for the "color" variable. Make sure it is in the correct order',...
+        'It will be parsed as follows:\n 1.nucleus \n 2.protein of interest \n 3.microtubules \n 4.segmentation channel (usually er or tubules)\n'])
+    extention_dapi  = color{1};
+    extention_ab    = color{2};
+    extention_mtub  = color{3};
+    extention_er    = color{4};
+else
+    fprintf(['You have passed a cell array for the "color" variable. Make sure it is in the correct order',...
+        'It will be parsed as follows:\n 1.nucleus \n 2.protein of interest \n 3.microtubules \n 4.segmentation channel (usually er or tubules)\n'])
+    extention_dapi  = extensions{1};
+    extention_ab    = extensions{2};
+    extention_mtub  = extensions{3};
+    %For historical reasons 'color' is separate and we are trying to make
+    %the script such that it breaks nothing in the current pipeline 
+    extention_er    = strcat('_', color, '.tif');
+end
+
+
 
 if(resolution==63)
 	resolution = 1;
@@ -21,10 +61,10 @@ warning('off', 'Images:imfeature:obsoleteFunction');
 filename = out_folder,'/feature_extraction_HPA';
 mkdir(filename);
 
-extention_dapi  = '_blue.tif';
-extention_ab    = '_green.tif';
-extention_mtub  = '_red.tif';
-extention_er    = strcat('_', color, '.tif');
+% extention_dapi  = '_blue.tif';
+% extention_ab    = '_green.tif';
+% extention_mtub  = '_red.tif';
+% extention_er    = strcat('_', color, '.tif');
 
 list_ab     = rdir_list(char([in_folder,'/*',extention_ab]));
 list_dapi   = rdir_list(char([in_folder,'/*',extention_dapi]));
