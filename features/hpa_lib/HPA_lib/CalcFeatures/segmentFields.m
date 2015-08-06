@@ -35,7 +35,11 @@ function [regions, nucseeds] = segmentFields(readdir, writedir, naming_conventio
 % 2011-12-07 tebuck: adding option
 % naming_convention.segmentation_suffix to allow reordering
 % channels without erroneously affecting segmentation.
-
+%2015,07,13 DPSullivan - added support for voronoi segmentation and
+%cleaned up code 
+%2015,08,05 DPSullivan - added support for base naming convention that
+%starts with a "-", this previously would fail because grep would try to
+%use it as an option field rather than a search term.
 
 if ~exist('readdir','var')
     readdir = '/images/HPA/images/IFconfocal/';
@@ -73,7 +77,19 @@ end
 filetype = 'tif';
 
 %greparg = '| grep green';
-greparg = ['| grep ', naming_convention.protein_channel]
+%DPS 05,08,2015 - adding support for naming_conventions to begin with a "-"
+dashlocs = strfind(naming_convention.protein_channel,'-')
+if any(dashlocs==1)
+    %adding two slashes escapes the special character '-' at the beginning
+    %of the pattern. This only needs to be done if the dash is at the start
+    %of the pattern.
+%     naming_convention.protein_channel = ['\\',naming_convention.protein_channel];
+    greparg = ['| grep \\', naming_convention.protein_channel]
+else
+    greparg = ['| grep ', naming_convention.protein_channel]
+end
+
+
 
 ind = find(readdir=='/');
 readdir_ = readdir;

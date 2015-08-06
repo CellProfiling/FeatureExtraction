@@ -42,6 +42,38 @@ else
     %use voronoi segmentation to approximate cells
     regions = ~(ml_getvoronoi(fgs));
     
+    %because we use all the nuclei to get more accurate cell shapes we now
+    %have to eliminate "cells" where nuclei are touching the border to be
+    %consistent with previous code. 
+    %Note: cells with full nuclei but cytoplasm touching the border are
+    %removed in post processing.
+    
+    %first find regions in image
+    imgobjs = bwconncomp(regions,4);
+    
+    %get the value of nuclei touching the border 
+    nucvallist = unique(fgs(:));
+    bordernucval = nucvallist(2);%the first should always be 0
+    bordernucimg = fgs==bordernucval;
+    
+    %then loop through each region and eliminate the offending ones 
+    for i = 1:imgobjs.NumObjects
+        %create a temporary image for testing 
+        tmpimg = zeros(size(regions));
+        %fill the current region of the temporary image 
+        tmpimg(imgobjs.PixelIdxList{i}) = 1;
+        
+        %check if the image overlaps with any of the nuclei touching the
+        %edge of the image 
+        if sum(sum(tmpimg.*bordernucimg))>0
+            disp(['Eliminating cell object ', num2str(i), ' because nuclei touches the boundary'])
+            regions(imgobjs.PixelIdxList{i}) = 0;
+        end
+        
+        
+    end
+    
+    
 end
 %figure;subplot(1,2,1);imshow(cellim_proc);subplot(1,2,2);imshow(regions);
 

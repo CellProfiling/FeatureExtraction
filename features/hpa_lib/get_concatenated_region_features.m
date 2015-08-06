@@ -63,10 +63,18 @@ function [features, feature_names, feature_computation_time, cell_regions , nuc_
   feature_set_naming_conventions = repmat({base_naming_convention}, size(feature_set_directories));
   feature_set_naming_conventions = repmat({base_naming_convention}, size(feature_set_directories));
   feature_set_naming_conventions{2}.protein_channel = base_naming_convention.nuclear_channel;
-  feature_set_naming_conventions{2}.blank_channels = {'nuclear'};
+  %DPS 05,08,2015 - resetting the 'blank' channel each feature set screws
+  %things up if a channel is actually missing. We need to ADD the blank
+  %name to the base naming convention! 
+%   feature_set_naming_conventions{2}.blank_channels = {'nuclear'};
+  feature_set_naming_conventions{2}.blank_channels = [base_naming_convention.blank_channels,{'nuclear'}];
   feature_set_naming_conventions{4}.nuclear_channel = base_naming_convention.protein_channel;
   feature_set_naming_conventions{5}.protein_channel = base_naming_convention.tubulin_channel;
-  feature_set_naming_conventions{5}.blank_channels = {'tubulin'};
+  %DPS 05,08,2015 - resetting the 'blank' channel each feature set screws
+  %things up if a channel is actually missing. We need to ADD the blank
+  %name to the base naming convention! 
+%   feature_set_naming_conventions{5}.blank_channels = {'tubulin'};
+  feature_set_naming_conventions{5}.blank_channels = [base_naming_convention.blank_channels,{'tubulin'}];
   feature_set_naming_conventions{6}.nuclear_channel = base_naming_convention.tubulin_channel;
   
   % new code

@@ -33,7 +33,7 @@ elseif iscell(color)
     extention_mtub  = color{3};
     extention_er    = color{4};
 else
-    fprintf(['You have passed a cell array for the "color" variable. Make sure it is in the correct order',...
+    fprintf(['You have passed a cell array for the "extensions" variable. Make sure it is in the correct order',...
         'It will be parsed as follows:\n 1.nucleus \n 2.protein of interest \n 3.microtubules \n 4.segmentation channel (usually er or tubules)\n'])
     extention_dapi  = extensions{1};
     extention_ab    = extensions{2};
@@ -130,6 +130,11 @@ if(step2)
     base_naming_convention.tubulin_channel  = extention_mtub;
     base_naming_convention.er_channel       = extention_er;
     base_naming_convention.blank_channels = {};
+    
+    if isempty(color)
+        disp('No "color" variable passed for a segmentation channel suffix. Assuming this channel is not present')
+        base_naming_convention.blank_channels = {'er'};
+    end
     
     base_naming_convention.segmentation_suffix = base_naming_convention.protein_channel;
         

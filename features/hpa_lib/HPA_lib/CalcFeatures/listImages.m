@@ -25,6 +25,7 @@ function [readlist] = listImages(rootdir, writedir, naming_convention)
 
 % 2011-11-12 tebuck: copied from calcRegionFeat.m just to get the
 % list of images considered (just channel zero)
+% 2015-08-05 dpsullivan: added support for patterns starting with '-'
 
 
 fsetnames = {...
@@ -78,9 +79,21 @@ if ~isfield(naming_convention, 'segmentation_suffix')
 end
 
 filetype = 'tif';
-%greparg = '| grep green';
-greparg = ['| grep ', naming_convention.protein_channel];
-%greparg = ['| grep ', naming_convention.segmentation_suffix];
+
+%DPS 05,08,2015 - adding support for naming_conventions to begin with a "-"
+dashlocs = strfind(naming_convention.protein_channel,'-')
+if any(dashlocs==1)
+    %adding two slashes escapes the special character '-' at the beginning
+    %of the pattern. This only needs to be done if the dash is at the start
+    %of the pattern.
+%     naming_convention.protein_channel = ['\\',naming_convention.protein_channel];
+    greparg = ['| grep \\', naming_convention.protein_channel]
+else
+    greparg = ['| grep ', naming_convention.protein_channel]
+end
+% %greparg = '| grep green';
+% greparg = ['| grep ', naming_convention.protein_channel];
+% %greparg = ['| grep ', naming_convention.segmentation_suffix];
 
 ind = find(rootdir=='/');
 rootdir_ = rootdir;

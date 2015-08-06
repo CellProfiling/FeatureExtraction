@@ -28,6 +28,7 @@ function [protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct] = maskAll
 %Edited by: 
 %Devin P Sullivan 28,07,2015 - created function and added documentation
 %Devin P Sullivan 28,07,2015 - added isempty check for each channel
+%Devin P Sullivan 05,08,2015 - added blank_channel check 
 
 %This is very inefficient code and could be a single function called 4
 %times, but for the sake of not changing production code I will leave it
@@ -63,42 +64,66 @@ quant_thresh = 0.999;
 %%%
 %First check that the images have not yet been loaded into the channel
 %field
-if isempty(protfieldstruct.channel)
-    disp(['Protein field structure path is: ',protfieldstruct.channel_path]);
-    protfieldstruct.channel = imread(protfieldstruct.channel_path);
-end
+%DPS 05,08,2015 - Check if the channel is slated to be empty. If so, no
+%need to try to load it into the channel field
 
-if isempty(nucfieldstruct.channel)
-    nucfieldstruct.channel = imread(nucfieldstruct.channel_path);
-end
-
-if isempty(tubfieldstruct.channel)
-    tubfieldstruct.channel = imread(tubfieldstruct.channel_path);
-end
-
-if isempty(erfieldstruct.channel)
-    erfieldstruct.channel = imread(erfieldstruct.channel_path);
-end
-
-if isempty(maskfieldstruct.channel)
+%DPS 05,08,2015 - Moved this to first because there should always at least
+%be a mask image and it will give the size for other blank images.
+% if isempty(maskfieldstruct.channel)
+if isempty(maskfieldstruct.channel) && ~maskfieldstruct.isempty
     maskfieldstruct.channel = imread(maskfieldstruct.channel_path);
 end
+
+% if isempty(protfieldstruct.channel) 
+if isempty(protfieldstruct.channel) && ~protfieldstruct.isempty
+    disp(['Protein field structure path is: ',protfieldstruct.channel_path]);
+    protfieldstruct.channel = imread(protfieldstruct.channel_path);
+elseif protfieldstruct.isempty
+    warning('You are using a blank "protein" channel! Are you sure you want to do this?')
+    protfieldstruct.channel = zeros(size(maskfieldstruct.channel));
+end
+
+% if isempty(nucfieldstruct.channel)
+if isempty(nucfieldstruct.channel) && ~nucfieldstruct.isempty
+    nucfieldstruct.channel = imread(nucfieldstruct.channel_path);
+elseif nucfieldstruct.isempty
+    nucfieldstruct.channel = zeros(size(maskfieldstruct.channel));
+end
+
+% if isempty(tubfieldstruct.channel)
+if isempty(tubfieldstruct.channel) && ~tubfieldstruct.isempty
+    tubfieldstruct.channel = imread(tubfieldstruct.channel_path);
+elseif tubfieldstruct.isempty
+    tubfieldstruct.channel = zeros(size(maskfieldstruct.channel));
+end
+
+% if isempty(erfieldstruct.channel)
+if isempty(erfieldstruct.channel) && ~erfieldstruct.isempty
+    erfieldstruct.channel = imread(erfieldstruct.channel_path);
+elseif erfieldstruct.isempty
+    erfieldstruct.channel = zeros(size(maskfieldstruct.channel));
+end
+
+% % if isempty(maskfieldstruct.channel)
+% if isempty(maskfieldstruct.channel) && ~maskfieldstruct.isempty
+%     maskfieldstruct.channel = imread(maskfieldstruct.channel_path);
+% end
 %%%
 
 %%%DPS 28,07,2015 - check if the channel is empty (or mostly empty)
-protfieldstruct.isempty = checkIsEmpty(protfieldstruct.channel,quant_thresh);
+protfieldstruct.isempty = protfieldstruct.isempty+checkIsEmpty(protfieldstruct.channel,quant_thresh);
 if protfieldstruct.isempty
     warning('Protein image appears to be empty!')
 end
-nucfieldstruct.isempty = checkIsEmpty(nucfieldstruct.channel,quant_thresh);
+nucfieldstruct.isempty = nucfieldstruct.isempty+checkIsEmpty(nucfieldstruct.channel,quant_thresh);
 if nucfieldstruct.isempty
     warning('Nucleus image appears to be empty!')
 end
-tubfieldstruct.isempty = checkIsEmpty(tubfieldstruct.channel,quant_thresh);
+tubfieldstruct.isempty = tubfieldstruct.isempty+checkIsEmpty(tubfieldstruct.channel,quant_thresh);
 if tubfieldstruct.isempty
     warning('Tubulin image appears to be empty!')
 end
-erfieldstruct.isempty = checkIsEmpty(erfieldstruct.channel,quant_thresh);
+erfieldstruct.isempty = erfieldstruct.isempty+checkIsEmpty(erfieldstruct.channel,quant_thresh);
 if erfieldstruct.isempty
     warning('ER image appears to be empty!')
 end
@@ -125,8 +150,23 @@ end
 %If there are some that haven't been done yet, do them.
 if sum(tmp_indexer==0)~=length(tmp_indexer)
     bwtmp = maskfieldstruct.channel==max(maskfieldstruct.channel(:));
-    bw2 = imopen(bwtmp,ones(11,11));
-    bwl = bwlabel(bwtmp,4);
+    %bw2 never appears to be used, commenting it out. - DPS 05,08,2015
+%     bw2 = imopen(bwtmp,ones(11,11));
+    
+    %DPS 05,08,2015 - For voronoi segmentation, because the borders can
+    %have sharp angles there may be hanging pixels at cell junctions that
+    %are not considered "connected". (this should never happen in watershed
+    %segmentation). To eliminate these hanging pixels we filter for groups
+    %of pixels bigger than min_cell_size.
+    %This is hardcoded because it's a very conservative number only meant
+    %to remove hanging pixels not estimate cell size. If a cell is smaller
+    %than 5 pixels at any resolution, it is likely that you could not
+    %segment a nucleus inside it as is our practice.
+    min_cell_size = 5;%pixels
+    bw3 = bwareaopen(bwtmp,min_cell_size);
+    
+%     bwl = bwlabel(bwtmp,4);
+    bwl = bwlabel(bw3,4);
     s = size(maskfieldstruct.channel);
     ma = max(bwl(:));
 
@@ -157,5 +197,10 @@ if sum(tmp_indexer==0)~=length(tmp_indexer)
             newIm(idx2) = erfieldstruct.channel(idx);
             erfieldstruct.channel_regions{tmp_i} = newIm;
         end
+        
+        if size(newIm,1)<10
+            something_is_wrong = 1
+        end
+        
     end
 end

@@ -42,6 +42,8 @@ function calcRegionFeat(rootdir, maskdir, writedir, naming_convention, fsetnames
 % 2011-12-30 tebuck: saving computation_time per feature file.
 % 2015-07-28 dpsullivan: switched maskAllChannels from script to function
 % to better document what's going on
+% 2015-08-05 dpsullivan: added support for naming conventions that start
+% with a "-" character
 
 
 original_fsetnames = {...
@@ -134,7 +136,17 @@ end
 
 filetype = 'tif';
 %greparg = '| grep green';
-greparg = ['| grep ', naming_convention.protein_channel];
+%DPS 05,08,2015 - adding support for naming_conventions to begin with a "-"
+dashlocs = strfind(naming_convention.protein_channel,'-')
+if any(dashlocs==1)
+    %adding two slashes escapes the special character '-' at the beginning
+    %of the pattern. This only needs to be done if the dash is at the start
+    %of the pattern.
+%     naming_convention.protein_channel = ['\\',naming_convention.protein_channel];
+    greparg = ['| grep \\', naming_convention.protein_channel]
+else
+    greparg = ['| grep ', naming_convention.protein_channel]
+end
 
 ind = find(rootdir=='/');
 rootdir_ = rootdir;
@@ -225,12 +237,24 @@ for i=1:length(readlist)
     tubfieldstruct.channel_path = readlist_tub{i};
     erfieldstruct.channel_path = readlist_er{i};
     maskfieldstruct.channel_path = readlist_mask{i};
+    
+    %DPS 05,08,2015 - adding blank_channels now rather than later. 
+    protfieldstruct.isempty = any(strcmpi(naming_convention.blank_channels,'protein'));
+    nucfieldstruct.isempty = any(strcmpi(naming_convention.blank_channels,'nuclear'));
+    tubfieldstruct.isempty = any(strcmpi(naming_convention.blank_channels,'tubulin'));
+    erfieldstruct.isempty = any(strcmpi(naming_convention.blank_channels,'er'));
+    maskfieldstruct.isempty = 0;
+    
     %DPS 28,07,2015 - switched to function to document what's happening
     %I hate invisible variable passing!
     %maskAllChannels
     [protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct]...
         = maskAllChannels(protfieldstruct,nucfieldstruct,...
         tubfieldstruct,erfieldstruct,maskfieldstruct);
+%     
+%     [protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct]...
+%         = maskAllChannels(protfieldstruct,nucfieldstruct,...
+%         tubfieldstruct,erfieldstruct,maskfieldstruct);
     
     %DPS 28,07,2015 - update the blank image fields
     protein_channel_blank = protfieldstruct.isempty;
@@ -353,8 +377,16 @@ for i=1:length(readlist)
                  naming_convention.blank_channels = [naming_convention.blank_channels,{'protein'}];
               end
             end
+            
+            if strcmpi(protstruct.channel_path,'/Users/devinsullivan/Documents/golgi/images/Golgi_partly_overlap//image--U11--V00--X00--Y01--C00.tif')
+                holdup = 1
+            end
 
+            try
             commonScriptCalculateSet
+            catch 
+                sheit = 1
+            end
 
             allfeats = [allfeats; feats];
         end
