@@ -1,5 +1,11 @@
-function [features, feature_names, feature_computation_time, cell_regions , nuc_regions] = get_concatenated_region_features(...
+function [features, feature_names, feature_computation_time, cell_regions , nuc_regions, skipimgs] = get_concatenated_region_features(...
   image_path, storage_path, base_naming_convention, label_name, optimize, use_segmentation_suffix_in_list,resolution)
+%
+%Written by: Unknown
+%
+%Edited by: 
+%Devin P Sullivan 10/08/15 - added 'skipimgs' variable to track blank
+%images
 
   start_time = tic;
 
@@ -33,7 +39,9 @@ function [features, feature_names, feature_computation_time, cell_regions , nuc_
     feature_computation_time = 0; 
   end
   disp('segmenting fields') 
-  [cell_regions, nuc_regions] = segmentFields(image_path, mask_path, base_naming_convention,resolution);
+  %DPS 10/08/15 - adding field for tracking blank images 
+%   [cell_regions, nuc_regions] = segmentFields(image_path, mask_path, base_naming_convention,resolution);
+  [cell_regions, nuc_regions,skipimgs] = segmentFields(image_path, mask_path, base_naming_convention,resolution);
 %   figure;imshow(label2rgb(bwlabel(cell_regions)));
 %   figure;imshow(label2rgb(bwlabel(nuc_regions)));
   disp('getting nuclear region feats')

@@ -18,29 +18,29 @@ if nargin<5 || isempty(extensions)
         'please make sure your files are names accordingly:\n',...
         '1."*_blue.tif" - nucleus \n 2."*_green.tif" - protein of interest \n',...
         '3."*_red.tif" - microtubules \n lastly, the "color" variable is used as the segmentation channel usually "yellow" corresponding to er \n'])
-    extention_dapi  = '_blue.tif';
-    extention_ab    = '_green.tif';
-    extention_mtub  = '_red.tif';
+    extension_dapi  = '_blue.tif';
+    extension_ab    = '_green.tif';
+    extension_mtub  = '_red.tif';
     %For historical reasons 'color' is separate and we are trying to make
     %the script such that it breaks nothing in the current pipeline 
-    extention_er    = strcat('_', color, '.tif');
+    extension_er    = strcat('_', color, '.tif');
 elseif iscell(color)
     %if someone has passed a cell array of color, process it
     fprintf(['You have passed a cell array for the "color" variable. Make sure it is in the correct order',...
         'It will be parsed as follows:\n 1.nucleus \n 2.protein of interest \n 3.microtubules \n 4.segmentation channel (usually er or tubules)\n'])
-    extention_dapi  = color{1};
-    extention_ab    = color{2};
-    extention_mtub  = color{3};
-    extention_er    = color{4};
+    extension_dapi  = color{1};
+    extension_ab    = color{2};
+    extension_mtub  = color{3};
+    extension_er    = color{4};
 else
     fprintf(['You have passed a cell array for the "extensions" variable. Make sure it is in the correct order',...
         'It will be parsed as follows:\n 1.nucleus \n 2.protein of interest \n 3.microtubules \n 4.segmentation channel (usually er or tubules)\n'])
-    extention_dapi  = extensions{1};
-    extention_ab    = extensions{2};
-    extention_mtub  = extensions{3};
+    extension_dapi  = extensions{1};
+    extension_ab    = extensions{2};
+    extension_mtub  = extensions{3};
     %For historical reasons 'color' is separate and we are trying to make
     %the script such that it breaks nothing in the current pipeline 
-    extention_er    = strcat('_', color, '.tif');
+    extension_er    = strcat('_', color, '.tif');
 end
 
 
@@ -61,20 +61,20 @@ warning('off', 'Images:imfeature:obsoleteFunction');
 filename = out_folder,'/feature_extraction_HPA';
 mkdir(filename);
 
-% extention_dapi  = '_blue.tif';
-% extention_ab    = '_green.tif';
-% extention_mtub  = '_red.tif';
-% extention_er    = strcat('_', color, '.tif');
+% extension_dapi  = '_blue.tif';
+% extension_ab    = '_green.tif';
+% extension_mtub  = '_red.tif';
+% extension_er    = strcat('_', color, '.tif');
 
-list_ab     = rdir_list(char([in_folder,'/*',extention_ab]));
-list_dapi   = rdir_list(char([in_folder,'/*',extention_dapi]));
-list_mtub   = rdir_list(char([in_folder,'/*',extention_mtub]));
-list_er     = rdir_list(char([in_folder,'/*',extention_er]));
+list_ab     = rdir_list(char([in_folder,'/*',extension_ab]));
+list_dapi   = rdir_list(char([in_folder,'/*',extension_dapi]));
+list_mtub   = rdir_list(char([in_folder,'/*',extension_mtub]));
+list_er     = rdir_list(char([in_folder,'/*',extension_er]));
 
-%list_ab     = rdir_list(char([in_folder,'/*','/*',extention_ab]));
-%list_dapi   = rdir_list(char([in_folder,'/*','/*',extention_dapi]));
-%list_mtub   = rdir_list(char([in_folder,'/*','/*',extention_mtub]));
-%list_er     = rdir_list(char([in_folder,'/*','/*',extention_er]));
+%list_ab     = rdir_list(char([in_folder,'/*','/*',extension_ab]));
+%list_dapi   = rdir_list(char([in_folder,'/*','/*',extension_dapi]));
+%list_mtub   = rdir_list(char([in_folder,'/*','/*',extension_mtub]));
+%list_er     = rdir_list(char([in_folder,'/*','/*',extension_er]));
 
 
 %% Init
@@ -125,11 +125,28 @@ end
 
 if(step2)
     
-    base_naming_convention.protein_channel  = extention_ab;
-    base_naming_convention.nuclear_channel  = extention_dapi;
-    base_naming_convention.tubulin_channel  = extention_mtub;
-    base_naming_convention.er_channel       = extention_er;
+    %DPS 10/08/15 - Defining key words and adding auto detection of
+    %channels left blank by the user.
+    %Keywords allowed: 'nuclear','tubulin','er','protein'
     base_naming_convention.blank_channels = {};
+    
+    base_naming_convention.protein_channel  = extension_ab;
+    if isempty(extension_ab)
+        base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'protein'}];
+    end
+    base_naming_convention.nuclear_channel  = extension_dapi;
+    if isempty(extension_dapi)
+        base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'nuclear'}];
+    end
+    base_naming_convention.tubulin_channel  = extension_mtub;
+    if isempty(extension_mtub)
+        base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'tubulin'}];
+    end
+    base_naming_convention.er_channel       = extension_er;
+    if isempty(extension_er)
+        base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'er'}];
+    end
+    
     
     if isempty(color)
         disp('No "color" variable passed for a segmentation channel suffix. Assuming this channel is not present')
@@ -156,7 +173,22 @@ if(step2)
     %storage_subdirectory
     disp('In 63x code')
     %try
-        [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
+    
+    %DPS 06/08/15 - adding support for partially scanned images
+    %Check if images need to be trimmed, trim them and updated the
+    %directory field.
+%     [image_subdirectory] = trimImages(image_subdirectory,base_naming_convention,out_folder);
+    %DPS 10/08/15 - After discussing with Emma, we will now mark images
+    %that are partial scans and not trim images 
+    [nucfiles, skipimage] = preprocessImages(image_subdirectory,base_naming_convention,out_folder)
+    %DPS 11/08/15 - Need to eliminate folders that don't have any files in
+    %them (that match our naming convention).
+    if skipimage==inf
+        cell_feat = [];
+        exit_code = 1;
+        return
+    end
+        [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed,segskips] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
         regions_results     =   cell2mat(label_features);
         
         % read cell (x,y) centers and bounding box values
@@ -203,23 +235,35 @@ if(step2)
 	    warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
 	end
 	end
-
-	if sum(position_stats(:))>0
-            cell_feat  = [position_stats regions_results];
-            %DPS 30,07,2015 - added feature name save and concatenation of
-            %position stats to feature names 
-            feature_names = [pos_stats_names feature_names];
-            save([out_folder,filesep,'feature_names.mat'],'feature_names');
-            csvwrite([out_folder,'/','features.csv'], [position_stats regions_results]);
-            
-        else
-	    breaking = breakme
-            cell_feat = 0;
-            exit_code = 1;
-            disp('Segmentation error occuring during feature extraction 63x/40x');
-            exit(exit_code);
-        end
+    
+    if sum(position_stats(:))>0
+        cell_feat  = [position_stats regions_results];
+        %DPS 30,07,2015 - added feature name save and concatenation of
+        %position stats to feature names
+        feature_names = [pos_stats_names feature_names];
+        save([out_folder,filesep,'feature_names.mat'],'feature_names');
+        csvwrite([out_folder,'/','features.csv'], [position_stats regions_results]);
         
+    elseif sum(skipimage(:)>0)==length(dir_png) || sum(segskips==1)==length(dir_png)
+        fprintf(['There was no fluorescence for any images in ',in_folder, '. We will not bother saving the features.\n'])
+        cell_feat = [];
+    elseif sum(segskips>1)==length(dir_png)
+        fprintf(['There was no cell regions for any images in ',in_folder, '. Position stats will be blank.\n'])
+        cell_feat  = [position_stats regions_results];
+        %DPS 30,07,2015 - added feature name save and concatenation of
+        %position stats to feature names
+        feature_names = [pos_stats_names feature_names];
+        save([out_folder,filesep,'feature_names.mat'],'feature_names');
+        csvwrite([out_folder,'/','features.csv'], [position_stats regions_results]);
+        
+    else
+        breaking = breakme
+        cell_feat = 0;
+        exit_code = 1;
+        disp('Segmentation error occuring during feature extraction 63x/40x');
+        exit(exit_code);
+    end
+    
     %catch
         %cell_feat = 0;
         %exit_code = 1;

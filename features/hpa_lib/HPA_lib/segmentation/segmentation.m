@@ -2,9 +2,58 @@ function [regions, fgs]= segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUC
 
 %Edited by:
 %Devin Sullivan July 13, 2015 - added support for voronoi segmentation
+%Devin P Sullivan Aug 7, 2015 - added support for partially scanned nuclear
+%image.
 
 minarea = (MINNUCLEUSDIAMETER/IMAGEPIXELSIZE/2)^2*pi;
 maxarea = (MAXNUCLEUSDIAMETER/IMAGEPIXELSIZE/2)^2*pi;
+
+% %make sure that the nuclear channel is fully scanned. If not, trim the
+% %image to the last scanned line. Note this may be verticle or horizontal
+% %depending on the microscope, but generally should be horizontal.
+% nucx = sum(nucim,1);
+% nucy = sum(nucim,2);
+% xrange = nucx>0;
+% yrange = nucy>0;
+% xstart = find(xrange,1,'first');
+% if xstart~=1
+%     warning('no nuclear fluorescence in beginning of x image. Skipping to second column with fluorescence.')
+%     %here we use the 2nd column instead of the first since there was an
+%     %error in acquisition and we want to be sure to eliminate the last
+%     %incorrectly scanned one.
+%     xstart = xstart+1;
+% end
+% 
+% xend = find(xrange,1,'last');
+% if xend~=size(nucim,2)
+%     warning('no nuclear fluorescence in end of x image. Skipping to second to last column with fluorescence.')
+%     %here we use the 2nd to last column instead of the first since there was an
+%     %error in acquisition and we want to be sure to eliminate the last
+%     %incorrectly scanned one.
+%     xend = xend-1;
+% 
+% end
+% ystart = find(yrange,1,'first');
+% if ystart~=1
+%     warning('no nuclear fluorescence in beginning of y image. Skipping to second column with fluorescence.')
+%     %here we use the 2nd column instead of the first since there was an
+%     %error in acquisition and we want to be sure to eliminate the last
+%     %incorrectly scanned one.
+%     ystart = ystart+1;
+% end
+% 
+% yend = find(yrange,1,'last');
+% if yend~=size(nucim,2)
+%     warning('no nuclear fluorescence in end of y image. Skipping to second to last column with fluorescence.')
+%     %here we use the 2nd to last column instead of the first since there was an
+%     %error in acquisition and we want to be sure to eliminate the last
+%     %incorrectly scanned one.
+%     yend = yend-1;
+% 
+% end
+% 
+% 
+% nucim = nucim(ystart:yend,xstart:xend);
 
 % determine foreground seeds
 

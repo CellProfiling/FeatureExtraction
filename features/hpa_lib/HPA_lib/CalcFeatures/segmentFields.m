@@ -1,4 +1,4 @@
-function [regions, nucseeds] = segmentFields(readdir, writedir, naming_convention,resolution)
+function [regions, nucseeds,skipimgs] = segmentFields(readdir, writedir, naming_convention,resolution)
 
 % function segmentFields
 % readdir is the directory storing all images;
@@ -40,6 +40,7 @@ function [regions, nucseeds] = segmentFields(readdir, writedir, naming_conventio
 %2015,08,05 DPSullivan - added support for base naming convention that
 %starts with a "-", this previously would fail because grep would try to
 %use it as an option field rather than a search term.
+%2015,08,10 DPSullivan - added field for tracking blank images. 
 
 if ~exist('readdir','var')
     readdir = '/images/HPA/images/IFconfocal/';
@@ -134,6 +135,10 @@ mout = findreplacestring( mout, '.tif','.png');
 writelist = listmatlabformat( mout);
 writelist'
 mkdir(writedir,'/tmp')
+
+%DPS 10/08/15 - adding variable to track the blank channels 
+skipimgs = zeros(length(readlist),1);
+
 for i=1:length(readlist)
 %    i
 %     if exist(writelist{i},'file')
@@ -170,7 +175,14 @@ for i=1:length(readlist)
     end
 
     [regions, nucseeds] = segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE);
-
+    if max(nucseeds(:))==0
+        warning('No nuclei found in the image after segmentation. This image appears to be blank!')
+        skipimgs(i) = 1;
+    elseif max(regions(:))==0
+        warning('No cell regions found in the image after segmentation. This image appears to be blank!')
+        skipimgs(i) = 2;
+    end
+    
     % saving results
     disp(['writing image ',writelist{i}])
     imwrite( regions, writelist{i});

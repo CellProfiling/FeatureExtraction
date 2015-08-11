@@ -1,4 +1,14 @@
 function seeds = fgseeds( dna, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE)
+%
+%Written by: Unknown
+%
+%Edited by: 
+%Devin P Sullivan 11/08/15 - added conversion for uint16 iamges. 
+
+if ~isa(dna,'unit8')
+    warning('The DNA image appears to not be uint8 as expected by fgseeds.m. Converting to uint8. This may result in loss of data.')
+    dna = uint8(double(dna)./double(max(dna(:))).*255);
+end
 
 minarea = (MINNUCLEUSDIAMETER/IMAGEPIXELSIZE/2)^2*pi;
 maxarea = (MAXNUCLEUSDIAMETER/IMAGEPIXELSIZE/2)^2*pi;
