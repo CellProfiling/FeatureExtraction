@@ -41,7 +41,7 @@ function [features, feature_names, feature_computation_time, cell_regions , nuc_
   disp('segmenting fields') 
   %DPS 10/08/15 - adding field for tracking blank images 
 %   [cell_regions, nuc_regions] = segmentFields(image_path, mask_path, base_naming_convention,resolution);
-  [cell_regions, nuc_regions,skipimgs] = segmentFields(image_path, mask_path, base_naming_convention,resolution);
+  [cell_regions, nuc_regions,skipimgs] = segmentFields(image_path, mask_path, base_naming_convention,resolution); 
 %   figure;imshow(label2rgb(bwlabel(cell_regions)));
 %   figure;imshow(label2rgb(bwlabel(nuc_regions)));
   disp('getting nuclear region feats')

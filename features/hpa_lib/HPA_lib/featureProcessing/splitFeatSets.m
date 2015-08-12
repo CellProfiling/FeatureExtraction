@@ -27,6 +27,19 @@ if nargin<4
     %also position stats which are added to the BEGINNING of the feature
     %list 
     fsets = {'position_stats',fsets{:}}';
+    fnames = {...
+    'position_stats'...
+    ;'feature_set1'...
+    ;'feature_set2'...
+    ;'feature_set3'...
+    ;'feature_set4'...
+    ;'feature_set5'...
+    ;'feature_set6'...
+    ;'feature_set7'...
+    ;'feature_set8'...
+    };
+
+    fsets = [fsets,fnames];
 end 
 
 %if the output place doesn't exist we have to create it
@@ -41,11 +54,21 @@ rawfeatnames = rawfeatnames(2:end);
 setnames = unique(setnames);
 %First split all fsets and save them 
 for i = 1:length(setnames)
+    if size(fsets,2)==2
+        currind = strcmpi(setnames{i},fsets(:,2));
+        currname = fsets{currind,1};
+    elseif sum(strcmpi(setnames{i},fsets))==0
+        warning('Setname does not match any given pattern, using setname directly')
+        currname = setnames{i}
+    else
+        disp('setname found')
+        currname = setnames{i};
+    end
     setinds = findstr_cell(totfeatnames,setnames{i},0);
     features = totfeatures(:,setinds);
     featnames = totfeatnames(setinds);
-    save([outputdir,filesep,fsets{i},'_splitfeats.mat'],'features','featnames');
-    clear features
+    save([outputdir,filesep,currname,'_splitfeats.mat'],'features','featnames','fsets','setnames','i');
+    clear features featnames
 end
 
 
