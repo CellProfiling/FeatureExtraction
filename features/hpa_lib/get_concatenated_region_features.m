@@ -109,6 +109,9 @@ function [features, feature_names, feature_computation_time, cell_regions , nuc_
 % $$$   end
 % $$$   for feature_set_index = 5
   for feature_set_index = 1:number_feature_sets
+      if feature_set_index == 7
+          holdup = 1
+      end
     %feature_set_index
     % Compute features:
     %feature_set_subdirectory = [storage_path(1:end - 1), feature_set_directories{feature_set_index}, filesep];

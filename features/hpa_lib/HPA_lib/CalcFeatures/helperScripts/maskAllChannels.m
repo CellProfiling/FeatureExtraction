@@ -104,6 +104,17 @@ elseif erfieldstruct.isempty
     erfieldstruct.channel = zeros(size(maskfieldstruct.channel));
 end
 
+
+%DPS 17,08,2015 - Need to add support for other datatypes. Specifically,
+%uint16 images are getting assigned to uint8 without conversion leading to
+%very saturated images. 
+maskfieldstruct.channel = convert_to_uint8(maskfieldstruct.channel);
+protfieldstruct.channel = convert_to_uint8(protfieldstruct.channel);
+nucfieldstruct.channel = convert_to_uint8(nucfieldstruct.channel);
+tubfieldstruct.channel = convert_to_uint8(tubfieldstruct.channel);
+erfieldstruct.channel = convert_to_uint8(erfieldstruct.channel);
+
+
 % % if isempty(maskfieldstruct.channel)
 % if isempty(maskfieldstruct.channel) && ~maskfieldstruct.isempty
 %     maskfieldstruct.channel = imread(maskfieldstruct.channel_path);

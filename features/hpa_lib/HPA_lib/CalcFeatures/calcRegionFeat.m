@@ -382,11 +382,11 @@ for i=1:length(readlist)
                 holdup = 1
             end
 
-            try
+%             try
             commonScriptCalculateSet
-            catch 
-                sheit = 1
-            end
+%             catch 
+%                 sheit = 1
+%             end
 
             allfeats = [allfeats; feats];
         end
