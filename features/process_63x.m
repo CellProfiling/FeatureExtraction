@@ -22,7 +22,7 @@ if nargin<5 || isempty(extensions)
     extension_ab    = '_green.tif';
     extension_mtub  = '_red.tif';
     %For historical reasons 'color' is separate and we are trying to make
-    %the script such that it breaks nothing in the current pipeline 
+    %the script such that it breaks nothing in the current pipeline
     extension_er    = strcat('_', color, '.tif');
 elseif iscell(color)
     %if someone has passed a cell array of color, process it
@@ -39,16 +39,16 @@ else
     extension_ab    = extensions{2};
     extension_mtub  = extensions{3};
     %For historical reasons 'color' is separate and we are trying to make
-    %the script such that it breaks nothing in the current pipeline 
+    %the script such that it breaks nothing in the current pipeline
     extension_er    = strcat('_', color, '.tif');
 end
 
 
 
 if(resolution==63)
-	resolution = 1;
+    resolution = 1;
 else
-	resolution = 0;
+    resolution = 0;
 end
 
 step1   = true;
@@ -97,9 +97,9 @@ if(step1)
     label_subdirectories = cell(1,1);
     dirlist.name
     currind = 1;
-    %breaking = breakme 
+
     for i=1:length(dirlist)
-%         currdir = dirlist(i+padnumb).name;
+        %         currdir = dirlist(i+padnumb).name;
         currdir = dirlist(i).name;
         if any(strcmpi(currdir,{'.','..','.DS_Store'}))
             continue
@@ -115,7 +115,7 @@ if(step1)
     
     processed_path = out_folder,'/featextraction_rawdata/';
     mkdir(processed_path);
-        
+    
     feature_names = [];
     
 end
@@ -154,14 +154,14 @@ if(step2)
     end
     
     base_naming_convention.segmentation_suffix = base_naming_convention.protein_channel;
-        
+    
     index  = 1;
-   
-    label_subdirectories 
+    
+    label_subdirectories
     image_subdirectory      = [image_path, filesep, (label_subdirectories{index}), filesep]
     
     %DPS - 28,07,2015  Adding support for direct parent directories rather
-    %than directories of directories 
+    %than directories of directories
     if ~isdir(image_subdirectory)
         image_subdirectory = [image_path, filesep];
     end
@@ -177,9 +177,9 @@ if(step2)
     %DPS 06/08/15 - adding support for partially scanned images
     %Check if images need to be trimmed, trim them and updated the
     %directory field.
-%     [image_subdirectory] = trimImages(image_subdirectory,base_naming_convention,out_folder);
+    %     [image_subdirectory] = trimImages(image_subdirectory,base_naming_convention,out_folder);
     %DPS 10/08/15 - After discussing with Emma, we will now mark images
-    %that are partial scans and not trim images 
+    %that are partial scans and not trim images
     [nucfiles, skipimage] = preprocessImages(image_subdirectory,base_naming_convention,out_folder)
     %DPS 11/08/15 - Need to eliminate folders that don't have any files in
     %them (that match our naming convention).
@@ -188,15 +188,15 @@ if(step2)
         exit_code = 1;
         return
     end
-        [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed,segskips] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
-        regions_results     =   cell2mat(label_features);
-        
-        % read cell (x,y) centers and bounding box values
-        
-        dir_png         = dir([storage_subdirectory,'/*.png']);
-        
-	%%%DPS 2015/07/09 - I don't understand how this ever worked without a for loop unless they were running on one image at a time. I am changing now
-	position_stats = zeros(size(regions_results,1),7);
+    [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed,segskips] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
+    regions_results     =   cell2mat(label_features);
+    
+    % read cell (x,y) centers and bounding box values
+    
+    dir_png         = dir([storage_subdirectory,'/*.png']);
+    
+    %%%DPS 2015/07/09 - I don't understand how this ever worked without a for loop unless they were running on one image at a time. I am changing now
+    position_stats = zeros(size(regions_results,1),7);
     %DPS 30,07,2015 - Adding variable to track variable names; 7 position
     %stats are calculated
     pos_stats_names = cell(1,7);
@@ -210,19 +210,19 @@ if(step2)
     pos_stats_names{5} = 'position_stats:BoundingBox_uly';
     pos_stats_names{6} = 'position_stats:BoundingBox_wx';
     pos_stats_names{7} = 'position_stats:BoundingBox_wy';
-	currstart = 1;
-	for i = 1:length(dir_png)
-	%bw_seg          = imread([storage_subdirectory,'/',char(dir_png(1).name)]);
+    currstart = 1;
+    for i = 1:length(dir_png)
+        %bw_seg          = imread([storage_subdirectory,'/',char(dir_png(1).name)]);
         bw_seg = imread([storage_subdirectory,'/',char(dir_png(i).name)]);
-	nucstats_seg    = regionprops(bwlabel(bw_seg,4),'Centroid','BoundingBox','Area');
+        nucstats_seg    = regionprops(bwlabel(bw_seg,4),'Centroid','BoundingBox','Area');
         
         if(length(nucstats_seg)>0)
             
             %num_cells = size(regions_results);
             %num_cells = num_cells(1,1);
             num_cells = length(nucstats_seg);
-	    %position_stats(1:num_cells,1) = [nucstats_seg(1:num_cells).Area]';
-	    position_stats(currstart:currstart+num_cells-1,1)      =   [nucstats_seg.Area]';
+            %position_stats(1:num_cells,1) = [nucstats_seg(1:num_cells).Area]';
+            position_stats(currstart:currstart+num_cells-1,1)      =   [nucstats_seg.Area]';
             position_stats(currstart:currstart+num_cells-1,2:3)    =   reshape([nucstats_seg(1:num_cells).Centroid],2,num_cells)';
             position_stats(currstart:currstart+num_cells-1,4:7)    =   reshape([nucstats_seg(1:num_cells).BoundingBox],4,num_cells)';
             
@@ -230,11 +230,11 @@ if(step2)
             currstart = currstart+num_cells;
             %size(regions_results)
             %size(position_stats)
-	
-	else
-	    warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
-	end
-	end
+            
+        else
+            warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
+        end
+    end
     
     if sum(position_stats(:))>0
         cell_feat  = [position_stats regions_results];
@@ -257,7 +257,6 @@ if(step2)
         csvwrite([out_folder,'/','features.csv'], [position_stats regions_results]);
         
     else
-        breaking = breakme
         cell_feat = 0;
         exit_code = 1;
         disp('Segmentation error occuring during feature extraction 63x/40x');
@@ -265,18 +264,18 @@ if(step2)
     end
     
     %catch
-        %cell_feat = 0;
-        %exit_code = 1;
-        %disp('Segmentation error occuring during feature extraction 63x/40x');
-        %exit(exit_code);
+    %cell_feat = 0;
+    %exit_code = 1;
+    %disp('Segmentation error occuring during feature extraction 63x/40x');
+    %exit(exit_code);
     %end
 end
 
 
-%% create segmentation masks 
+%% create segmentation masks
 
 if(step3)
-   %%%DPS 2015-07-09  Not sure where I is supposed to be coming from without a for loop!  
+    %%%DPS 2015-07-09  Not sure where I is supposed to be coming from without a for loop!
     % Read images
     
     im_dapi     =   imread(list_dapi(i).name);
@@ -305,12 +304,12 @@ if(step3)
     alpha_ch(cyto_seed>0)                       = 2;
     alpha_ch(nucleus_seed>0&cell_seed>0)        = 1;
     alpha_ch(plasmaMem)                         = 4;
-         
+    
     imwrite(double(merge_mask),[out_folder,'/segmentation.png'],'Alpha',alpha_ch/255);
     
     % merge the output from the image set with other ABs image set data
-    % previously analysed (if multiple ABs are included or if analysis is 
-    % run at the plate level)  
+    % previously analysed (if multiple ABs are included or if analysis is
+    % run at the plate level)
 end
 
 % exit(exit_code);

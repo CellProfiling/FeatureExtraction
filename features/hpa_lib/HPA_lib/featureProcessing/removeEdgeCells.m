@@ -16,7 +16,7 @@ function [prunedfeats,eliminds] = removeEdgeCells(features,featnames,imgsize)
 
 
 if nargin<3
-    imgsize = [1728,1728];
+    imgsize = [2048,2048];%[1728,1728];
 end
 
 if length(imgsize)==1
@@ -61,20 +61,33 @@ wxvals = posfeats(:,findstr_cell(posnames,'_wx',casei));
 %get lower right y value from coordinate 
 wyvals = posfeats(:,findstr_cell(posnames,'_wy',casei));
 
-%make lower right x values 
+
+%%%CHECK THIS%%%
+% %make lower right x values 
 lrxvals = ulxvals + wxvals;
-%make lower right y values 
-lryvals = ulyvals - wyvals;
+% %make lower right y values 
+%  lryvals = ulyvals - wyvals;
+lryvals = ulyvals + wyvals;
+
+
 
 %initialize the indicies for any cells we find to be touching the edge of
 %the image
 eliminds = zeros(size(posfeats,1),1);
 
 %check that the upper left of the bounding box is not outside the image 
-eliminds = (ulxvals<1)+(ceil(ulyvals)==imgsize(2));
+% eliminds = (ulxvals<1)+(ceil(ulyvals)==imgsize(2));
+%DPS 19,08,15 - adding greater-than or equals in case all images are not
+%the same size. We will therefore eliminate cells that are outsize this
+%range
+eliminds = (ulxvals<1)+(ceil(ulyvals)>=imgsize(2));
 
 %check if the bottom right is in the image
-eliminds = eliminds + (ceil(lrxvals)==imgsize(1)) + (lryvals<1);
+% eliminds = eliminds + (ceil(lrxvals)==imgsize(1)) + (lryvals<1);
+%DPS 19,08,15 - adding greater-than or equals in case all images are not
+%the same size. We will therefore eliminate cells that are outsize this
+%range
+eliminds = eliminds + (ceil(lrxvals)>=imgsize(1)) + (lryvals<1);
 
 %get rid of all cells touching edges
 prunedfeats = features(~eliminds,:);
