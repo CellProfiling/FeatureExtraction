@@ -265,13 +265,25 @@ for i=1:length(readlist)
     for zed = 1:length(fsetnames)
 % $$$         mout = findreplacestring( readlist{i}, '/', '_');
         mout = readlist{i};
-        mout = findreplacestring( mout, naming_convention.protein_channel, naming_convention.segmentation_suffix);
-        mout = findreplacestring( mout, '/', '_');
         feature_set_suffix = ['_', fsetnames{zed}];
+        %D. Sullivan 10/09/2015 - can't use segmentation_suffix for this
+        %write path as it will skip combinations. To ensure a unique name
+        %we will use prot_nuc_tub_er_seg naming suffix. 
+%         mout = findreplacestring( mout, naming_convention.protein_channel, naming_convention.segmentation_suffix);
+        [folder,protsuff] = fileparts(naming_convention.protein_channel);
+        [folder,nucsuff] = fileparts(naming_convention.nuclear_channel);
+        [folder,tubsuff] = fileparts(naming_convention.tubulin_channel);
+        [folder,ersuff] = fileparts(naming_convention.er_channel);
+        [folder,segsuff] = fileparts(naming_convention.segmentation_suffix);
+        mout = findreplacestring( mout, naming_convention.protein_channel, [protsuff,nucsuff,tubsuff,ersuff,segsuff,feature_set_suffix,'.mat']);
+        mout = findreplacestring( mout, '/', '_');
+        
 % $$$         if ~strcmpi(channel_as_protein, 'protein')
 % $$$           feature_set_suffix = [feature_set_suffix, '_', channel_as_protein, '-focus'];
 % $$$         end
-        mout = findreplacestring( mout, '.tif', [feature_set_suffix, '.mat']);
+          %No longer need this line since we explicitly make a .mat file
+          %above. 
+%         mout = findreplacestring( mout, '.tif', [feature_set_suffix, '.mat']);
         writepath = findreplacestring( mout, rootdir_, [writedir '/features/' lower(datasettype) '/']); %%
         
         if exist(writepath,'file')
@@ -382,11 +394,9 @@ for i=1:length(readlist)
                 holdup = 1
             end
 
-%             try
+
             commonScriptCalculateSet
-%             catch 
-%                 sheit = 1
-%             end
+
 
             allfeats = [allfeats; feats];
         end

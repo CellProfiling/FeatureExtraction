@@ -1,4 +1,4 @@
-function [features_filename, feature_computation_time] = loadAllRegionFeatures(readdir,rootmeta,rootdir,outfilename, featsets, old_feature_set_behavior)
+function [features_filename, feature_computation_time] = loadAllRegionFeatures(readdir,rootmeta,rootdir,outfilename, featsets, featsuffix)
 %function [features_filename] = loadAllRegionFeatures(readdir,rootmeta,rootdir,outfilename, featsets, old_feature_set_behavior)
 %%function [features_filename] = loadAllRegionFeatures(readdir,rootmeta,rootdir,outfilename, channel_as_protein, featsets, old_feature_set_behavior)
 
@@ -155,6 +155,10 @@ stcount = [1 encount(1:end-1)+1];
 tmplist = cell(length(imagelist),1);
 for i = 1:length(imagelist)
     [origfolder,tmplist{i},ext] = fileparts(imagelist{i});
+    %need to remove the 'green' (or other channel) suffix from file name
+    nameparts = strsplit(tmplist{i},'_');
+    tmplist{i} = strjoin(nameparts(1:end-1),'_');
+    
 end
 
 
@@ -164,13 +168,14 @@ for i=1:length(featsets)
 %     rootdirtmp = findreplacestring( rootdir, '/','_')
 %     tmplist = findreplacestring( tmplist, rootdirtmp, readdir)
 % $$$     flists{i} = findreplacestring( tmplist, '.tif', ['_' featsets{i} '.mat']);
-    feature_set_suffix = ['_', featsets{i}];
+    feature_set_suffix = [featsuffix,'_',featsets{i}];
 % $$$     if ~strcmpi(channel_as_protein, 'protein')
 % $$$       feature_set_suffix = [feature_set_suffix, '_', channel_as_protein, '-focus'];
 % $$$     end
 %     flists{i} = findreplacestring( tmplist, '.tif', [feature_set_suffix, '.mat']);
 %     featlists{i} = listmatlabformat( flists{i})'
     featlists{i} = strcat(readdir,tmplist,feature_set_suffix,'.mat');
+%     featlists{i} = strcat(readdir,{'*'},feature_set_suffix,'.mat');
 end
 %keyboard
 
