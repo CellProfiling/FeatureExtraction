@@ -35,8 +35,8 @@ protpath = [imagedir,filesep,'*',namingconvention.protein_channel,'*'];
 protfiles = ml_ls(protpath);
 mtpath = [imagedir,filesep,'*',namingconvention.tubulin_channel,'*']; 
 mtfiles = ml_ls(mtpath);
-erpath = [imagedir,'*',namingconvention.er_channel,'*']; 
-erfiles = ml_ls(erpath);
+erpath = [imagedir,filesep,'*',namingconvention.er_channel,'*'] 
+erfiles = ml_ls(erpath)
 
 if any(strcmpi(namingconvention.blank_channels,'nuc'))
     error('The nuclear channel cannot be blank as it is needed for segmentation!')
@@ -86,6 +86,7 @@ for i = 1:length(nucfiles)
         skipimage(i,4) = NaN;
         erim = nan(size(nucim));
     else
+        erfiles
         erim = imread(erfiles{i});
     end
    

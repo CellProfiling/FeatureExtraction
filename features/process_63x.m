@@ -40,7 +40,8 @@ else
     extension_mtub  = extensions{3};
     %For historical reasons 'color' is separate and we are trying to make
     %the script such that it breaks nothing in the current pipeline
-    extension_er    = strcat('_', color, '.tif');
+    %extension_er    = strcat('_', color, '.tif');
+    extension_er    = strcat(color, '.tif');
 end
 
 

@@ -87,9 +87,9 @@ if any(dashlocs==1)
     %of the pattern. This only needs to be done if the dash is at the start
     %of the pattern.
 %     naming_convention.protein_channel = ['\\',naming_convention.protein_channel];
-    greparg = ['| grep \\', naming_convention.protein_channel]
+    %greparg = ['| grep \\', naming_convention.protein_channel]
 else
-    greparg = ['| grep ', naming_convention.protein_channel]
+    %greparg = ['| grep ', naming_convention.protein_channel]
 end
 % %greparg = '| grep green';
 % greparg = ['| grep ', naming_convention.protein_channel];
@@ -99,6 +99,6 @@ ind = find(rootdir=='/');
 rootdir_ = rootdir;
 rootdir_(ind) = '_';
 
-uout = unixfind( rootdir, filetype, greparg);
-readlist = listmatlabformat( uout);
-
+%uout = unixfind( rootdir, filetype, greparg);
+%readlist = listmatlabformat( uout);
+readlist = ml_ls([rootdir,filesep,'*',naming_convention.protein_channel])

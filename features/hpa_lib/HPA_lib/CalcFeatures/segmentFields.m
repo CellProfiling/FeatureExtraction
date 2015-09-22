@@ -85,9 +85,9 @@ if any(dashlocs==1)
     %of the pattern. This only needs to be done if the dash is at the start
     %of the pattern.
 %     naming_convention.protein_channel = ['\\',naming_convention.protein_channel];
-    greparg = ['| grep \\', naming_convention.protein_channel]
+    %greparg = ['| grep \\', naming_convention.protein_channel]
 else
-    greparg = ['| grep ', naming_convention.protein_channel]
+    %greparg = ['| grep ', naming_convention.protein_channel]
 end
 
 
@@ -95,19 +95,31 @@ end
 ind = find(readdir=='/');
 readdir_ = readdir;
 readdir_(ind) = '_';
-uout = unixfind( readdir, filetype, greparg);
-readlist = listmatlabformat( uout);
+%uout = unixfind( readdir, filetype, greparg);
+readdir
+naming_convention.protein_channel
+%filetype is now added before in process_63x.m
+uout = ml_ls([readdir,filesep,'*',naming_convention.protein_channel])
+%uout = [readdir,filesep,uout]
+%readlist = listmatlabformat( uout);
+readlist = uout;
 
 %adjust readdir in case it's not right
 [readdir,filename,exttype] = fileparts(readlist{1});
 readdir_ = strrep(readdir,'/','_');
 
-uout_nuc = findreplacestring(uout, naming_convention.protein_channel, naming_convention.nuclear_channel);
-uout_tub = findreplacestring(uout, naming_convention.protein_channel, naming_convention.tubulin_channel);
-uout_er = findreplacestring(uout, naming_convention.protein_channel, naming_convention.er_channel);
-readlist_nuc = listmatlabformat( uout_nuc);
-readlist_tub = listmatlabformat( uout_tub);
-readlist_er = listmatlabformat( uout_er);
+%uout_nuc = findreplacestring(uout, naming_convention.protein_channel, naming_convention.nuclear_channel);
+uout_nuc = strrep(uout,naming_convention.protein_channel,naming_convention.nuclear_channel);
+%uout_tub = findreplacestring(uout, naming_convention.protein_channel, naming_convention.tubulin_channel);
+uout_tub = strrep(uout,naming_convention.protein_channel,naming_convention.tubulin_channel);
+%uout_er = findreplacestring(uout, naming_convention.protein_channel, naming_convention.er_channel);
+uout_er = strrep(uout,naming_convention.protein_channel,naming_convention.er_channel);
+%readlist_nuc = listmatlabformat( uout_nuc);
+readlist_nuc = uout_nuc;
+%readlist_tub = listmatlabformat( uout_tub);
+readlist_tub = uout_tub;
+%readlist_er = listmatlabformat( uout_er);
+readlist_er = uout_er;
 % $$$ if strcmpi(naming_convention.nuclear_channel, 'ignore_channel')
 % $$$   readlist_nuc = repmat({''}, size(readlist)); 
 % $$$ else
@@ -122,7 +134,8 @@ readlist_er = listmatlabformat( uout_er);
 uout
 mout = uout;
 mout
-mout = findreplacestring( mout, naming_convention.protein_channel, naming_convention.segmentation_suffix);
+%mout = findreplacestring( mout, naming_convention.protein_channel, naming_convention.segmentation_suffix);
+mout = strrep(mout,naming_convention.protein_channel,naming_convention.segmentation_suffix);
 %mout = findreplacestring( uout, '/', '_');
 %mout = findreplacestring( mout, '/', '_');
 writedir_ = [writedir '/']
@@ -130,9 +143,10 @@ writedir_ = [writedir '/']
 %mout
 %mout = findreplacestring( mout, readdir_,writedir_);
 mout = strrep(mout,readdir,writedir);
-mout = findreplacestring( mout, '.tif','.png');
+%mout = findreplacestring( mout, '.tif','.png');
+mout = strrep(mout,filetype,'png');
 
-writelist = listmatlabformat( mout);
+writelist = mout;%listmatlabformat( mout);
 writelist'
 mkdir(writedir,'/tmp')
 
@@ -155,6 +169,7 @@ for i=1:length(readlist)
     end
     fid = fopen(tmpfile,'w');
 
+    disp(readlist_nuc{i})
     nucim = imread(strtrim(readlist_nuc{i}));
     
     %Devin S. 2015,07,13 - Added voronoi segmentation when ER channel is
@@ -176,7 +191,7 @@ for i=1:length(readlist)
 
     [regions, nucseeds] = segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE);
     if max(nucseeds(:))==0
-        warning('No nuclei found in the image after segmentation. This image appears to be blank!')
+        error('No nuclei found in the image after segmentation. This image appears to be blank!')
         skipimgs(i) = 1;
     elseif max(regions(:))==0
         warning('No cell regions found in the image after segmentation. This image appears to be blank!')

@@ -143,43 +143,51 @@ if any(dashlocs==1)
     %of the pattern. This only needs to be done if the dash is at the start
     %of the pattern.
 %     naming_convention.protein_channel = ['\\',naming_convention.protein_channel];
-    greparg = ['| grep \\', naming_convention.protein_channel]
+    %greparg = ['| grep \\', naming_convention.protein_channel]
 else
-    greparg = ['| grep ', naming_convention.protein_channel]
+    %greparg = ['| grep ', naming_convention.protein_channel]
 end
 
 ind = find(rootdir=='/');
 rootdir_ = rootdir;
 rootdir_(ind) = '_';
 
-uout = unixfind( rootdir, filetype, greparg);
-readlist = listmatlabformat( uout);
+%uout = unixfind( rootdir, filetype, greparg);
+%readlist = listmatlabformat( uout);
+readlist = ml_ls([rootdir,filesep,'*',naming_convention.protein_channel])
 %DPS - add fix if the parent dir is not the directory where the images are since unixfind.m performs recursive searches
 [folder,file,exttype] = fileparts(readlist{1})
 rootdir = [folder,filesep]
 rootdir_ = strrep(rootdir,'/','_')
 
-uout_nuc = findreplacestring(uout, naming_convention.protein_channel, naming_convention.nuclear_channel)
-uout_tub = findreplacestring(uout, naming_convention.protein_channel, naming_convention.tubulin_channel)
-uout_er = findreplacestring(uout, naming_convention.protein_channel, naming_convention.er_channel)
-readlist_nuc = listmatlabformat( uout_nuc)
-readlist_tub = listmatlabformat( uout_tub)
-readlist_er = listmatlabformat( uout_er)
+%uout_nuc = findreplacestring(uout, naming_convention.protein_channel, naming_convention.nuclear_channel)
+%uout_tub = findreplacestring(uout, naming_convention.protein_channel, naming_convention.tubulin_channel)
+%uout_er = findreplacestring(uout, naming_convention.protein_channel, naming_convention.er_channel)
+%readlist_nuc = listmatlabformat( uout_nuc)
+readlist_nuc = strrep(readlist,naming_convention.protein_channel, naming_convention.nuclear_channel);
+%readlist_tub = listmatlabformat( uout_tub)
+readlist_tub = strrep(readlist,naming_convention.protein_channel, naming_convention.tubulin_channel);
+%readlist_er = listmatlabformat( uout_er)
+readlist_er = strrep(readlist,naming_convention.protein_channel, naming_convention.er_channel);
 
 
 
-mout = uout;
-mout = findreplacestring( mout, naming_convention.protein_channel, naming_convention.segmentation_suffix);
+%mout = uout;
+%mout = findreplacestring( mout, naming_convention.protein_channel, naming_convention.segmentation_suffix);
+mout = strrep(readlist,naming_convention.protein_channel, naming_convention.segmentation_suffix);
 %mout = findreplacestring( uout, '/', '_');
-mout = findreplacestring( mout, '/', '_');
-mout = findreplacestring( mout, '.tif', '.png');
+%mout = findreplacestring( mout, '/', '_');
+mout = strrep(mout,'/', '_');
+%mout = findreplacestring( mout, '.tif', '.png');
+mout = strrep(mout,filetype, 'png');
 %mout = findreplacestring( mout, rootdir_, ['./data/masks/']);
 maskdir_ = [maskdir '/']
 % mout
 % rootdir_
 % maskdir_
-mout = findreplacestring( mout, rootdir_, maskdir_);
-readlist_mask = listmatlabformat( mout)'
+%mout = findreplacestring( mout, rootdir_, maskdir_);
+readlist_mask = strrep(mout,rootdir_,maskdir_);
+%readlist_mask = listmatlabformat( mout)'
 % readlist'
 
 cleanobject.channel_path = [];
