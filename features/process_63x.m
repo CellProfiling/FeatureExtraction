@@ -1,4 +1,4 @@
-function [cell_feat, exit_code] = process_63x(in_folder,out_folder,resolution,color,extensions)
+function [cell_feat, exit_code] = process_63x(in_folder,out_folder,resolution,color,extensions,pattern)
 %
 %
 %Written by: Elton Date-unknown
@@ -10,6 +10,12 @@ addpath(genpath('./hpa_lib'),'-begin');
 addpath(genpath('./adaptive_watersheed_seg'),'-begin');
 
 exit_code   = 0;
+
+%DPS 22,09,2015 - added 'pattern' field so we can handle sub-patterns in
+%addition to extensions.
+if nargin<6
+    pattern = '';
+end
 
 %DPS 04,08,2015 - added 'extensions' field so that we can handle multiple
 %file-naming conventions. This should not break the former pipeline
@@ -67,10 +73,16 @@ mkdir(filename);
 % extension_mtub  = '_red.tif';
 % extension_er    = strcat('_', color, '.tif');
 
-list_ab     = rdir_list(char([in_folder,'/*',extension_ab]));
-list_dapi   = rdir_list(char([in_folder,'/*',extension_dapi]));
-list_mtub   = rdir_list(char([in_folder,'/*',extension_mtub]));
-list_er     = rdir_list(char([in_folder,'/*',extension_er]));
+%
+% list_ab     = rdir_list(char([in_folder,'/*',pattern,extension_ab]));
+% list_dapi   = rdir_list(char([in_folder,'/*',pattern,extension_dapi]));
+% list_mtub   = rdir_list(char([in_folder,'/*',pattern,extension_mtub]));
+% list_er     = rdir_list(char([in_folder,'/*',pattern,extension_er]));
+
+% list_ab     = rdir_list(char([in_folder,'/*',extension_ab]));
+% list_dapi   = rdir_list(char([in_folder,'/*',extension_dapi]));
+% list_mtub   = rdir_list(char([in_folder,'/*',extension_mtub]));
+% list_er     = rdir_list(char([in_folder,'/*',extension_er]));
 
 %list_ab     = rdir_list(char([in_folder,'/*','/*',extension_ab]));
 %list_dapi   = rdir_list(char([in_folder,'/*','/*',extension_dapi]));
@@ -98,7 +110,7 @@ if(step1)
     label_subdirectories = cell(1,1);
     dirlist.name
     currind = 1;
-
+    
     for i=1:length(dirlist)
         %         currdir = dirlist(i+padnumb).name;
         currdir = dirlist(i).name;
@@ -114,7 +126,7 @@ if(step1)
     number_labels = length(label_subdirectories);
     label_features = cell(1, number_labels);
     
-    processed_path = out_folder,'/featextraction_rawdata/';
+    processed_path = [out_folder,'/featextraction_rawdata/'];
     mkdir(processed_path);
     
     feature_names = [];
@@ -126,150 +138,164 @@ end
 
 if(step2)
     
-    %DPS 10/08/15 - Defining key words and adding auto detection of
-    %channels left blank by the user.
-    %Keywords allowed: 'nuclear','tubulin','er','protein'
-    base_naming_convention.blank_channels = {};
-    
-    base_naming_convention.protein_channel  = extension_ab;
-    if isempty(extension_ab)
-        base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'protein'}];
-    end
-    base_naming_convention.nuclear_channel  = extension_dapi;
-    if isempty(extension_dapi)
-        base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'nuclear'}];
-    end
-    base_naming_convention.tubulin_channel  = extension_mtub;
-    if isempty(extension_mtub)
-        base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'tubulin'}];
-    end
-    base_naming_convention.er_channel       = extension_er;
-    if isempty(extension_er)
-        base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'er'}];
-    end
-    
-    
-    if isempty(color)
-        disp('No "color" variable passed for a segmentation channel suffix. Assuming this channel is not present')
-        base_naming_convention.blank_channels = {'er'};
-    end
-    
-    base_naming_convention.segmentation_suffix = base_naming_convention.protein_channel;
-    
-    index  = 1;
-    
-    label_subdirectories
-    image_subdirectory      = [image_path, filesep, (label_subdirectories{index}), filesep]
-    
-    %DPS - 28,07,2015  Adding support for direct parent directories rather
-    %than directories of directories
-    if ~isdir(image_subdirectory)
-        image_subdirectory = [image_path, filesep];
-    end
-    image_path
-    %storage_subdirectory    = [processed_path, (label_subdirectories{index}), filesep];
-    storage_subdirectory    = processed_path;
-    %label_subdirectories{index}
-    %image_subdirectory
-    %storage_subdirectory
-    disp('In 63x code')
-    %try
-    
-    %DPS 06/08/15 - adding support for partially scanned images
-    %Check if images need to be trimmed, trim them and updated the
-    %directory field.
-    %     [image_subdirectory] = trimImages(image_subdirectory,base_naming_convention,out_folder);
-    %DPS 10/08/15 - After discussing with Emma, we will now mark images
-    %that are partial scans and not trim images
-    [nucfiles, skipimage] = preprocessImages(image_subdirectory,base_naming_convention,out_folder)
-    %DPS 11/08/15 - Need to eliminate folders that don't have any files in
-    %them (that match our naming convention).
-    if skipimage==inf
-        cell_feat = [];
-        exit_code = 1;
-        return
-    end
-    [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed,segskips] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
-    regions_results     =   cell2mat(label_features);
-    
-    % read cell (x,y) centers and bounding box values
-    
-    dir_png         = dir([storage_subdirectory,'/*.png']);
-    
-    %%%DPS 2015/07/09 - I don't understand how this ever worked without a for loop unless they were running on one image at a time. I am changing now
-    position_stats = zeros(size(regions_results,1),7);
-    %DPS 30,07,2015 - Adding variable to track variable names; 7 position
-    %stats are calculated
-    pos_stats_names = cell(1,7);
-    %area
-    pos_stats_names{1} = 'position_stats:Area';
-    %center of mass location
-    pos_stats_names{2} = 'position_stats:Centroid_x';
-    pos_stats_names{3} = 'position_stats:Centroid_y';
-    %bounding box
-    pos_stats_names{4} = 'position_stats:BoundingBox_ulx';
-    pos_stats_names{5} = 'position_stats:BoundingBox_uly';
-    pos_stats_names{6} = 'position_stats:BoundingBox_wx';
-    pos_stats_names{7} = 'position_stats:BoundingBox_wy';
-    currstart = 1;
-    for i = 1:length(dir_png)
-        %bw_seg          = imread([storage_subdirectory,'/',char(dir_png(1).name)]);
-        bw_seg = imread([storage_subdirectory,'/',char(dir_png(i).name)]);
-        nucstats_seg    = regionprops(bwlabel(bw_seg,4),'Centroid','BoundingBox','Area');
+    for index = 1:length(label_subdirectories)
         
-        if(length(nucstats_seg)>0)
+        %set up the subfolder stuff
+        curr_out_folder = [out_folder,filesep,label_subdirectories{index}];
+        
+        %DPS 10/08/15 - Defining key words and adding auto detection of
+        %channels left blank by the user.
+        %Keywords allowed: 'nuclear','tubulin','er','protein'
+        base_naming_convention.blank_channels = {};
+        
+        base_naming_convention.protein_channel  = extension_ab;
+        if isempty(extension_ab)
+            base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'protein'}];
+        end
+        base_naming_convention.nuclear_channel  = extension_dapi;
+        if isempty(extension_dapi)
+            base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'nuclear'}];
+        end
+        base_naming_convention.tubulin_channel  = extension_mtub;
+        if isempty(extension_mtub)
+            base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'tubulin'}];
+        end
+        base_naming_convention.er_channel       = extension_er;
+        if isempty(extension_er)
+            base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'er'}];
+        end
+        
+        
+        if isempty(color)
+            disp('No "color" variable passed for a segmentation channel suffix. Assuming this channel is not present')
+            base_naming_convention.blank_channels = {'er'};
+        end
+        
+        base_naming_convention.segmentation_suffix = base_naming_convention.protein_channel;
+        %DPS 22,09,2015 - added pattern field to allow for wild card
+        %specification
+        base_naming_convention.pattern = pattern;
+        
+%         index  = 1;
+        
+%         label_subdirectories
+        image_subdirectory      = [image_path, filesep, (label_subdirectories{index}), filesep]
+        
+        %DPS - 28,07,2015  Adding support for direct parent directories rather
+        %than directories of directories
+        if ~isdir(image_subdirectory)
+            image_subdirectory = [image_path, filesep];
+        end
+%         image_path
+        storage_subdirectory    = [processed_path, (label_subdirectories{index}), filesep];
+%         storage_subdirectory    = processed_path;
+        %label_subdirectories{index}
+        %image_subdirectory
+        %storage_subdirectory
+        disp('In 63x code')
+        %try
+        
+        %DPS 06/08/15 - adding support for partially scanned images
+        %Check if images need to be trimmed, trim them and updated the
+        %directory field.
+        %     [image_subdirectory] = trimImages(image_subdirectory,base_naming_convention,out_folder);
+        %DPS 10/08/15 - After discussing with Emma, we will now mark images
+        %that are partial scans and not trim images
+        [nucfiles{index}, skipimage{index}] = preprocessImages(image_subdirectory,base_naming_convention,curr_out_folder)
+        %DPS 11/08/15 - Need to eliminate folders that don't have any files in
+        %them (that match our naming convention).
+        if skipimage{index}==inf
+            cell_feat = [];
+            exit_code = 1;
+            return
+        end
+        [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed,segskips] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
+        %DPS 20150924 - added support for cell array within our for loop of
+        %subfolders (fields)
+%         regions_results     =   cell2mat(label_features);
+        regions_results = cat(1,label_features{:});
+        
+        % read cell (x,y) centers and bounding box values
+        
+        dir_png         = dir([storage_subdirectory,'/*.png']);
+        
+        %%%DPS 2015/07/09 - I don't understand how this ever worked without a for loop unless they were running on one image at a time. I am changing now
+        position_stats{index} = zeros(size(label_features{index},1),7);
+        %DPS 30,07,2015 - Adding variable to track variable names; 7 position
+        %stats are calculated
+        pos_stats_names = cell(1,7);
+        %area
+        pos_stats_names{1} = 'position_stats:Area';
+        %center of mass location
+        pos_stats_names{2} = 'position_stats:Centroid_x';
+        pos_stats_names{3} = 'position_stats:Centroid_y';
+        %bounding box
+        pos_stats_names{4} = 'position_stats:BoundingBox_ulx';
+        pos_stats_names{5} = 'position_stats:BoundingBox_uly';
+        pos_stats_names{6} = 'position_stats:BoundingBox_wx';
+        pos_stats_names{7} = 'position_stats:BoundingBox_wy';
+        currstart = 1;
+        for i = 1:length(dir_png)
+            %bw_seg          = imread([storage_subdirectory,'/',char(dir_png(1).name)]);
+            bw_seg = imread([storage_subdirectory,'/',char(dir_png(i).name)]);
+            nucstats_seg    = regionprops(bwlabel(bw_seg,4),'Centroid','BoundingBox','Area');
             
-            %num_cells = size(regions_results);
-            %num_cells = num_cells(1,1);
-            num_cells = length(nucstats_seg);
-            %position_stats(1:num_cells,1) = [nucstats_seg(1:num_cells).Area]';
-            position_stats(currstart:currstart+num_cells-1,1)      =   [nucstats_seg.Area]';
-            position_stats(currstart:currstart+num_cells-1,2:3)    =   reshape([nucstats_seg(1:num_cells).Centroid],2,num_cells)';
-            position_stats(currstart:currstart+num_cells-1,4:7)    =   reshape([nucstats_seg(1:num_cells).BoundingBox],4,num_cells)';
+            if(length(nucstats_seg)>0)
+                
+                %num_cells = size(regions_results);
+                %num_cells = num_cells(1,1);
+                num_cells = length(nucstats_seg);
+                %position_stats(1:num_cells,1) = [nucstats_seg(1:num_cells).Area]';
+                position_stats{index}(currstart:currstart+num_cells-1,1)      =   [nucstats_seg.Area]';
+                position_stats{index}(currstart:currstart+num_cells-1,2:3)    =   reshape([nucstats_seg(1:num_cells).Centroid],2,num_cells)';
+                position_stats{index}(currstart:currstart+num_cells-1,4:7)    =   reshape([nucstats_seg(1:num_cells).BoundingBox],4,num_cells)';
+                
+                time_so_far = toc(start_time);
+                currstart = currstart+num_cells;
+                %size(regions_results)
+                %size(position_stats)
+                
+            else
+                warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
+            end
+        end
+        
+        position_results = cat(1,position_stats{:});
+        
+        if sum(position_results(:))>0
+            cell_feat  = [position_results regions_results];
+            %DPS 30,07,2015 - added feature name save and concatenation of
+            %position stats to feature names
+            feature_names = [pos_stats_names feature_names];
+            save([curr_out_folder,filesep,'feature_names.mat'],'feature_names');
+            csvwrite([curr_out_folder,'/','features.csv'], cell_feat);
             
-            time_so_far = toc(start_time);
-            currstart = currstart+num_cells;
-            %size(regions_results)
-            %size(position_stats)
+        elseif sum(skipimage(:)>0)==length(dir_png) || sum(segskips==1)==length(dir_png)
+            fprintf(['There was no fluorescence for any images in ',in_folder, '. We will not bother saving the features.\n'])
+            cell_feat = [];
+        elseif sum(segskips>1)==length(dir_png)
+            fprintf(['There was no cell regions for any images in ',in_folder, '. Position stats will be blank.\n'])
+            cell_feat  = [position_results regions_results];
+            %DPS 30,07,2015 - added feature name save and concatenation of
+            %position stats to feature names
+            feature_names = [pos_stats_names feature_names];
+            save([curr_out_folder,filesep,'feature_names.mat'],'feature_names');
+            csvwrite([curr_out_folder,'/','features.csv'], cell_feat);
             
         else
-            warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
+            cell_feat = 0;
+            exit_code = 1;
+            disp('Segmentation error occuring during feature extraction 63x/40x');
+            exit(exit_code);
         end
-    end
-    
-    if sum(position_stats(:))>0
-        cell_feat  = [position_stats regions_results];
-        %DPS 30,07,2015 - added feature name save and concatenation of
-        %position stats to feature names
-        feature_names = [pos_stats_names feature_names];
-        save([out_folder,filesep,'feature_names.mat'],'feature_names');
-        csvwrite([out_folder,'/','features.csv'], [position_stats regions_results]);
         
-    elseif sum(skipimage(:)>0)==length(dir_png) || sum(segskips==1)==length(dir_png)
-        fprintf(['There was no fluorescence for any images in ',in_folder, '. We will not bother saving the features.\n'])
-        cell_feat = [];
-    elseif sum(segskips>1)==length(dir_png)
-        fprintf(['There was no cell regions for any images in ',in_folder, '. Position stats will be blank.\n'])
-        cell_feat  = [position_stats regions_results];
-        %DPS 30,07,2015 - added feature name save and concatenation of
-        %position stats to feature names
-        feature_names = [pos_stats_names feature_names];
-        save([out_folder,filesep,'feature_names.mat'],'feature_names');
-        csvwrite([out_folder,'/','features.csv'], [position_stats regions_results]);
-        
-    else
-        cell_feat = 0;
-        exit_code = 1;
-        disp('Segmentation error occuring during feature extraction 63x/40x');
-        exit(exit_code);
+        %catch
+        %cell_feat = 0;
+        %exit_code = 1;
+        %disp('Segmentation error occuring during feature extraction 63x/40x');
+        %exit(exit_code);
+        %end
     end
-    
-    %catch
-    %cell_feat = 0;
-    %exit_code = 1;
-    %disp('Segmentation error occuring during feature extraction 63x/40x');
-    %exit(exit_code);
-    %end
 end
 
 

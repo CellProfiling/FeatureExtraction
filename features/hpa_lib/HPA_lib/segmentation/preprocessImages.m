@@ -29,13 +29,13 @@ if ~isdir(newimgdir)
 end
 
 %first get all the paths 
-nucpath = [imagedir,filesep,'*',namingconvention.nuclear_channel,'*'];
+nucpath = [imagedir,filesep,'*',namingconvention.pattern,'*',namingconvention.nuclear_channel,'*'];
 nucfiles = ml_ls(nucpath);
-protpath = [imagedir,filesep,'*',namingconvention.protein_channel,'*']; 
+protpath = [imagedir,filesep,'*',namingconvention.pattern,'*',namingconvention.protein_channel,'*']; 
 protfiles = ml_ls(protpath);
-mtpath = [imagedir,filesep,'*',namingconvention.tubulin_channel,'*']; 
+mtpath = [imagedir,filesep,'*',namingconvention.pattern,'*',namingconvention.tubulin_channel,'*']; 
 mtfiles = ml_ls(mtpath);
-erpath = [imagedir,filesep,'*',namingconvention.er_channel,'*'] 
+erpath = [imagedir,filesep,'*',namingconvention.pattern,'*',namingconvention.er_channel,'*'] 
 erfiles = ml_ls(erpath)
 
 if any(strcmpi(namingconvention.blank_channels,'nuc'))

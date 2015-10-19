@@ -156,8 +156,19 @@ tmplist = cell(length(imagelist),1);
 for i = 1:length(imagelist)
     [origfolder,tmplist{i},ext] = fileparts(imagelist{i});
     %need to remove the 'green' (or other channel) suffix from file name
-    nameparts = strsplit(tmplist{i},'_');
-    tmplist{i} = strjoin(nameparts(1:end-1),'_');
+    delim = '_';
+    nameparts = strsplit(tmplist{i},delim);
+    if length(nameparts)==1
+        warning('Empty file base list. trying -- instead of _ ')
+        delim = '--';
+        nameparts = strsplit(tmplist{i},delim);
+        tmplist{i} = strjoin(nameparts(1:end-1),delim);
+        tmplist{i} = [tmplist{i},delim];
+    else
+        tmplist{i} = strjoin(nameparts(1:end-1),delim);
+    end    
+    
+    
     
 end
 

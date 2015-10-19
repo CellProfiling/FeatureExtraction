@@ -99,7 +99,7 @@ readdir_(ind) = '_';
 readdir
 naming_convention.protein_channel
 %filetype is now added before in process_63x.m
-uout = ml_ls([readdir,filesep,'*',naming_convention.protein_channel])
+uout = ml_ls([readdir,filesep,'*',naming_convention.pattern,'*',naming_convention.protein_channel])
 %uout = [readdir,filesep,uout]
 %readlist = listmatlabformat( uout);
 readlist = uout;
@@ -191,7 +191,7 @@ for i=1:length(readlist)
 
     [regions, nucseeds] = segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE);
     if max(nucseeds(:))==0
-        error('No nuclei found in the image after segmentation. This image appears to be blank!')
+        warning('No nuclei found in the image after segmentation. This image appears to be blank!')
         skipimgs(i) = 1;
     elseif max(regions(:))==0
         warning('No cell regions found in the image after segmentation. This image appears to be blank!')

@@ -154,7 +154,7 @@ rootdir_(ind) = '_';
 
 %uout = unixfind( rootdir, filetype, greparg);
 %readlist = listmatlabformat( uout);
-readlist = ml_ls([rootdir,filesep,'*',naming_convention.protein_channel])
+readlist = ml_ls([rootdir,filesep,'*',naming_convention.pattern,'*',naming_convention.protein_channel])
 %DPS - add fix if the parent dir is not the directory where the images are since unixfind.m performs recursive searches
 [folder,file,exttype] = fileparts(readlist{1})
 rootdir = [folder,filesep]
@@ -298,14 +298,23 @@ for i=1:length(readlist)
             continue;
         end
         
-        tmpfile2 = writepath;
-        tmpfile2(find(tmpfile2=='/')) = [];
-        tmpfile2(find(tmpfile2=='.')) = [];
-        tmpfile2 = [writedir '/tmp/' tmpfile2 '_REGION.txt']; %%
+        %DPS 20150924 - had to change this to make the paths shorter. If
+        %the path is too long then fopen will fail. 
+%         tmpfile2 = writepath;
+        [resultdir,writefile,writetype] = fileparts(writepath);
+%         tmpfile2(find(tmpfile2=='/')) = [];
+%         tmpfile2(find(tmpfile2=='.')) = [];
+%         tmpfile2 = [writedir '/tmp/' tmpfile2 '_REGION.txt']; %%
+          tmpfile2 = [writedir '/tmp/' writefile '_REGION.txt']; %%
 %tmpfile2
-        if exist(tmpfile2,'file')
-            continue;
-        end
+        %DPS 20150924 - I don't think we want to skip it if the file
+        %exists. This is only if we are running multiple jobs on the same
+        %image in parralel, but that is not going to happen because things
+        %can get messy and it doesn't take that long...
+%         if exist(tmpfile2,'file')
+%             continue;
+%         end
+        
         fid2 = fopen(tmpfile2,'w');
         
         start_time = tic;
