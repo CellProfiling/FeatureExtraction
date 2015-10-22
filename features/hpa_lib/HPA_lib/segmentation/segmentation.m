@@ -1,4 +1,4 @@
-function [regions, fgs]= segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE)
+function [regions, regions_nuc]= segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE)
 
 %Edited by:
 %Devin Sullivan July 13, 2015 - added support for voronoi segmentation
@@ -7,6 +7,8 @@ function [regions, fgs]= segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUC
 
 minarea = (MINNUCLEUSDIAMETER/IMAGEPIXELSIZE/2)^2*pi;
 maxarea = (MAXNUCLEUSDIAMETER/IMAGEPIXELSIZE/2)^2*pi;
+
+% dilation = round((MINNUCLEUSDIAMETER/IMAGEPIXELSIZE)/2)+1;
 
 % %make sure that the nuclear channel is fully scanned. If not, trim the
 % %image to the last scanned line. Note this may be verticle or horizontal
@@ -59,10 +61,15 @@ maxarea = (MAXNUCLEUSDIAMETER/IMAGEPIXELSIZE/2)^2*pi;
 
 % morphological closing to remove artificial pixels from touching nucleis
 
-fgs = fgseeds( nucim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE);
+regions_nuc = fgseeds( nucim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE);
+
+% %This actually fills holes and makes nuclei more contiguous 
+% regions_nuc2 = bwmorph(regions_nuc,'dilate',dilation);
+% regions_nuc = bwmorph(regions_nuc2,'erode',dilation);
+
 
 if(IMAGEPIXELSIZE==0.1)
-    nucim_p = bwmorph((fgs),'open',2);
+    nucim_p = bwmorph((regions_nuc),'open',2);
 end
 
 %check if the cellim is actually empty or even just a bit of noise
@@ -82,14 +89,19 @@ if ~isempty(cellim)
     %figure;subplot(1,2,1);imshow(cellim_proc);subplot(1,2,2);imshow(bgs);
     
     % combine seeds
-    seeds = fgs + bgs;
+    %DPS 2015,10,22 - This should be depricated code, but using the refined
+    %nuclear segmentation gives much better segmentations, so updating it here
+    %as well.
+    % seeds = regions_nuc + bgs;
+    seeds = uint8(regions_nuc)*255+bgs;
+
     
     % perform seeded watershed
     MA = max(cellim_proc(:));
     regions = seededwatershed(MA-cellim_proc,seeds,4);
 else
     %use voronoi segmentation to approximate cells
-    regions = ~(ml_getvoronoi(fgs));
+    regions = ~(ml_getvoronoi(regions_nuc));
     
     %because we use all the nuclei to get more accurate cell shapes we now
     %have to eliminate "cells" where nuclei are touching the border to be
@@ -101,9 +113,9 @@ else
     imgobjs = bwconncomp(regions,4);
     
     %get the value of nuclei touching the border 
-    nucvallist = unique(fgs(:));
+    nucvallist = unique(regions_nuc(:));
     bordernucval = nucvallist(2);%the first should always be 0
-    bordernucimg = fgs==bordernucval;
+    bordernucimg = regions_nuc==bordernucval;
     
     %then loop through each region and eliminate the offending ones 
     for i = 1:imgobjs.NumObjects
@@ -121,6 +133,18 @@ else
         
         
     end
+    
+    %DPS 05,08,2015 - For voronoi segmentation, because the borders can
+    %have sharp angles there may be hanging pixels at cell junctions that
+    %are not considered "connected". (this should never happen in watershed
+    %segmentation). To eliminate these hanging pixels we filter for groups
+    %of pixels bigger than min_cell_size.
+    %This is hardcoded because it's a very conservative number only meant
+    %to remove hanging pixels not estimate cell size. If a cell is smaller
+    %than 5 pixels at any resolution, it is likely that you could not
+    %segment a nucleus inside it as is our practice.
+    bw3 = bwareaopen(bwtmp,minarea/2);
+
     
     
 end

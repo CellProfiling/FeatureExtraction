@@ -289,7 +289,10 @@ switch fsetnames{zed}
     %loadNucleusChannel
 
     commonScriptProtTotalIntensity
-
+    
+  case 'IntensityStats'
+%       [feats,names,slfnames] = commonScriptTotalIntensity(protstruct,tubstruct,erstruct,nucstruct);
+    [feats,names,slfnames] = commonScriptIntensityStats(protstruct,tubstruct,erstruct,nucstruct);
     
   otherwise
     error('improper feature set specified');

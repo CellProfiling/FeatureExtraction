@@ -1,5 +1,7 @@
 function [regions_results, exit_code] = process_10x(in_folder,out_folder, color)
 
+warning('This is an outdated method and should be removed. If you are still using this, please consider using process_img.m')
+
 % input_folder is the directory storing all plate images however could be 
 % changed to a folder containing only the fielf of view imageset - red,blue 
 % and green channel images are required to be present.
@@ -47,10 +49,14 @@ addpath(genpath('./adaptive_watersheed_seg'),'-begin');
 input_folder    = in_folder;
 output_folder   = out_folder;
 
-extention_dapi  = '_blue.tif';
-extention_ab    = '_green.tif';
-extention_mtub  = '_red.tif';
-extention_er    = strcat('_', color, '.tif');
+% extention_dapi  = '_blue.tif';
+% extention_ab    = '_green.tif';
+% extention_mtub  = '_red.tif';
+extention_dapi = 'C01.ome.tif';
+extention_ab = 'C00.ome.tif';
+extention_mtub = 'C03.ome.tif';
+% extention_er    = strcat('_', color, '.tif');
+extention_er    = strcat(color, '.tif');
 
 plate_wildcard  = 'exp*';
 gene_wildcard   = '*';
@@ -90,7 +96,7 @@ for i=1:length(list_dapi)
     
     % Segment the nucleus and cell extent mask
     
-    [regions nuc_seed]  =   segmentFields10x(im_dapi, im_mtub, im_er);
+    [regions, nuc_seed]  =   segmentFields10x(im_dapi, im_mtub, im_er);
     
     % Extract IF intensity measurements from the masks computed above 
     
@@ -147,7 +153,7 @@ if(numel(allresults_tab)>0)
 else
      exit_code = 1;
      disp('Segmentation error occuring during feature extraction 10x');
-     exit(exit_code);
+%      exit(exit_code);
 end
 
 %% To add if segmentation of clustered cells need to be optimised 

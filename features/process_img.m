@@ -1,10 +1,13 @@
-function [cell_feat, exit_code] = process_63x(in_folder,out_folder,resolution,color,extensions,pattern)
+function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,color,extensions,pattern)
 %
 %
 %Written by: Elton Date-unknown
 %
 %Edited by: (dd,mm,yy)
 %Devin P Sullivan 04,08,2015 - added 'extensions' input
+%Devin P Sullivan 20,10,2015 - merging multiple resolutions that have
+%replicate code to one code base for high efficiency, reliability and
+%easier code managment. 
 
 addpath(genpath('./hpa_lib'),'-begin');
 addpath(genpath('./adaptive_watersheed_seg'),'-begin');
@@ -51,12 +54,12 @@ else
 end
 
 
-
-if(resolution==63)
-    resolution = 1;
-else
-    resolution = 0;
-end
+%DPS 2015,10,20 - the resolution should now be passed in as um/pixel
+% if(resolution==63)
+%     resolution = 1;
+% else
+%     resolution = 0;
+% end
 
 step1   = true;
 step2   = true;

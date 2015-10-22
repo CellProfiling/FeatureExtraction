@@ -1,5 +1,7 @@
 function [regions_cell regions_nuc] = segmentFields10x(nucim, cellim, erim)
 
+warning('This is an outdated method and should be removed. If you are still using this, please consider using segmentFields.m')
+
 % nucim is the the input image of the DAPI to segment the seeds for the 
 % cell masks.
 % 

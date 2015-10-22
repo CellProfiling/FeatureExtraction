@@ -101,8 +101,10 @@ all_featsets = original_featsets;
 all_numfeats = original_numfeats; 
 all_featsets = [all_featsets, {'nucStats'}]; 
 all_numfeats = [all_numfeats, 20]; 
-all_featsets = [all_featsets, {'protTotalIntensity'}]; 
-all_numfeats = [all_numfeats, 1]; 
+% all_featsets = [all_featsets, {'protTotalIntensity'}]; 
+all_featsets = [all_featsets, {'IntensityStats'}];
+% all_numfeats = [all_numfeats, 1]; 
+all_numfeats = [all_numfeats, 8];
 
 % $$$ if ~exist('featsets','var')
 % $$$   %featsets = original_featsets;

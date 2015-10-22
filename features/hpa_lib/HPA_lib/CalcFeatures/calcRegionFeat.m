@@ -174,7 +174,11 @@ readlist_er = strrep(readlist,naming_convention.protein_channel, naming_conventi
 
 %mout = uout;
 %mout = findreplacestring( mout, naming_convention.protein_channel, naming_convention.segmentation_suffix);
-mout = strrep(readlist,naming_convention.protein_channel, naming_convention.segmentation_suffix);
+if isstruct(naming_convention.segmentation_suffix)
+    mout = strrep(readlist,naming_convention.protein_channel, naming_convention.segmentation_suffix.cell);
+else
+    mout = strrep(readlist,naming_convention.protein_channel, naming_convention.segmentation_suffix);
+end
 %mout = findreplacestring( uout, '/', '_');
 %mout = findreplacestring( mout, '/', '_');
 mout = strrep(mout,'/', '_');
@@ -246,6 +250,12 @@ for i=1:length(readlist)
     erfieldstruct.channel_path = readlist_er{i};
     maskfieldstruct.channel_path = readlist_mask{i};
     
+    %if we want to do cyto. 
+    if isstruct(naming_convention.segmentation_suffix)
+        maskfieldstruct.channel_path_nuc = strrep(readlist_mask{i},'.png','_nuc.png');
+        
+    end
+    
     %DPS 05,08,2015 - adding blank_channels now rather than later. 
     protfieldstruct.isempty = any(strcmpi(naming_convention.blank_channels,'protein'));
     nucfieldstruct.isempty = any(strcmpi(naming_convention.blank_channels,'nuclear'));
@@ -282,7 +292,13 @@ for i=1:length(readlist)
         [folder,nucsuff] = fileparts(naming_convention.nuclear_channel);
         [folder,tubsuff] = fileparts(naming_convention.tubulin_channel);
         [folder,ersuff] = fileparts(naming_convention.er_channel);
-        [folder,segsuff] = fileparts(naming_convention.segmentation_suffix);
+        if isstruct(naming_convention.segmentation_suffix)
+            [folder,segsuff1] = fileparts(naming_convention.segmentation_suffix.nuc);
+            [folder,segsuff2] = fileparts(naming_convention.segmentation_suffix.cell);
+            segsuff = [segsuff1,segsuff2];
+        else
+            [folder,segsuff] = fileparts(naming_convention.segmentation_suffix);
+        end
         mout = findreplacestring( mout, naming_convention.protein_channel, [protsuff,nucsuff,tubsuff,ersuff,segsuff,feature_set_suffix,'.mat']);
         mout = findreplacestring( mout, '/', '_');
         
@@ -406,10 +422,10 @@ for i=1:length(readlist)
                  naming_convention.blank_channels = [naming_convention.blank_channels,{'protein'}];
               end
             end
-            
-            if strcmpi(protstruct.channel_path,'/Users/devinsullivan/Documents/golgi/images/Golgi_partly_overlap//image--U11--V00--X00--Y01--C00.tif')
-                holdup = 1
-            end
+  
+%             if strcmpi(protstruct.channel_path,'/Users/devinsullivan/Documents/golgi/images/Golgi_partly_overlap//image--U11--V00--X00--Y01--C00.tif')
+%                 holdup = 1
+%             end
 
 
             commonScriptCalculateSet

@@ -108,7 +108,10 @@ end
 %DPS 17,08,2015 - Need to add support for other datatypes. Specifically,
 %uint16 images are getting assigned to uint8 without conversion leading to
 %very saturated images. 
-maskfieldstruct.channel = convert_to_uint8(maskfieldstruct.channel);
+%No longer convert the mask to uint8 here because it is a labeled image and
+%we want to have up to 65,000 cells in the image.
+% maskfieldstruct.channel = convert_to_uint8(maskfieldstruct.channel);
+maskfieldstruct.channel = double(maskfieldstruct.channel);
 protfieldstruct.channel = convert_to_uint8(protfieldstruct.channel);
 nucfieldstruct.channel = convert_to_uint8(nucfieldstruct.channel);
 tubfieldstruct.channel = convert_to_uint8(tubfieldstruct.channel);
@@ -160,30 +163,55 @@ end
 %%%
 %If there are some that haven't been done yet, do them.
 if sum(tmp_indexer==0)~=length(tmp_indexer)
-    bwtmp = maskfieldstruct.channel==max(maskfieldstruct.channel(:));
+%     bwtmp = maskfieldstruct.channel==max(maskfieldstruct.channel(:));
     %bw2 never appears to be used, commenting it out. - DPS 05,08,2015
 %     bw2 = imopen(bwtmp,ones(11,11));
     
-    %DPS 05,08,2015 - For voronoi segmentation, because the borders can
-    %have sharp angles there may be hanging pixels at cell junctions that
-    %are not considered "connected". (this should never happen in watershed
-    %segmentation). To eliminate these hanging pixels we filter for groups
-    %of pixels bigger than min_cell_size.
-    %This is hardcoded because it's a very conservative number only meant
-    %to remove hanging pixels not estimate cell size. If a cell is smaller
-    %than 5 pixels at any resolution, it is likely that you could not
-    %segment a nucleus inside it as is our practice.
-    min_cell_size = 5;%pixels
-    bw3 = bwareaopen(bwtmp,min_cell_size);
+%DPS 2015,10,22 - This is now done in the segmentation to avoid destroying
+%signal. 
+%     %DPS 05,08,2015 - For voronoi segmentation, because the borders can
+%     %have sharp angles there may be hanging pixels at cell junctions that
+%     %are not considered "connected". (this should never happen in watershed
+%     %segmentation). To eliminate these hanging pixels we filter for groups
+%     %of pixels bigger than min_cell_size.
+%     %This is hardcoded because it's a very conservative number only meant
+%     %to remove hanging pixels not estimate cell size. If a cell is smaller
+%     %than 5 pixels at any resolution, it is likely that you could not
+%     %segment a nucleus inside it as is our practice.
+%     min_cell_size = 5;%microns
+%     bw3 = bwareaopen(bwtmp,min_cell_size);
     
+    %The labeling is now done in segmentation to ensure that all channels
+    %have matching labels (cell to nucleus for example)
 %     bwl = bwlabel(bwtmp,4);
-    bwl = bwlabel(bw3,4);
+%     bwl = bwlabel(bw3,4);
+    bwl = maskfieldstruct.channel;
+    
+    %DPS 2015,10,20 - making a hack for when we want cytoplasm to
+    %ensure that we always have the same number of cells
+    %See calcRegionFeat for where we add this field to the struct
+    if isfield(maskfieldstruct,'channel_path_nuc')
+        nucimg = imread(maskfieldstruct.channel_path_nuc);
+        bwl = bwl.*double(~nucimg);
+        clear nucimg
+    end
+    
     s = size(maskfieldstruct.channel);
     ma = max(bwl(:));
-
+    small_objs = 0;
     for tmp_i=1:ma
         %imagesc(bwl==tmp_i); title(num2str([ma, tmp_i], 'total %d, index %d'));pause;
+        
+
         [r c] = find(bwl==tmp_i);
+        
+        %now we have to check if the cell actually has any cytoplasm. if
+        %not, we need to keep it, but make it a 0 pixel. 
+        if isempty(r)
+            r = 1;
+            c = 1;
+        end
+        
         minr = min(r);  maxr = max(r);  minc = min(c);  maxc = max(c);
         newIm = uint8(zeros(maxr-minr+1,maxc-minc+1));
         idx = (c-1)*s(1)+r;
@@ -210,8 +238,12 @@ if sum(tmp_indexer==0)~=length(tmp_indexer)
         end
         
         if size(newIm,1)<10
-            something_is_wrong = 1
+            small_objs = 1;
         end
         
+    end
+    
+    if small_objs==1
+        warning('Very small objects detected (<10 pixels diameter). Double check this is expected.')
     end
 end

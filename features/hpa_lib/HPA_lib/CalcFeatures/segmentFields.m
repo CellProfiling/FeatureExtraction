@@ -65,15 +65,26 @@ elseif exist('naming_convention', 'var') && strcmpi(naming_convention, 'IFconfoc
   naming_convention.segmentation_suffix = naming_convention.protein_channel; 
 end
 
-if (resolution==1)
+if (resolution==63)
+    warning('You appear to be using an outdated version. Resolution should now be specified as um/pixel.');
     IMAGEPIXELSIZE = 0.05; % um/px
-    MINNUCLEUSDIAMETER = 4; %um
-    MAXNUCLEUSDIAMETER = 40; %um
+%     MINNUCLEUSDIAMETER = 4; %um
+%     MAXNUCLEUSDIAMETER = 40; %um
+elseif ~isempty(resolution)
+    disp('We are assuming you entered your resolution in um/px')
+    IMAGEPIXELSIZE = resolution; % um/px
 else
     IMAGEPIXELSIZE = 0.1; % um/px
+%     MINNUCLEUSDIAMETER = 4; %um
+%     MAXNUCLEUSDIAMETER = 40; %um
+end
+
+%This may change if the cell type changes, but probably not too much. For
+%now we will keep them as constants and tell the user
+warning('We assume that nuclei in your image are between 4 and 40 um. If this is not correct please adjust the lines of code below.')
     MINNUCLEUSDIAMETER = 4; %um
     MAXNUCLEUSDIAMETER = 40; %um
-end
+
 
 filetype = 'tif';
 
@@ -144,6 +155,11 @@ writedir_ = [writedir '/']
 %mout = findreplacestring( mout, readdir_,writedir_);
 mout = strrep(mout,readdir,writedir);
 %mout = findreplacestring( mout, '.tif','.png');
+
+nucwritelist = strrep(mout,['.',filetype],'_nuc.png');
+cytowritelist = strrep(mout,['.',filetype],'_cyto.png');
+
+
 mout = strrep(mout,filetype,'png');
 
 writelist = mout;%listmatlabformat( mout);
@@ -179,13 +195,31 @@ for i=1:length(readlist)
     if ~isfield(naming_convention,'blank_channels')
         naming_convention.blank_channels = {};
     end
+    
+    %DPS 2015,10,20 - since we are no longer concerned with keeping the
+    %code the same as before, we can take some steps to make it better. 
+    %Here we will use the strategy of combining ER and MT for cell
+    %segmentation was done in the 10x code. 
+    %First check ER
     if ~isempty(naming_convention.er_channel) && ~any(strcmpi(naming_convention.blank_channels,'er'))
-        cellim = imread(strtrim(readlist_er{i}));
+        erim = imread(strtrim(readlist_er{i}));
     else
-        warning(['No ER naming convention given.',...
-            ' If you wish to use MT for segmentation please specify this',...
-            ' path in the naming_convention.er_channel.\n',...
-            'Otherwise defaulting to Voronoi segmentation using nuclei'])
+        erim = zeros(size(nucim));
+    end
+    %Then check MT
+    if ~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt'))
+        mtim = imread(strtrim(readlist_er{i}));
+    else
+        mtim = zeros(size(nucim));
+    end
+    %Then combine them
+    cellim = imadd(erim,mtim);
+    
+    %If neither existed, use Voronoi. If the sum is 0, there is no signal
+    %for either ER or MT. 
+    if sum(cellim(:)) == 0
+        warning(['No ER or MT naming convention given, or both are blank.',...
+            'Defaulting to Voronoi segmentation using nuclei as seeds.'])
         cellim = [];
     end
 
@@ -200,8 +234,17 @@ for i=1:length(readlist)
     
     % saving results
     disp(['writing image ',writelist{i}])
+    %DPS - I'm using uint16 here so we can have 65,000 objects (cells) per image. 
+    regions = uint16(bwlabel(regions,4));
+    nucseg = uint16(nucseeds==max(nucseeds(:))).*(regions);
+    nucseg = imfill(nucseg,'holes');
+%     cytoseg = (regions>0)-nucseg;
+%     imwrite(cytoseg,cytowritelist{i});
     imwrite( regions, writelist{i});
-
+    
+    %2015/10/19 DPS - save the nuclear segmentations too! 
+    imwrite( nucseg, nucwritelist{i});
+    
     fclose(fid);
     delete(tmpfile);
 end
