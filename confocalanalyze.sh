@@ -19,12 +19,10 @@ rm -rf $basedir/${pid}
 mkdir -p $basedir/${pid}/In/in
 mkdir -p $basedir/${pid}/Out
 ln -s -t $basedir/${pid}/In/in ${filename}*.tif
-if [ "$magnification" == "10" ]
-	then
-		/usr/local/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -r "cd $dir/features; try; [arr exit_status] = process_10x('${basedir}/${pid}/In','${basedir}/${pid}/Out', '$special_color'); catch; exit(122); end; exit(exit_status);"
-	else 
-		/usr/local/bin/matlab -nodisplay -nodesktop -nosplash -r "cd $dir/features; try; [arr exit_status] = process_63x('${basedir}/${pid}/In','${basedir}/${pid}/Out',$magnification, '$special_color'); catch; exit(122); end; exit(exit_status);"
-fi
+
+# Call the script
+/usr/local/bin/matlab -nodisplay -nodesktop -nosplash -r "cd $dir/features; try; [arr exit_status] = process_img('${basedir}/${pid}/In','${basedir}/${pid}/Out', $magnification, '$special_color'); catch; exit(122); end; exit(exit_status);"
+
 exitstatus=$?
 if [ $exitstatus -eq 0 ]
 then
