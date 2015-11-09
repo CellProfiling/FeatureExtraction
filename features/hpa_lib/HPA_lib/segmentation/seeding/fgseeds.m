@@ -10,6 +10,7 @@ if ~isa(dna,'unit8')
     dna = uint8(double(dna)./double(max(dna(:))).*255);
 end
 
+nucD_inpixels = MINNUCLEUSDIAMETER/IMAGEPIXELSIZE;
 minarea = (MINNUCLEUSDIAMETER/IMAGEPIXELSIZE/2)^2*pi;
 maxarea = (MAXNUCLEUSDIAMETER/IMAGEPIXELSIZE/2)^2*pi;
 
@@ -22,12 +23,12 @@ maxarea = (MAXNUCLEUSDIAMETER/IMAGEPIXELSIZE/2)^2*pi;
 %segmentation.
 %Using slightly different blurring for low resolution to ensure that we do
 %not blur too much when there is a small number of pixels. 
-if (MINNUCLEUSDIAMETER/IMAGEPIXELSIZE)>10
-    dtmp = fspecial('disk',round(MINNUCLEUSDIAMETER));
+if (nucD_inpixels)>10
+    dtmp = fspecial('disk',round(nucD_inpixels)/2);
     tmp = imfilter(dna,dtmp,'replicate');
-    nuc = imerode(tmp>b(ind),strel('disk',round(MINNUCLEUSDIAMETER/IMAGEPIXELSIZE/8)));
+    nuc = imerode(dna>b(ind),strel('disk',round(nucD_inpixels/8)));
 else
-    dtmp = fspecial('disk',round(MINNUCLEUSDIAMETER/2));
+    dtmp = fspecial('disk',round(MINNUCLEUSDIAMETER/4));
     tmp = imfilter(dna,dtmp,'replicate');
     nuc = imerode(dna>b(ind),strel('disk',round(MINNUCLEUSDIAMETER/IMAGEPIXELSIZE/8)));
 end

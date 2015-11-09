@@ -53,7 +53,7 @@ end
 
 
 if(resolution==63)
-    resolution = 1;
+    resolution = 0.08;%microns/pixel 1;
 else
     resolution = 0;
 end
@@ -114,11 +114,21 @@ if(step1)
     for i=1:length(dirlist)
         %         currdir = dirlist(i+padnumb).name;
         currdir = dirlist(i).name;
-        if any(strcmpi(currdir,{'.','..','.DS_Store'}))
+        if any(strcmpi(currdir,{'.','..','.DS_Store','tmp'})) || ~isdir(currdir)
             continue
         end
         label_subdirectories{currind} = currdir;
         currind = currind+1;
+    end
+    
+    if isempty(label_subdirectories{1})
+        pathparts = strsplit(image_path,'/');
+%         if isdir(image_path)
+            label_subdirectories{1} = pathparts{end};
+%         else
+            
+%         end
+        
     end
     
     label_names = label_subdirectories;
@@ -185,6 +195,11 @@ if(step2)
         %than directories of directories
         if ~isdir(image_subdirectory)
             image_subdirectory = [image_path, filesep];
+            %DPS - 09,11,2015 Adding support for direct file pattern names
+            %rather than directories or directories of directories.
+            if ~isdir(image_subdirectory)
+                image_subdirectory = image_path;
+            end
         end
 %         image_path
         storage_subdirectory    = [processed_path, (label_subdirectories{index}), filesep];

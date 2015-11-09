@@ -154,7 +154,7 @@ rootdir_(ind) = '_';
 
 %uout = unixfind( rootdir, filetype, greparg);
 %readlist = listmatlabformat( uout);
-readlist = ml_ls([rootdir,filesep,'*',naming_convention.pattern,'*',naming_convention.protein_channel])
+readlist = ml_ls([rootdir,'*',naming_convention.pattern,'*',naming_convention.protein_channel])
 %DPS - add fix if the parent dir is not the directory where the images are since unixfind.m performs recursive searches
 [folder,file,exttype] = fileparts(readlist{1})
 rootdir = [folder,filesep]

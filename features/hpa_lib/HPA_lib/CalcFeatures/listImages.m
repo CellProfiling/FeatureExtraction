@@ -101,4 +101,4 @@ rootdir_(ind) = '_';
 
 %uout = unixfind( rootdir, filetype, greparg);
 %readlist = listmatlabformat( uout);
-readlist = ml_ls([rootdir,filesep,'*',naming_convention.pattern,'*',naming_convention.protein_channel])
+readlist = ml_ls([rootdir,'*',naming_convention.pattern,'*',naming_convention.protein_channel])

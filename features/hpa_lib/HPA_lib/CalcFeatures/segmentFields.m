@@ -81,6 +81,7 @@ end
 
 %This may change if the cell type changes, but probably not too much. For
 %now we will keep them as constants and tell the user
+%Bionumbers - for HeLa cells, ~10um
 warning('We assume that nuclei in your image are between 4 and 40 um. If this is not correct please adjust the lines of code below.')
     MINNUCLEUSDIAMETER = 4; %um
     MAXNUCLEUSDIAMETER = 40; %um
@@ -110,7 +111,8 @@ readdir_(ind) = '_';
 readdir
 naming_convention.protein_channel
 %filetype is now added before in process_63x.m
-uout = ml_ls([readdir,filesep,'*',naming_convention.pattern,'*',naming_convention.protein_channel])
+% uout = ml_ls([readdir,filesep,'*',naming_convention.pattern,'*',naming_convention.protein_channel])
+uout = ml_ls([readdir,'*',naming_convention.pattern,'*',naming_convention.protein_channel])
 %uout = [readdir,filesep,uout]
 %readlist = listmatlabformat( uout);
 readlist = uout;
