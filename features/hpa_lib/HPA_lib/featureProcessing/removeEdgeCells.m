@@ -80,13 +80,16 @@ eliminds = zeros(size(posfeats,1),1);
 %DPS 19,08,15 - adding greater-than or equals in case all images are not
 %the same size. We will therefore eliminate cells that are outsize this
 %range
-eliminds = (ulxvals<1)+(ceil(ulyvals)>=imgsize(2));
+eliminds = (ulxvals<1)+(ulyvals<1)+(ceil(ulyvals)>=imgsize(2));
 
 %check if the bottom right is in the image
 % eliminds = eliminds + (ceil(lrxvals)==imgsize(1)) + (lryvals<1);
 %DPS 19,08,15 - adding greater-than or equals in case all images are not
 %the same size. We will therefore eliminate cells that are outsize this
 %range
+if any(lryvals<1) || any(ulyvals>imgsize(2))
+    error('unexpected')
+end
 eliminds = eliminds + (ceil(lrxvals)>=imgsize(1)) + (lryvals<1);
 
 %get rid of all cells touching edges
