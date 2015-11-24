@@ -12,6 +12,7 @@ function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,co
 addpath(genpath('./hpa_lib'),'-begin');
 addpath(genpath('./adaptive_watersheed_seg'),'-begin');
 
+faillist = [];
 exit_code   = 0;
 
 %DPS 22,09,2015 - added 'pattern' field so we can handle sub-patterns in
@@ -207,8 +208,8 @@ if(step2)
         %label_subdirectories{index}
         %image_subdirectory
         %storage_subdirectory
-        disp('In 63x code')
-        %try
+        %disp('In 63x code')
+        try
         
         %DPS 06/08/15 - adding support for partially scanned images
         %Check if images need to be trimmed, trim them and updated the
@@ -305,16 +306,18 @@ if(step2)
             exit(exit_code);
         end
         
-        %catch
+        catch
+          faillist = [faillist,image_subdirectory];
+          save([image_subdirectory,filesep,'listOfFailed.mat'],'faillist','skipimage')
         %cell_feat = 0;
         %exit_code = 1;
         %disp('Segmentation error occuring during feature extraction 63x/40x');
         %exit(exit_code);
-        %end
+        end
     end
+%end
+save([out_folder,filesep,'listOfFailed.mat'],'faillist')
 end
-
-
 %% create segmentation masks
 
 if(step3)
