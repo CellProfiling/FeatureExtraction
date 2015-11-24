@@ -1,4 +1,4 @@
-function calcRegionFeat(rootdir, maskdir, writedir, naming_convention, fsetnames, optimize)
+function calcRegionFeat(rootdir, maskdir, writedir, naming_convention, fsetnames, optimize,skipimgs)
 %function calcRegionFeat(rootdir, maskdir, writedir, naming_convention, fsetnames, optimize)
 % rootdir is the root directory storing all images.
 
@@ -133,8 +133,17 @@ if ~exist('optimize','var')
 end
 
 
+if findstr(naming_convention.nuclear_channel,'.tif');
+    filetype = 'tif';
+elseif findstr(naming_convention.nuclear_channel,'.TIF');
+    filetype = 'TIF';
+else 
+    warning('This image does not appear to be a tif (or TIF). Trying to separate file type. Assuming fileparts will give correct answer.')
+    [~,~,nucext] = fileparts(naming_convention.nuclear_channel);
+    filetype = nucext(2:end);
+end
+% filetype = 'tif';
 
-filetype = 'tif';
 %greparg = '| grep green';
 %DPS 05,08,2015 - adding support for naming_conventions to begin with a "-"
 dashlocs = strfind(naming_convention.protein_channel,'-')
@@ -243,6 +252,11 @@ for i=1:length(readlist)
     
     readlist{i}
     
+    if skipimgs(i)>0
+        warning('This image is being skipped. Please see output file for skipped files and code for reason.')
+        continue
+    end
+    
     %DPS 28,07,2015 - Moved to outer for loop.
     protfieldstruct.channel_path = readlist{i};
     nucfieldstruct.channel_path = readlist_nuc{i};
@@ -281,6 +295,7 @@ for i=1:length(readlist)
     er_channel_blank = erfieldstruct.isempty;
 
     for zed = 1:length(fsetnames)
+        zed
 % $$$         mout = findreplacestring( readlist{i}, '/', '_');
         mout = readlist{i};
         feature_set_suffix = ['_', fsetnames{zed}];

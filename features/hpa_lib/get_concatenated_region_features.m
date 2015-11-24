@@ -99,8 +99,17 @@ feature_set_naming_conventions{6}.nuclear_channel = base_naming_convention.tubul
 %DPS 2015/10/19 - Protein within nucleus features 
 nucmasksuffix = base_naming_convention.protein_channel;
 % cytomasksuffix = strrep(nucmasksuffix,'.tif','_cyto.png');
-nucmasksuffix = strrep(nucmasksuffix,'.tif','_nuc.png');
 
+if findstr(nucmasksuffix,'.tif');
+    nucmasksuffix = strrep(nucmasksuffix,'.tif','_nuc.png');
+elseif findstr(nucmasksuffix,'.TIF');
+    nucmasksuffix = strrep(nucmasksuffix,'.TIF','_nuc.png');
+else 
+    warning('This image does not appear to be a tif (or TIF). Trying to separate file type. Assuming fileparts will give correct answer.')
+    [~,~,nucext] = fileparts(nucmasksuffix);
+    nucmasksuffix = strrep(nucmasksuffix,nucext,'_nuc.png');
+end
+    
 feature_set_naming_conventions{8}.segmentation_suffix = nucmasksuffix;
 feature_set_naming_conventions{9} = rmfield(feature_set_naming_conventions{9},'segmentation_suffix');
 feature_set_naming_conventions{9}.segmentation_suffix.nuc = nucmasksuffix;
@@ -162,7 +171,7 @@ for feature_set_index = 1:number_feature_sets
     calcRegionFeat(image_path, mask_path, feature_set_subdirectory, ...
         feature_set_naming_conventions{feature_set_index}, ...
         feature_set_feature_names{feature_set_index}, ...
-        optimize);
+        optimize,skipimgs);
     
     % Dummy metadata needed for Jieyue's HPA_lib code:
     classlabels = label_list;

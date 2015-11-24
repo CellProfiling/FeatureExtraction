@@ -86,8 +86,17 @@ warning('We assume that nuclei in your image are between 4 and 40 um. If this is
     MINNUCLEUSDIAMETER = 4; %um
     MAXNUCLEUSDIAMETER = 40; %um
 
-
-filetype = 'tif';
+if findstr(naming_convention.nuclear_channel,'.tif');
+    filetype = 'tif';
+elseif findstr(naming_convention.nuclear_channel,'.TIF');
+    filetype = 'TIF';
+else 
+    warning('This image does not appear to be a tif (or TIF). Trying to separate file type. Assuming fileparts will give correct answer.')
+    [~,~,nucext] = fileparts(naming_convention.nuclear_channel);
+    filetype = nucext(2:end);
+end
+    
+% filetype = 'tif';
 
 %greparg = '| grep green';
 %DPS 05,08,2015 - adding support for naming_conventions to begin with a "-"

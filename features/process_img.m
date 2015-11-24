@@ -9,6 +9,10 @@ function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,co
 %replicate code to one code base for high efficiency, reliability and
 %easier code managment. 
 
+segskips= [];
+skipimage = [];
+
+
 addpath(genpath('./hpa_lib'),'-begin');
 addpath(genpath('./adaptive_watersheed_seg'),'-begin');
 
@@ -23,7 +27,7 @@ end
 
 %DPS 04,08,2015 - added 'extensions' field so that we can handle multiple
 %file-naming conventions. This should not break the former pipeline
-if nargin<5 || isempty(extensions)
+if (nargin<5 || isempty(extensions)) && ~iscell(color)
     fprintf(['You have not passed an "extensions" variable or full list of colors. We will assume you are using the HPA production channels.\n ',...
         'please make sure your files are names accordingly:\n',...
         '1."*_blue.tif" - nucleus \n 2."*_green.tif" - protein of interest \n',...
@@ -209,7 +213,7 @@ if(step2)
         %image_subdirectory
         %storage_subdirectory
         %disp('In 63x code')
-        try
+        %try
         
         %DPS 06/08/15 - adding support for partially scanned images
         %Check if images need to be trimmed, trim them and updated the
@@ -232,8 +236,21 @@ if(step2)
         regions_results = cat(1,label_features{:});
         
         % read cell (x,y) centers and bounding box values
-        pngsuff = strrep(base_naming_convention.protein_channel,'tif','png');
-        nucpngsuff = strrep(base_naming_convention.protein_channel,'.tif','_nuc.png');
+        infiletype = [];
+        if findstr(base_naming_convention.nuclear_channel,'.tif');
+            infiletype = 'tif';
+        elseif findstr(base_naming_convention.nuclear_channel,'.TIF');
+            infiletype = 'TIF';
+        else
+            warning('This image does not appear to be a tif (or TIF). Trying to separate file type. Assuming fileparts will give correct answer.')
+            [~,~,nucext] = fileparts(base_naming_convention.nuclear_channel);
+            infiletype = nucext(2:end);
+        end
+
+        
+        
+        pngsuff = strrep(base_naming_convention.protein_channel,infiletype,'png');
+        nucpngsuff = strrep(base_naming_convention.protein_channel,['.',infiletype],'_nuc.png');
         dir_png         = dir([storage_subdirectory,filesep,'*',pngsuff]);
         
         %%%DPS 2015/07/09 - I don't understand how this ever worked without a for loop unless they were running on one image at a time. I am changing now
@@ -287,9 +304,10 @@ if(step2)
             save([curr_out_folder,filesep,'feature_names.mat'],'feature_names');
             csvwrite([curr_out_folder,'/','features.csv'], cell_feat);
             
-        elseif sum(skipimage(:)>0)==length(dir_png) || sum(segskips==1)==length(dir_png)
+        elseif sum(skipimage{:}>0)==length(dir_png) || sum(segskips==1)==length(dir_png)
             fprintf(['There was no fluorescence for any images in ',in_folder, '. We will not bother saving the features.\n'])
             cell_feat = [];
+            faillist = [faillist,image_subdirectory];
         elseif sum(segskips>1)==length(dir_png)
             fprintf(['There was no cell regions for any images in ',in_folder, '. Position stats will be blank.\n'])
             cell_feat  = [position_results regions_results];
@@ -298,25 +316,28 @@ if(step2)
             feature_names = [pos_stats_names feature_names];
             save([curr_out_folder,filesep,'feature_names.mat'],'feature_names');
             csvwrite([curr_out_folder,'/','features.csv'], cell_feat);
-            
+            faillist = [faillist,image_subdirectory];
         else
             cell_feat = 0;
             exit_code = 1;
             disp('Segmentation error occuring during feature extraction 63x/40x');
+            faillist = [faillist,image_subdirectory];
             exit(exit_code);
         end
         
-        catch
-          faillist = [faillist,image_subdirectory];
-          save([image_subdirectory,filesep,'listOfFailed.mat'],'faillist','skipimage')
-        %cell_feat = 0;
-        %exit_code = 1;
+        save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
+        %catch
+            %faillist = [faillist,image_subdirectory];
+            %save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
+            %cell_feat = 0;
+            %exit_code = 1;
+            
         %disp('Segmentation error occuring during feature extraction 63x/40x');
         %exit(exit_code);
-        end
+        %end
     end
 %end
-save([out_folder,filesep,'listOfFailed.mat'],'faillist')
+% save([out_folder,filesep,'listOfFailed_tot.mat'],'faillist')
 end
 %% create segmentation masks
 
