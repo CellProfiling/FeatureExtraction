@@ -1,4 +1,4 @@
-function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,color,extensions,pattern)
+function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,color,extensions,pattern,mstype,seg_channels)
 %
 %
 %Written by: Elton Date-unknown
@@ -19,7 +19,19 @@ addpath(genpath('./adaptive_watersheed_seg'),'-begin');
 faillist = [];
 exit_code   = 0;
 
-%DPS 22,09,2015 - added 'pattern' field so we can handle sub-patterns in
+if nargin<8 
+    seg_channels = {'er','mt'};
+end
+
+%DPS 25,11,2015 - added 'mstype' var so we can have types of microscopes
+%for segmentation. Widefield microscopes require less blurring for good
+%segmentation as they are already blurry. 
+%Currently accepted values are 'confocal', and 'widefield'
+if nargin<7 || isempty(mstype)
+    mstype = 'confocal';
+end
+
+%DPS 22,09,2015 - added 'pattern' var so we can handle sub-patterns in
 %addition to extensions.
 if nargin<6
     pattern = '';
@@ -129,6 +141,9 @@ if(step1)
         currind = currind+1;
     end
     
+       if strcmpi(image_path(end),filesep)
+           image_path = image_path(1:end-1);
+       end
        if isempty(label_subdirectories{1})
         pathparts = strsplit(image_path,'/');
         label_subdirectories{1} = pathparts{end};
@@ -190,6 +205,13 @@ if(step2)
         %DPS 22,09,2015 - added pattern field to allow for wild card
         %specification
         base_naming_convention.pattern = pattern;
+        
+        %DPS 25,11,2015 - added mstype field to allow for specific segmenation 
+        base_naming_convention.mstype = mstype;
+        
+        %DPS 25,11,2015 - added mstype field to allow for specific segmenation 
+        base_naming_convention.seg_channel = seg_channels;
+        
         
 %         index  = 1;
         

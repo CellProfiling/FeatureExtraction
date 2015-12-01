@@ -50,10 +50,39 @@ idx = find(stats>maxarea | stats<minarea);
 idx2 = unique([bwl(:,1)' bwl(:,end)' bwl(1,:) bwl(end,:)]);
 idx2(idx2==0) = [];
 idx = unique([idx' idx2]);
-seeds = seeds - 127*uint8(ismember(bwl,idx));
+seeds_edge = seeds - 127*uint8(ismember(bwl,idx));
 
 %DPS 2015,10,22
 %This actually fills holes and makes nuclei more contiguous 
 dilation = round((MINNUCLEUSDIAMETER/IMAGEPIXELSIZE)/2)+1;
 fgs2 = bwmorph(seeds,'dilate',dilation);
 seeds = bwmorph(fgs2,'erode',dilation);
+
+%% double check if nuclei are within the size limits. If not, delete them. 
+%this makes sure we didn't accidently make things that are really big or
+%small in the process of dilating and shrinking. 
+
+%%Copy-pasta code. Should probably put this in a function
+% filter away very small objects
+bwl = bwlabel(seeds, 4);
+props = regionprops( bwl, 'Area');
+stats = zeros(size(props));
+for i=1:length(props)
+    stats(i) = props(i).Area;
+end
+idx = find(stats>minarea/2);
+seeds = ismember(bwl,idx);
+seeds = 255*uint8(seeds);
+
+%eliminate things on the edges 
+edgenums = unique(bwl.*(double(seeds_edge)==128));
+for ecell = 1:length(edgenums)
+    seeds = seeds-uint8((bwl==edgenums(ecell)).*128);
+end
+
+% idx = find(stats>maxarea | stats<minarea);
+% idx2 = unique([bwl(:,1)' bwl(:,end)' bwl(1,:) bwl(end,:)]);
+% idx2(idx2==0) = [];
+% idx = unique([idx' idx2]);
+% seeds = seeds - 127*uint8(ismember(bwl,idx));
+

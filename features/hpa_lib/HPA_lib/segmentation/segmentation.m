@@ -1,9 +1,13 @@
-function [regions, regions_nuc]= segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE)
+function [regions, regions_nuc]= segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE, microscope_type)
 
 %Edited by:
 %Devin Sullivan July 13, 2015 - added support for voronoi segmentation
 %Devin P Sullivan Aug 7, 2015 - added support for partially scanned nuclear
 %image.
+
+if nargin<6 || isempty(microscope_type)
+    microscope_type = 'confocal';
+end
 
 minarea = (MINNUCLEUSDIAMETER/IMAGEPIXELSIZE/2)^2*pi;
 maxarea = (MAXNUCLEUSDIAMETER/IMAGEPIXELSIZE/2)^2*pi;
@@ -60,8 +64,14 @@ maxarea = (MAXNUCLEUSDIAMETER/IMAGEPIXELSIZE/2)^2*pi;
 % determine foreground seeds
 
 % morphological closing to remove artificial pixels from touching nucleis
-
-regions_nuc = fgseeds( nucim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE);
+if strcmpi(microscope_type,'confocal')
+    regions_nuc = fgseeds( nucim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE);
+elseif strcmpi(microscope_type,'widefield')
+    regions_nuc = fgseeds_wf( nucim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE);
+else
+    error('Unrecognized microscope type given. Please choose which microscope type you used or add to this if-else a segmentation for your scope type.')
+end
+    
 
 % %This actually fills holes and makes nuclei more contiguous 
 % regions_nuc2 = bwmorph(regions_nuc,'dilate',dilation);
@@ -99,6 +109,7 @@ if ~isempty(cellim)
     % perform seeded watershed
     MA = max(cellim_proc(:));
     regions = seededwatershed(MA-cellim_proc,seeds,4);
+    
 else
     %use voronoi segmentation to approximate cells
     regions = ~(ml_getvoronoi(regions_nuc));
@@ -114,8 +125,12 @@ else
     
     %get the value of nuclei touching the border 
     nucvallist = unique(regions_nuc(:));
-    bordernucval = nucvallist(2);%the first should always be 0
-    bordernucimg = regions_nuc==bordernucval;
+    if length(nucvallist)>2
+        bordernucval = nucvallist(2);%the first should always be 0
+        bordernucimg = regions_nuc==bordernucval;
+    else
+        bordernucimg = zeros(size(regions_nuc));
+    end
     
     %then loop through each region and eliminate the offending ones 
     for i = 1:imgobjs.NumObjects
@@ -143,7 +158,9 @@ else
     %to remove hanging pixels not estimate cell size. If a cell is smaller
     %than 5 pixels at any resolution, it is likely that you could not
     %segment a nucleus inside it as is our practice.
-    bw3 = bwareaopen(bwtmp,minarea/2);
+%     bw3 = bwareaopen(regions,round(minarea/2));
+    se = strel('disk',2,0);
+    regions = ~imdilate(~regions,se);
 
     
     

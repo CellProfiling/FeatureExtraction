@@ -42,6 +42,8 @@ function [regions, nucseeds,skipimgs] = segmentFields(readdir, writedir, naming_
 %use it as an option field rather than a search term.
 %2015,08,10 DPSullivan - added field for tracking blank images. 
 
+regions = [];
+
 if ~exist('readdir','var')
     readdir = '/images/HPA/images/IFconfocal/';
 end
@@ -55,7 +57,9 @@ if ~exist('naming_convention', 'var') || strcmpi(naming_convention, 'IFconfocal'
   naming_convention.nuclear_channel = 'blue'; 
   naming_convention.tubulin_channel = 'red'; 
   naming_convention.er_channel = 'yellow'; 
-  naming_convention.segmentation_suffix = naming_convention.protein_channel; 
+  naming_convention.segmentation_suffix = naming_convention.protein_channel;
+  naming_convention.mstype = 'confocal';
+  naming_convention.seg_channel = {'er','mt'};
 elseif exist('naming_convention', 'var') && strcmpi(naming_convention, 'IFconfocal_CellCycle')
   naming_convention = struct(); 
   naming_convention.protein_channel = '_ch00'; 
@@ -63,6 +67,12 @@ elseif exist('naming_convention', 'var') && strcmpi(naming_convention, 'IFconfoc
   naming_convention.tubulin_channel = '_ch03'; 
   naming_convention.er_channel = '_ch02'; 
   naming_convention.segmentation_suffix = naming_convention.protein_channel; 
+  naming_convention.mstype = 'confocal';
+  naming_convention.seg_channel = {'er','mt'};
+end
+
+if ~isfield(naming_convention,'seg_channel')
+    naming_convention.seg_channel = {'er','mt'};
 end
 
 if (resolution==63)
@@ -212,13 +222,17 @@ for i=1:length(readlist)
     %Here we will use the strategy of combining ER and MT for cell
     %segmentation was done in the 10x code. 
     %First check ER
-    if ~isempty(naming_convention.er_channel) && ~any(strcmpi(naming_convention.blank_channels,'er'))
+    %if ~isempty(naming_convention.er_channel) && ~any(strcmpi(naming_convention.blank_channels,'er'))
+    %DPS 25/11/2015 - Adding 'seg_channel' to naming_convention struct to
+    %specify what channels we want to use 
+    if any(strcmpi(naming_convention.seg_channel,'er')) && (~isempty(naming_convention.er_channel) && ~any(strcmpi(naming_convention.blank_channels,'er')))
         erim = imread(strtrim(readlist_er{i}));
     else
         erim = zeros(size(nucim));
     end
     %Then check MT
-    if ~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt'))
+%     if ~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt'))
+    if any(strcmpi(naming_convention.seg_channel,'mt')) && (~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt')))
         mtim = imread(strtrim(readlist_er{i}));
     else
         mtim = zeros(size(nucim));
@@ -234,7 +248,8 @@ for i=1:length(readlist)
         cellim = [];
     end
 
-    [regions, nucseeds] = segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE);
+    microscope_type = naming_convention.mstype;
+    [regions, nucseeds] = segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE, microscope_type);
     if max(nucseeds(:))==0
         warning('No nuclei found in the image after segmentation. This image appears to be blank!')
         skipimgs(i) = 1;
@@ -249,6 +264,18 @@ for i=1:length(readlist)
     regions = uint16(bwlabel(regions,4));
     nucseg = uint16(nucseeds==max(nucseeds(:))).*(regions);
     nucseg = imfill(nucseg,'holes');
+    
+    %DPS 11/27/15 - make sure there is a 1-1 mapping for regions to nuc. so
+    %if a nuc is removed for touching an edge, remove the cell
+    nucvals = unique(nucseg);
+    cellvals = unique(regions);
+    %regions2 = regions;
+    for cellind = 1:length(cellvals)
+        if sum(cellvals(cellind)==nucvals)==0
+            regions(regions==cellvals(cellind)) = 0;
+        end
+    end
+    
 %     cytoseg = (regions>0)-nucseg;
 %     imwrite(cytoseg,cytowritelist{i});
     imwrite( regions, writelist{i});

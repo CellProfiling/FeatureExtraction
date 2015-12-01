@@ -165,7 +165,7 @@ for i = 1:length(imagelist)
         delim = '--';
         nameparts = strsplit(tmplist{i},delim);
         tmplist{i} = strjoin(nameparts(1:end-1),delim);
-        tmplist{i} = [tmplist{i},delim];
+        %tmplist{i} = [tmplist{i},delim];
     else
         tmplist{i} = strjoin(nameparts(1:end-1),delim);
     end    
