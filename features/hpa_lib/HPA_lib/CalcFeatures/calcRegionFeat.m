@@ -442,8 +442,11 @@ for i=1:length(readlist)
 %                 holdup = 1
 %             end
 
-
+%            try
             commonScriptCalculateSet
+%            catch 
+%                waitup = 1
+%            end
 
 
             allfeats = [allfeats; feats];
