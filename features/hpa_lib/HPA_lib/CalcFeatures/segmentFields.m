@@ -228,14 +228,18 @@ for i=1:length(readlist)
     if any(strcmpi(naming_convention.seg_channel,'er')) && (~isempty(naming_convention.er_channel) && ~any(strcmpi(naming_convention.blank_channels,'er')))
         erim = imread(strtrim(readlist_er{i}));
     else
-        erim = zeros(size(nucim));
+        %Use .*0 here to ensure we match the expected data type (class)
+%         erim = zeros(size(nucim));
+        erim = nucim.*0;
     end
     %Then check MT
 %     if ~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt'))
     if any(strcmpi(naming_convention.seg_channel,'mt')) && (~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt')))
         mtim = imread(strtrim(readlist_er{i}));
     else
-        mtim = zeros(size(nucim));
+        %Use .*0 here to ensure we match the expected data type (class)
+%         mtim = zeros(size(nucim));
+        mtim = nucim.*0;
     end
     %Then combine them
     cellim = imadd(erim,mtim);
