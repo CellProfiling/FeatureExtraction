@@ -197,13 +197,17 @@ if sum(tmp_indexer==0)~=length(tmp_indexer)
     end
     
     s = size(maskfieldstruct.channel);
-    ma = max(bwl(:));
+    %ma = max(bwl(:));
+    imgvallist = unique(bwl(:));
     small_objs = 0;
-    for tmp_i=1:ma
+    
+    %for tmp_i=1:ma
+    
+    for tmp_i=1:(length(imgvallist)-1)
         %imagesc(bwl==tmp_i); title(num2str([ma, tmp_i], 'total %d, index %d'));pause;
         
-
-        [r c] = find(bwl==tmp_i);
+        %start at 2 because 1 should always be the background (0) 
+        [r c] = find(bwl==imgvallist(tmp_i+1));
         
         %now we have to check if the cell actually has any cytoplasm. if
         %not, we need to keep it, but make it a 0 pixel. 
