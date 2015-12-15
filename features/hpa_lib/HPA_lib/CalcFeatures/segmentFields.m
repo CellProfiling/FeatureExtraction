@@ -163,9 +163,9 @@ readlist_er = uout_er;
 % $$$ readlist_tub = listmatlabformat( uout_tub);
 % $$$ readlist_er = listmatlabformat( uout_er);
 
-uout
+% uout
 mout = uout;
-mout
+%mout
 %mout = findreplacestring( mout, naming_convention.protein_channel, naming_convention.segmentation_suffix);
 mout = strrep(mout,naming_convention.protein_channel,naming_convention.segmentation_suffix);
 %mout = findreplacestring( uout, '/', '_');
@@ -254,7 +254,7 @@ for i=1:length(readlist)
 
     microscope_type = naming_convention.mstype;
     [regions, nucseeds] = segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE, microscope_type);
-    if max(nucseeds(:))==0
+    if max(nucseeds(:))==0 
         warning('No nuclei found in the image after segmentation. This image appears to be blank!')
         skipimgs(i) = 1;
     elseif max(regions(:))==0

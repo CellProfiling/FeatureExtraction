@@ -134,7 +134,8 @@ if(step1)
     for i=1:length(dirlist)
         %         currdir = dirlist(i+padnumb).name;
         currdir = dirlist(i).name;
-        if any(strcmpi(currdir,{'.','..','.DS_Store','tmp'})) || ~isdir(currdir)
+        currpath = [image_path,filesep,currdir];
+        if any(strcmpi(currdir,{'.','..','.DS_Store','tmp'})) || ~isdir(currpath)
             continue
         end
         label_subdirectories{currind} = currdir;
@@ -246,11 +247,11 @@ if(step2)
         [nucfiles{index}, skipimage{index}] = preprocessImages(image_subdirectory,base_naming_convention,curr_out_folder)
         %DPS 11/08/15 - Need to eliminate folders that don't have any files in
         %them (that match our naming convention).
-        if skipimage{index}==inf
-            cell_feat = [];
-            exit_code = 1;
-            return
-        end
+%         if skipimage{index}==inf
+%             cell_feat = [];
+%             exit_code = 1;
+%             return
+%         end
         [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed,segskips] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
         %DPS 20150924 - added support for cell array within our for loop of
         %subfolders (fields)
@@ -294,6 +295,10 @@ if(step2)
         for i = 1:length(dir_png)
             %bw_seg          = imread([storage_subdirectory,'/',char(dir_png(1).name)]);
             bw_seg = imread([storage_subdirectory,'/',char(dir_png(i).name)]);
+            if sum(bw_seg(:))==0 || length(unique(bw_seg))==1
+                warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
+                continue
+            end
             cell_seg    = regionprops(bwlabel(bw_seg,4),'Centroid','BoundingBox','Area');
             
             if(length(cell_seg)>0)

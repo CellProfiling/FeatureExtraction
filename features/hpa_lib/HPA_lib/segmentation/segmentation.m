@@ -111,6 +111,7 @@ if ~isempty(cellim)
     regions = seededwatershed(MA-cellim_proc,seeds,4);
     
 else
+    
     %use voronoi segmentation to approximate cells
     regions = ~(ml_getvoronoi(regions_nuc));
     
@@ -163,6 +164,16 @@ else
     regions = ~imdilate(~regions,se);
 
     
+    %In the special case where we have only 1 nuclei, voronoi segmentation
+    %is not defined (it is the whole field, which is an arbitrarily bad
+    %segmentation). For now we will disregard images that contain only one
+    %nuclei. 
+    if length(unique(regions_nuc(:)))==2
+        warning('Only one nuclei found in the image while using voronoi segmentation. This results in an arbitrarily bad segmentation. Skipping image.')
+        regions_nuc = regions_nuc.*0;
+        regions = regions_nuc;
+
+    end
     
 end
 %figure;subplot(1,2,1);imshow(cellim_proc);subplot(1,2,2);imshow(regions);

@@ -165,7 +165,10 @@ for i = 1:length(imagelist)
         delim = '--';
         nameparts = strsplit(tmplist{i},delim);
         tmplist{i} = strjoin(nameparts(1:end-1),delim);
-        %tmplist{i} = [tmplist{i},delim];
+        
+        if ~strcmpi(featsuffix(1:2),'--')            
+            tmplist{i} = [tmplist{i},delim];
+        end
     else
         tmplist{i} = strjoin(nameparts(1:end-1),delim);
     end    
@@ -245,6 +248,11 @@ for i=1:length(imagelist)
         if size(feats,1)~=size(features,1)
             features = repmat(features, [size(feats,1) 1]);
         end
+        
+        if isempty(feats)
+            holdup = 1
+        end
+        
         features(:,stcount(j):encount(j)) = feats;
         if exist('feature_computation_time', 'var') && exist('computation_time', 'var')
           feature_computation_time = feature_computation_time + computation_time; 

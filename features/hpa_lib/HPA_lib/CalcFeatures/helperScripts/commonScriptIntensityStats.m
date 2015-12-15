@@ -28,9 +28,9 @@ totintnames = {...
 %Do average int feats
 avintfeats = zeros(1,4);
 avintfeats(1) = mean(protstruct.channel(:));
-avintfeats(2) = mean(protstruct.channel(:));
-avintfeats(3) = mean(protstruct.channel(:));
-avintfeats(4) = mean(protstruct.channel(:));
+avintfeats(2) = mean(tubstruct.channel(:));
+avintfeats(3) = mean(erstruct.channel(:));
+avintfeats(4) = mean(nucstruct.channel(:));
 
 avintnames = {...
     [fsetname,'prot(green) av intensity'],...
