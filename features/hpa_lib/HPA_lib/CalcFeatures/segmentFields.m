@@ -190,6 +190,7 @@ mkdir(writedir,'/tmp')
 %DPS 10/08/15 - adding variable to track the blank channels 
 skipimgs = zeros(length(readlist),1);
 
+
 for i=1:length(readlist)
 %    i
 %     if exist(writelist{i},'file')
@@ -202,9 +203,17 @@ for i=1:length(readlist)
     tmpfile = [writedir '/tmp/' tmpfile '.txt'];
 
     if exist(tmpfile,'file')
-        continue;
+        disp('Temporary file already exists, removing it')
+        
+        delete(tmpfile)
+        %Instead of skipping and continuing we will now re-do the image if
+        %the temporary file is found. I have not found the skipping feature
+        %is the one we want by default and makes the code very annoying to
+        %run. Removing the old file is to ensure that we don't impact the
+        %code later on. 
+        %continue;
     end
-    fid = fopen(tmpfile,'w');
+%     fid = fopen(tmpfile,'w');
 
     disp(readlist_nuc{i})
     nucim = imread(strtrim(readlist_nuc{i}));
@@ -287,6 +296,6 @@ for i=1:length(readlist)
     %2015/10/19 DPS - save the nuclear segmentations too! 
     imwrite( nucseg, nucwritelist{i});
     
-    fclose(fid);
-    delete(tmpfile);
+%     fclose(fid);
+%     delete(tmpfile);
 end

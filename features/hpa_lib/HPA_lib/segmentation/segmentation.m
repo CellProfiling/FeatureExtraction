@@ -90,7 +90,10 @@ end
 
 % process cell image
 %Devin S. 2015,07,13 - Added support for voronoi segmentation
+%Devin S. 2015,12,17 - Adding support for when there are fewer than 3 cells
+bwccnuc = bwconncomp(regions_nuc);
 if ~isempty(cellim)
+        
     cellim_proc = getcellimg(( cellim));
     
     
@@ -112,8 +115,19 @@ if ~isempty(cellim)
     
 else
     
+    %Make sure we have enough cells to do the segmentation properly
+    if bwccnuc.NumObjects<3
+        warning('The current image contains less than 3 nuclei after segmentation. Cannot use voronoi segmentation.')
+        regions = zeros(size(regions_nuc));
+        return
+    end
+    
     %use voronoi segmentation to approximate cells
+    try
     regions = ~(ml_getvoronoi(regions_nuc));
+    catch
+        whoops = 1
+    end
     
     %because we use all the nuclei to get more accurate cell shapes we now
     %have to eliminate "cells" where nuclei are touching the border to be

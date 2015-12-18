@@ -67,7 +67,14 @@ else
     %For historical reasons 'color' is separate and we are trying to make
     %the script such that it breaks nothing in the current pipeline
     %extension_er    = strcat('_', color, '.tif');
-    extension_er    = strcat(color, '.tif');
+    if length(extensions)==4
+        extension_er = extensions{4};
+    elseif ~isempty(color)
+        warning('no 4th extension provided. Trying to use the outdated "color" parameter')
+        extension_er    = strcat(color, '.tif');
+    else
+        extension_er = '';
+    end
 end
 
 
@@ -236,7 +243,7 @@ if(step2)
         %image_subdirectory
         %storage_subdirectory
         %disp('In 63x code')
-        %try
+       %try
         
         %DPS 06/08/15 - adding support for partially scanned images
         %Check if images need to be trimmed, trim them and updated the
@@ -354,12 +361,12 @@ if(step2)
         
         save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
         %catch
-            %faillist = [faillist,image_subdirectory];
-            %save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
-            %cell_feat = 0;
-            %exit_code = 1;
-            
-        %disp('Segmentation error occuring during feature extraction 63x/40x');
+%             faillist = [faillist,image_subdirectory];
+%             save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
+%             cell_feat = 0;
+%             exit_code = 1;
+%             
+        %disp('An error occuring during feature extraction 63x/40x');
         %exit(exit_code);
         %end
     end
