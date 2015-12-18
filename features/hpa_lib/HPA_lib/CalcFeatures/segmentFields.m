@@ -251,7 +251,7 @@ for i=1:length(readlist)
         mtim = nucim.*0;
     end
     %Then combine them
-    cellim = imadd(erim,mtim);
+    cellim = imadd(double(erim),double(mtim));
     
     %If neither existed, use Voronoi. If the sum is 0, there is no signal
     %for either ER or MT. 
