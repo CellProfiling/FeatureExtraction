@@ -176,7 +176,13 @@ else
 %     bw3 = bwareaopen(regions,round(minarea/2));
     se = strel('disk',2,0);
     regions = ~imdilate(~regions,se);
-
+    
+    %In case this dilation made any hanging elements, eliminate them 
+    conncomp = bwconncomp(regions,4);
+    removeinds = find(cellfun(@length,conncomp.PixelIdxList)<5);
+    for ri = 1:length(removeinds)
+        regions(conncomp.PixelIdxList{removeinds(ri)}) = 0;
+    end
     
     %In the special case where we have only 1 nuclei, voronoi segmentation
     %is not defined (it is the whole field, which is an arbitrarily bad
