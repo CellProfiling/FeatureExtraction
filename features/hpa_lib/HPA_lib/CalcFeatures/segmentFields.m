@@ -138,6 +138,12 @@ readlist = uout;
 
 %adjust readdir in case it's not right
 [readdir,filename,exttype] = fileparts(readlist{1});
+%add filesep to the relative path if we are sitting in the
+%working directory. This prevents replacing other '.' characters in the
+%file string later on. 
+if strcmpi(readdir,'.')
+    readdir = ['.',filesep];
+end
 readdir_ = strrep(readdir,'/','_');
 
 %uout_nuc = findreplacestring(uout, naming_convention.protein_channel, naming_convention.nuclear_channel);

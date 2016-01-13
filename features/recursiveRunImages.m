@@ -61,12 +61,21 @@ for i = 1:length(imgslist)
         continue
     end
     
+    [parfolder,currfilename,ext] = fileparts(imgfilebase);
+    finalresult = [submitstruct.outdir,filesep,currfilename,filesep,'features.csv'];
+    if exist(finalresult,'file')
+        disp('Already computed! skipping for now.')
+        continue
+    end
+    
 %     currinpath = [inpath,filesep,imgslist{i}];
     submitstruct.indir = imgfilebase;
     submitstruct.extensions = strcat(submitstruct.extensions,imgtype);
     %submit a job
+    tstart = tic;
     [~,exit_code] = process_img(submitstruct.indir,submitstruct.outdir,submitstruct.resolution,submitstruct.color,submitstruct.extensions,submitstruct.pattern,submitstruct.mstype,submitstruct.seg_channels);
-    
+    telapsed = toc(tstart)
+    telapsed
 end
 
 %remove anything that is not an experiment directory
@@ -92,6 +101,6 @@ for j = 1:numexperiments
     currsubmitstruct = submitstruct;
     currsubmitstruct.indir = currinpath;
     currsubmitstruct.outdir = curroutpath;
-    recursiveFindImages(currsubmitstruct,pattern,imgtype,newrecursiveind)
+    recursiveRunImages(currsubmitstruct,pattern,imgtype,newrecursiveind)
     
 end

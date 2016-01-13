@@ -1,6 +1,44 @@
 function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,color,extensions,pattern,mstype,seg_channels)
+%This function is used to process images for production in the Subcellular
+%Human Protein Atlas. 
 %
+%INPUTS:
+%in_folder - string containing path to image or folder of images - if a
+%whole folder is passed, all images in the folder will be treated as one
+%experiment and output into a single data matrix
 %
+%out_folder - string containing path to where the results will be saved. 
+%
+%resolution - double in units of microns/pixel. This is used for
+%segmentation, the default is 0.08 (63x)
+%
+%color - optional antiquated field. Leave blank []
+%
+%extensions - cell array of suffixes identifying each channel. The program
+%expects the following order separated from the main body by '_' or '--'. 
+%     extension_dapi  = extensions{1};%e.g. 'blue.tif'
+%     extension_ab    = extensions{2};%e.g. 'green.tif'
+%     extension_mtub  = extensions{3};%e.g. 'red.tif'
+%     extension_er    = extensions{4};%e.g. 'yellow.tif'
+%
+%pattern - a string specifying a part of a file name you wish to use. This
+%field may be used in the case where you have multiple files in a folder
+%but only wish to use some (e.g. thumbnails and full sized images). If no
+%pattern is desired, leave blank [].
+%
+%mstype - string specifying the microscope type. Currently 'confocal' or
+%'widefield' are supported. This impacts segmentation. The default is
+%'confocal' if this is not specified. 
+%
+%seg_channels - a cell array specifying which channels to use for
+%segmentation. This field is default seg_channels = {'er','mt'}; for
+%production. Only change if you wish to use different channels. For Voronoi
+%segmentation specify an empty cell array: seg_channels = {}.
+
+%OUTPUTS: 
+%This code generates several outputs in a set of folders. The output
+%folders will contain the name of the input file(s). 
+
 %Written by: Elton Date-unknown
 %
 %Edited by: (dd,mm,yy)
