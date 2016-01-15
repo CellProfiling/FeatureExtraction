@@ -292,7 +292,7 @@ switch fsetnames{zed}
     
   case 'IntensityStats'
 %       [feats,names,slfnames] = commonScriptTotalIntensity(protstruct,tubstruct,erstruct,nucstruct);
-    [feats,names,slfnames] = commonScriptIntensityStats(protstruct,tubstruct,erstruct,nucstruct);
+    [feats,names,slfnames] = commonScriptIntensityStats(protstruct,tubstruct,erstruct,nucstruct,maskstruct);
     
   otherwise
     error('improper feature set specified');

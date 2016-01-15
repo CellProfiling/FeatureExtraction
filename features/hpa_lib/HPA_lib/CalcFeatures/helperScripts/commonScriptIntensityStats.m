@@ -1,4 +1,4 @@
-function [feats,names,slfnames] = commonScriptIntensityStats(protstruct,tubstruct,erstruct,nucstruct)
+function [feats,names,slfnames] = commonScriptIntensityStats(protstruct,tubstruct,erstruct,nucstruct,maskstruct)
 %D. Sullivan - modified this from the feature for total protein intensity
 
 fsetname = 'IntensityStats:'
@@ -27,10 +27,10 @@ totintnames = {...
 %%%
 %Do average int feats
 avintfeats = zeros(1,4);
-avintfeats(1) = mean(protstruct.channel(:));
-avintfeats(2) = mean(tubstruct.channel(:));
-avintfeats(3) = mean(erstruct.channel(:));
-avintfeats(4) = mean(nucstruct.channel(:));
+avintfeats(1) = totintfeats(1)./sum(maskstruct.channel(:));
+avintfeats(2) = totintfeats(2)./sum(maskstruct.channel(:));
+avintfeats(3) = totintfeats(3)./sum(maskstruct.channel(:));
+avintfeats(4) = totintfeats(4)./sum(maskstruct.channel(:));
 
 avintnames = {...
     [fsetname,'prot(green) av intensity'],...

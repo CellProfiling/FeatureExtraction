@@ -1,4 +1,4 @@
-function [protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct] = maskAllChannels(protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct,maskfieldstruct)
+function [protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct,maskfieldstruct] = maskAllChannels(protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct,maskfieldstruct)
 %
 %This function modifies the structures for each channel in the HPA
 %production pipelin by reading in the original image and making sub-images
@@ -220,6 +220,9 @@ if sum(tmp_indexer==0)~=length(tmp_indexer)
         newIm = uint8(zeros(maxr-minr+1,maxc-minc+1));
         idx = (c-1)*s(1)+r;
         idx2 = (c-min(c))*(max(r)-minr+1)+r-min(r)+1;
+        
+        maskfieldstruct.channel_regions{tmp_i} = newIm;
+        maskfieldstruct.channel_regions{tmp_i}(idx2) = 1;
 
         if tmp_indexer(1)
             newIm(idx2) = protfieldstruct.channel(idx);

@@ -170,7 +170,7 @@ for i = 1:length(imagelist)
             tmplist{i} = [tmplist{i},delim];
         end
     else
-        tmplist{i} = strjoin(nameparts(1:end-1),delim);
+        tmplist{i} = [strjoin(nameparts(1:end-1),delim)];
     end    
     
     

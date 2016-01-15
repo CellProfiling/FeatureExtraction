@@ -280,7 +280,7 @@ for i=1:length(readlist)
     %DPS 28,07,2015 - switched to function to document what's happening
     %I hate invisible variable passing!
     %maskAllChannels
-    [protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct]...
+    [protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct,maskfieldstruct]...
         = maskAllChannels(protfieldstruct,nucfieldstruct,...
         tubfieldstruct,erfieldstruct,maskfieldstruct);
 %     
@@ -293,6 +293,7 @@ for i=1:length(readlist)
     nuclear_channel_blank = nucfieldstruct.isempty;
     tubulin_channel_blank = tubfieldstruct.isempty;
     er_channel_blank = erfieldstruct.isempty;
+    mask_channel_blank = maskfieldstruct.isempty;
 
     for zed = 1:length(fsetnames)
         zed
@@ -378,6 +379,7 @@ for i=1:length(readlist)
             nucstruct = cleanobject;
             tubstruct = cleanobject;
             erstruct = cleanobject;
+            maskstruct = cleanobject;
 
             protstruct.channel_path = readlist{i};
             nucstruct.channel_path = readlist_nuc{i};
@@ -389,6 +391,7 @@ for i=1:length(readlist)
             nucstruct.channel = nucfieldstruct.channel_regions{j};
             tubstruct.channel = tubfieldstruct.channel_regions{j};
             erstruct.channel = erfieldstruct.channel_regions{j};
+            maskstruct.channel = maskfieldstruct.channel_regions{j};
 
             %DPS 28,07,2015 - check each channel in turn to see if there is
             %fluorescent signal in our current region. If not, we will
@@ -408,7 +411,13 @@ for i=1:length(readlist)
                 warning(['No ER fluorescence in region ',num2str(j),' for ',readlist{i}])
             end
 
-
+            if mask_channel_blank
+              maskstruct.channel = ones(size(maskstruct.channel)); 
+              %also update the cell array of blank channels
+              if ~any(strcmpi(naming_convention.blank_channels,'mask'))
+                 naming_convention.blank_channels = [naming_convention.blank_channels,{'mask'}];
+              end
+            end
             if nuclear_channel_blank
               nucstruct.channel = nucstruct.channel * 0; 
               %also update the cell array of blank channels
@@ -442,11 +451,11 @@ for i=1:length(readlist)
 %                 holdup = 1
 %             end
 
-%            try
+           try
             commonScriptCalculateSet
-%            catch 
-%                waitup = 1
-%            end
+           catch 
+               waitup = 1
+           end
 
 
             allfeats = [allfeats; feats];
