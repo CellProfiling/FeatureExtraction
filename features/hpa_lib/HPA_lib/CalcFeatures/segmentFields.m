@@ -198,6 +198,11 @@ skipimgs = zeros(length(readlist),1);
 
 
 for i=1:length(readlist)
+    
+    if exist(nucwritelist,'file') && exist(cytowritelist,'file')
+        continue
+    end
+    
 %    i
 %     if exist(writelist{i},'file')
 %         continue;
