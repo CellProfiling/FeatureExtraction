@@ -62,7 +62,9 @@ label_list = repmat({label_name}, length(imagelist), 1);
 %If we have below a certain resolution, it doesn't make sense for us to
 %compute the texture features and all that. 
 lowres_cutoff = 0.5;
-if resolution>lowres_cutoff
+if resolution>=1
+    [feature_set_naming_conventions,feature_set_feature_names] = setupIntensityRedo(base_naming_convention)
+elseif resolution>lowres_cutoff
     [feature_set_naming_conventions,feature_set_feature_names]  = setupLowResFeaturesets(base_naming_convention)
 else
     [feature_set_naming_conventions,feature_set_feature_names]  = setupDefaultFeaturesets(base_naming_convention)

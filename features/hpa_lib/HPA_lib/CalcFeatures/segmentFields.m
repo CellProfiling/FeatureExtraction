@@ -77,7 +77,7 @@ end
 
 if (resolution==63)
     warning('You appear to be using an outdated version. Resolution should now be specified as um/pixel.');
-    IMAGEPIXELSIZE = 0.05; % um/px
+    IMAGEPIXELSIZE = 0.08; % um/px
 %     MINNUCLEUSDIAMETER = 4; %um
 %     MAXNUCLEUSDIAMETER = 40; %um
 elseif ~isempty(resolution)
