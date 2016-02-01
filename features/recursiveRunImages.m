@@ -42,7 +42,7 @@ listdirs = ml_ls(inpath);
 %first check if any of the files found are the images we are looking for
 imgslist = listdirs(~cellfun(@isempty,strfind(listdirs,imgtype)));
 
-imgslist = imgslist(~cellfun(@isempty,strfind(listdirs,submitstruct.extensions{2})));
+imgslist = imgslist(~cellfun(@isempty,strfind(imgslist,submitstruct.extensions{2})));
 
 %for all the images we have in this level
 for i = 1:length(imgslist)

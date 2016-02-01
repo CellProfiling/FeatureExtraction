@@ -38,11 +38,18 @@ expnames = {};
 for i = 1:length(featfilelist)
       currpath = [inpath,filesep,featfilelist{i}];
       currinfolders = strsplit(currpath,filesep);
-      currimgname = currinfolders(end-1);
-%       imgfilebase = currpath(1:end-length(submitstruct.extensions{1}));
+      currimgname = currinfolders{end-1};
+      
+      %Check if file is empty
+      currinfo = dir(currpath);
+      if currinfo.bytes==0
+          fprintf(['No data found in:',currpath,' \n skipping for now.\n'])
+          continue
+      end
+
       currfeats = csvread(currpath);
       featmat = [featmat;currfeats];
-      expnames = [expnames;repmat(currimgname,size(featmat,1),1)];
+      expnames = [expnames;repmat([currinfolders{end-2},'_',currimgname],size(featmat,1),1)];
 end
 
 
