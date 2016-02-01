@@ -70,10 +70,10 @@ for i = 1:length(imgslist)
     
 %     currinpath = [inpath,filesep,imgslist{i}];
     submitstruct.indir = imgfilebase;
-    submitstruct.extensions = strcat(submitstruct.extensions,imgtype);
+    extensions = strcat(submitstruct.extensions,imgtype);
     %submit a job
     tstart = tic;
-    [~,exit_code] = process_img(submitstruct.indir,submitstruct.outdir,submitstruct.resolution,submitstruct.color,submitstruct.extensions,submitstruct.pattern,submitstruct.mstype,submitstruct.seg_channels);
+    [~,exit_code] = process_img(submitstruct.indir,submitstruct.outdir,submitstruct.resolution,submitstruct.color,extensions,submitstruct.pattern,submitstruct.mstype,submitstruct.seg_channels);
     telapsed = toc(tstart)
     telapsed
 end

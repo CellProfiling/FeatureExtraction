@@ -199,7 +199,7 @@ skipimgs = zeros(length(readlist),1);
 
 for i=1:length(readlist)
     
-    if exist(nucwritelist,'file') && exist(cytowritelist,'file')
+    if exist(nucwritelist{i},'file') && exist(cytowritelist{i},'file')
         continue
     end
     
@@ -255,7 +255,7 @@ for i=1:length(readlist)
     %Then check MT
 %     if ~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt'))
     if any(strcmpi(naming_convention.seg_channel,'mt')) && (~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt')))
-        mtim = imread(strtrim(readlist_er{i}));
+        mtim = imread(strtrim(readlist_tub{i}));
     else
         %Use .*0 here to ensure we match the expected data type (class)
 %         mtim = zeros(size(nucim));

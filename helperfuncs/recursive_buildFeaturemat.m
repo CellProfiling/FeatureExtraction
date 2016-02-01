@@ -49,7 +49,7 @@ for i = 1:length(featfilelist)
 
       currfeats = csvread(currpath);
       featmat = [featmat;currfeats];
-      expnames = [expnames;repmat([currinfolders{end-2},'_',currimgname],size(featmat,1),1)];
+      expnames = [expnames;repmat({[currinfolders{end-2},'_',currimgname]},size(featmat,1),1)];
 end
 
 
