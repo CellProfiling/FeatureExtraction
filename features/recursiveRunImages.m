@@ -47,17 +47,18 @@ imgslist = imgslist(~cellfun(@isempty,strfind(imgslist,submitstruct.extensions{2
 %for all the images we have in this level
 for i = 1:length(imgslist)
     currinpath = [inpath,filesep,imgslist{i}(1:end-length(imgtype))];
-    imgfilebase = currinpath(1:end-length(submitstruct.extensions{1}));
+    imgfilebase = currinpath(1:end-length(submitstruct.extensions{2}));
     %double check that all the requested channels are present.
     allthere = 1;
     for j = 1:length(submitstruct.extensions)
         currextfile = [imgfilebase,submitstruct.extensions{j},imgtype];
         if ~exist(currextfile)
+            currextfile
             allthere = 0;
         end
     end
     if ~allthere
-        disp(['Can not compute requested features for the file', imgslist{i},', some files are missing. skipping'])
+        disp(['Can not compute requested features for the file ', imgslist{i},', some files are missing. skipping'])
         continue
     end
     
