@@ -45,7 +45,7 @@ end
 pixels = double(img(:));
 if original_version,
     pixels(pixels <= 30) = [];
-else,
+else
     pixels(pixels == 0)=[];
 end
 
@@ -53,7 +53,7 @@ mu = mean(pixels);
 
 if original_version,
     Margin=30;
-else,
+else
     Margin=std(pixels);
 end
 
@@ -66,12 +66,12 @@ values=calculatetas(1.-bimg);
 values=[values calculatetas(bimg)];
 
 names = {'tas_0', 'tas_1', 'tas_2', 'tas_3', 'tas_4', 'tas_5', 'tas_6', 'tas_7', 'tas_8', ...
-    'ntas_0', 'tas_1', 'tas_2', 'tas_3', 'tas_4', 'tas_5', 'tas_6', 'tas_7', 'tas_8' };
+    'ntas_0', 'ntas_1', 'ntas_2', 'ntas_3', 'ntas_4', 'ntas_5', 'ntas_6', 'ntas_7', 'ntas_8' };
 slfnames = {'tas_0', 'tas_1', 'tas_2', 'tas_3', 'tas_4', 'tas_5', 'tas_6', 'tas_7', 'tas_8', ...
-    'ntas_0', 'tas_1', 'tas_2', 'tas_3', 'tas_4', 'tas_5', 'tas_6', 'tas_7', 'tas_8' };
+    'ntas_0', 'ntas_1', 'ntas_2', 'ntas_3', 'ntas_4', 'ntas_5', 'ntas_6', 'ntas_7', 'ntas_8' };
 end
 
-function [values] = calculatetas(bimg),
+function [values] = calculatetas(bimg)
 M=[1 1 1; 1 10 1; 1 1 1];
 V=conv2(double(bimg),double(M),'valid');
 values=imhist(uint8(V));
@@ -79,7 +79,7 @@ values=values(1:9);
 T=sum(values);
 if T > 0,
     values=values'/T;
-else,
+else
     values=ones(size(values))'/9; % Return a fixed value instead of crashing...
 end
 

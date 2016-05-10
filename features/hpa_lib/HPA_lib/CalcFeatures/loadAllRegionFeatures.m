@@ -231,6 +231,10 @@ for i=1:length(imagelist)
         end
 
         load(featlists{j}{i});
+        
+        %prepend the feature set name onto here:
+        names=strcat(featsets{j},'_',names)
+        
         allnames = [allnames names];
         allslfnames = [allslfnames slfnames];
         %fprintf('featsets{j} = %s, size(feats) = [%d, %d], all_numfeats[j] = %d\n', featsets{j}, size(feats), any(all_numfeats == size(feats,2)))
