@@ -1,4 +1,4 @@
-function [featmat,expnames] = recursive_buildFeaturemat(inpath,featfilename,recursiveind)
+function [featmat,expnames,badpaths] = recursive_buildFeaturemat(inpath,featfilename,recursiveind)
 %This function takes a file output structure, finds the features.csv files
 %for each experiment, splits the features and compiles the desired features
 %into a single feature matrix
@@ -14,9 +14,16 @@ function [featmat,expnames] = recursive_buildFeaturemat(inpath,featfilename,recu
 %OUTPUTS:
 %featmat - a single feature matrix with an index list per-experiment in the
 %first column
+%expnames - cell array of experiment names for future reference
+%badpaths - cell array of bad experiments that failed
 %
 %Written by: Devin P Sullivan January 13, 2016
+%Edited by:
+%D. Sullivan 03,04,2016 - added "badpath" output for experiments that have
+%a bad feature matrix size
 
+badpaths = {};
+badpathstmp2 = {};
 if nargin<2
     featfilename = 'features.csv';
 end
@@ -64,8 +71,16 @@ newrecursiveind = recursiveind+1;
 for j = 1:numexperiments
     currpath = [inpath,filesep,listdirs{j}]
    
-    [featmattmp,expnamestmp] = recursive_buildFeaturemat(currpath,featfilename,newrecursiveind);
-    featmat = [featmat;featmattmp];
-    expnames = [expnames;expnamestmp];
-end
+    [featmattmp,expnamestmp,badpathstmp] = recursive_buildFeaturemat(currpath,featfilename,newrecursiveind);
+    if size(featmattmp,2)~=size(featmat,2) && (size(featmat,2)~=0 && size(featmattmp,2)~=0)
+        warning(['something is wrong with the matrix for image ',currpath,...
+            ' its size is ',size(featmattmp)])
+%         badpathstmp2 = [badpaths,currpath];
+        badpaths = [badpaths;badpathstmp;currpath];
+    else
+        featmat = [featmat;featmattmp];
+        expnames = [expnames;expnamestmp];
+    end
+    
 
+end
