@@ -22,6 +22,10 @@ function [featmat,expnames,badpaths] = recursive_buildFeaturemat(inpath,featfile
 %D. Sullivan 03,04,2016 - added "badpath" output for experiments that have
 %a bad feature matrix size
 
+if strcmpi(inpath,'/Volumes/DevinsStorage/recalc_features/1003/1003_C12_1/')
+    holdup = 1;
+end
+
 badpaths = {};
 badpathstmp2 = {};
 if nargin<2

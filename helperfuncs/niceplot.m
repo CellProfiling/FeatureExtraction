@@ -53,9 +53,9 @@ elseif nargin==4
 end
 
 if newfigure
-    h = figure
+    H = figure('Position', [100, 100, 1800, 1040]);%H = figure
 else 
-    h = gcf
+    H = gcf
     hold on
 end
 
@@ -75,7 +75,7 @@ switch plottype
         scatter(xval,yval,100,plotstyle);
     case 'plot'
         %figure,plot(xval,yval,plotstyle,'Linewidth',2,'MarkerSize',20);
-        plot(xval,yval,plotstyle,'Linewidth',2,'MarkerSize',20);
+        plot(xval,yval,plotstyle,'Linewidth',2,'MarkerSize',50);
     case 'semilogx'
         %figure,semilogx(xval,yval,plotstyle,'Linewidth',2,'MarkerSize',20);
         semilogx(xval,yval,plotstyle,'Linewidth',2,'MarkerSize',20);
@@ -120,3 +120,4 @@ title(titlestr,'FontSize',20,'Fontname','Ariel')
 xlabel(xlabelstr,'FontSize',20,'Fontname','Ariel');
 ylabel(ylabelstr,'FontSize',20,'Fontname','Ariel');
 set(gca,'FontSize',20)
+set(gcf, 'PaperPositionMode', 'auto');

@@ -1,13 +1,13 @@
 function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,color,extensions,pattern,mstype,seg_channels)
 %This function is used to process images for production in the Subcellular
-%Human Protein Atlas. 
+%Human Protein Atlas.
 %
 %INPUTS:
 %in_folder - string containing path to image or folder of images - if a
 %whole folder is passed, all images in the folder will be treated as one
 %experiment and output into a single data matrix
 %
-%out_folder - string containing path to where the results will be saved. 
+%out_folder - string containing path to where the results will be saved.
 %
 %resolution - double in units of microns/pixel. This is used for
 %segmentation, the default is 0.08 (63x)
@@ -15,7 +15,7 @@ function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,co
 %color - optional antiquated field. Leave blank []
 %
 %extensions - cell array of suffixes identifying each channel. The program
-%expects the following order separated from the main body by '_' or '--'. 
+%expects the following order separated from the main body by '_' or '--'.
 %     extension_dapi  = extensions{1};%e.g. 'blue.tif'
 %     extension_ab    = extensions{2};%e.g. 'green.tif'
 %     extension_mtub  = extensions{3};%e.g. 'red.tif'
@@ -28,16 +28,16 @@ function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,co
 %
 %mstype - string specifying the microscope type. Currently 'confocal' or
 %'widefield' are supported. This impacts segmentation. The default is
-%'confocal' if this is not specified. 
+%'confocal' if this is not specified.
 %
 %seg_channels - a cell array specifying which channels to use for
 %segmentation. This field is default seg_channels = {'er','mt'}; for
 %production. Only change if you wish to use different channels. For Voronoi
 %segmentation specify an empty cell array: seg_channels = {}.
 
-%OUTPUTS: 
+%OUTPUTS:
 %This code generates several outputs in a set of folders. The output
-%folders will contain the name of the input file(s). 
+%folders will contain the name of the input file(s).
 
 %Written by: Elton Date-unknown
 %
@@ -45,7 +45,7 @@ function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,co
 %Devin P Sullivan 04,08,2015 - added 'extensions' input
 %Devin P Sullivan 20,10,2015 - merging multiple resolutions that have
 %replicate code to one code base for high efficiency, reliability and
-%easier code managment. 
+%easier code managment.
 
 segskips= [];
 skipimage = [];
@@ -57,13 +57,13 @@ addpath(genpath('./adaptive_watersheed_seg'),'-begin');
 faillist = [];
 exit_code   = 0;
 
-if nargin<8 
+if nargin<8
     seg_channels = {'er','mt'};
 end
 
 %DPS 25,11,2015 - added 'mstype' var so we can have types of microscopes
 %for segmentation. Widefield microscopes require less blurring for good
-%segmentation as they are already blurry. 
+%segmentation as they are already blurry.
 %Currently accepted values are 'confocal', and 'widefield'
 if nargin<7 || isempty(mstype)
     mstype = 'confocal';
@@ -125,7 +125,7 @@ end
 
 step1   = true;
 step2   = true;
-step3   = false;%true;
+step3   = true;
 
 warning('off', 'MATLAB:MKDIR:DirectoryExists');
 warning('off', 'Images:imfeature:obsoleteFunction');
@@ -187,15 +187,15 @@ if(step1)
         currind = currind+1;
     end
     
-       if strcmpi(image_path(end),filesep)
-           image_path = image_path(1:end-1);
-       end
-       if isempty(label_subdirectories{1})
+    if strcmpi(image_path(end),filesep)
+        image_path = image_path(1:end-1);
+    end
+    if isempty(label_subdirectories{1})
         pathparts = strsplit(image_path,'/');
         label_subdirectories{1} = pathparts{end};
-
         
-       end
+        
+    end
     
     label_names = label_subdirectories;
     
@@ -211,10 +211,10 @@ end
 
 
 %% Remaining script to run image-segmentation and feature extraction
-
-if(step2)
-    
-    for index = 1:length(label_subdirectories)
+for index = 1:length(label_subdirectories)
+    if(step2)
+        
+        
         
         %set up the subfolder stuff
         curr_out_folder = [out_folder,filesep,label_subdirectories{index}];
@@ -252,36 +252,36 @@ if(step2)
         %specification
         base_naming_convention.pattern = pattern;
         
-        %DPS 25,11,2015 - added mstype field to allow for specific segmenation 
+        %DPS 25,11,2015 - added mstype field to allow for specific segmenation
         base_naming_convention.mstype = mstype;
         
-        %DPS 25,11,2015 - added mstype field to allow for specific segmenation 
+        %DPS 25,11,2015 - added mstype field to allow for specific segmenation
         base_naming_convention.seg_channel = seg_channels;
         
         
-%         index  = 1;
+        %         index  = 1;
         
-%         label_subdirectories
+        %         label_subdirectories
         image_subdirectory      = [image_path, filesep, (label_subdirectories{index}), filesep]
         
         %DPS - 28,07,2015  Adding support for direct parent directories rather
         %than directories of directories
         if ~isdir(image_subdirectory)
             image_subdirectory = [image_path, filesep];
-             %DPS - 09,11,2015 Adding support for direct file pattern names
+            %DPS - 09,11,2015 Adding support for direct file pattern names
             %rather than directories or directories of directories.
             if ~isdir(image_subdirectory)
                 image_subdirectory = image_path;
             end
         end
-%         image_path
+        %         image_path
         storage_subdirectory    = [processed_path, (label_subdirectories{index}), filesep];
-%         storage_subdirectory    = processed_path;
+        %         storage_subdirectory    = processed_path;
         %label_subdirectories{index}
         %image_subdirectory
         %storage_subdirectory
         %disp('In 63x code')
-       %try
+        %try
         
         %DPS 06/08/15 - adding support for partially scanned images
         %Check if images need to be trimmed, trim them and updated the
@@ -292,15 +292,15 @@ if(step2)
         [nucfiles{index}, skipimage{index}] = preprocessImages(image_subdirectory,base_naming_convention,curr_out_folder)
         %DPS 11/08/15 - Need to eliminate folders that don't have any files in
         %them (that match our naming convention).
-%         if skipimage{index}==inf
-%             cell_feat = [];
-%             exit_code = 1;
-%             return
-%         end
+        %         if skipimage{index}==inf
+        %             cell_feat = [];
+        %             exit_code = 1;
+        %             return
+        %         end
         [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed,segskips] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
         %DPS 20150924 - added support for cell array within our for loop of
         %subfolders (fields)
-%         regions_results     =   cell2mat(label_features);
+        %         regions_results     =   cell2mat(label_features);
         regions_results = cat(1,label_features{:});
         
         % read cell (x,y) centers and bounding box values
@@ -314,7 +314,7 @@ if(step2)
             [~,~,nucext] = fileparts(base_naming_convention.nuclear_channel);
             infiletype = nucext(2:end);
         end
-
+        
         
         
         pngsuff = strrep(base_naming_convention.protein_channel,infiletype,'png');
@@ -399,56 +399,56 @@ if(step2)
         
         save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
         %catch
-%             faillist = [faillist,image_subdirectory];
-%             save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
-%             cell_feat = 0;
-%             exit_code = 1;
-%             
+        %             faillist = [faillist,image_subdirectory];
+        %             save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
+        %             cell_feat = 0;
+        %             exit_code = 1;
+        %
         %disp('An error occuring during feature extraction 63x/40x');
         %exit(exit_code);
         %end
+        
+        %end
+        % save([out_folder,filesep,'listOfFailed_tot.mat'],'faillist')
     end
-%end
-% save([out_folder,filesep,'listOfFailed_tot.mat'],'faillist')
+    %% create segmentation masks
+    
+    if(step3)
+        %%%DPS 2015-07-09  Not sure where I is supposed to be coming from without a for loop!
+        % Read images - this step is not necessary. %DPS 2016-06-07
+        
+        %     im_dapi     =   imread(list_dapi(i).name);
+        %     im_ab       =   imread(list_ab(i).name);
+        %     im_mtub     =   imread(list_mtub(i).name);
+        %     im_er       =   imread(list_er(i).name);
+        
+        % Segment the nucleus and cell extent mask
+        
+        cyto_seed   =   cell_seed & (~(nucleus_seed>0));
+        
+        % create cell perimeter
+        
+        perim_thick = 5 ; % defines number of pixels thickness of the perimeter
+        bw2         = bwmorph(cell_seed,'erode',perim_thick);
+        bw3         = bwmorph(cell_seed,'remove');
+        plasmaMem   = bwmorph(bw3,'dilate',perim_thick-2);%imshow((plasmaMem));
+        
+        % save output images in the output directory
+        
+        alpha_ch       = plasmaMem*0;
+        merge_mask     = alpha_ch;
+        max_alpha      = 5000;
+        
+        alpha_ch(cell_seed>0)                       = 3;
+        alpha_ch(cyto_seed>0)                       = 2;
+        alpha_ch(nucleus_seed>0&cell_seed>0)        = 1;
+        alpha_ch(plasmaMem)                         = 4;
+        
+        imwrite(double(merge_mask),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
+        
+        % merge the output from the image set with other ABs image set data
+        % previously analysed (if multiple ABs are included or if analysis is
+        % run at the plate level)
+    end
 end
-%% create segmentation masks
-
-if(step3)
-    %%%DPS 2015-07-09  Not sure where I is supposed to be coming from without a for loop!
-    % Read images
-    
-    im_dapi     =   imread(list_dapi(i).name);
-    im_ab       =   imread(list_ab(i).name);
-    im_mtub     =   imread(list_mtub(i).name);
-    im_er       =   imread(list_er(i).name);
-    
-    % Segment the nucleus and cell extent mask
-    
-    cyto_seed   =   cell_seed & (~(nucleus_seed>0));
-    
-    % create cell perimeter
-    
-    perim_thick = 5 ; % defines number of pixels thickness of the perimeter
-    bw2         = bwmorph(cell_seed,'erode',perim_thick);
-    bw3         = bwmorph(cell_seed,'remove');
-    plasmaMem   = bwmorph(bw3,'dilate',perim_thick-2);%imshow((plasmaMem));
-    
-    % save output images in the output directory
-    
-    alpha_ch       = plasmaMem*0;
-    merge_mask     = alpha_ch;
-    max_alpha      = 5000;
-    
-    alpha_ch(cell_seed>0)                       = 3;
-    alpha_ch(cyto_seed>0)                       = 2;
-    alpha_ch(nucleus_seed>0&cell_seed>0)        = 1;
-    alpha_ch(plasmaMem)                         = 4;
-    
-    imwrite(double(merge_mask),[out_folder,'/segmentation.png'],'Alpha',alpha_ch/255);
-    
-    % merge the output from the image set with other ABs image set data
-    % previously analysed (if multiple ABs are included or if analysis is
-    % run at the plate level)
-end
-
 % exit(exit_code);
