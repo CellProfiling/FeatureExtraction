@@ -274,13 +274,6 @@ for i=1:length(readlist)
 
     microscope_type = naming_convention.mstype;
     [regions, nucseeds] = segmentation( nucim, cellim, MINNUCLEUSDIAMETER, MAXNUCLEUSDIAMETER, IMAGEPIXELSIZE, microscope_type);
-    if max(nucseeds(:))==0 
-        warning('No nuclei found in the image after segmentation. This image appears to be blank!')
-        skipimgs(i) = 1;
-    elseif max(regions(:))==0
-        warning('No cell regions found in the image after segmentation. This image appears to be blank!')
-        skipimgs(i) = 2;
-    end
     
     % saving results
     disp(['writing image ',writelist{i}])
@@ -288,6 +281,7 @@ for i=1:length(readlist)
     regions = uint16(bwlabel(regions,4));
     nucseg = uint16(nucseeds==max(nucseeds(:))).*(regions);
     nucseg = imfill(nucseg,'holes');
+    
     
     %DPS 11/27/15 - make sure there is a 1-1 mapping for regions to nuc. so
     %if a nuc is removed for touching an edge, remove the cell
@@ -299,6 +293,15 @@ for i=1:length(readlist)
             regions(regions==cellvals(cellind)) = 0;
         end
     end
+    
+    if max(nucseg(:))==0
+        warning('No nuclei found in the image after segmentation. This image appears to be blank!')
+        skipimgs(i) = 1;
+    elseif max(regions(:))==0
+        warning('No cell regions found in the image after segmentation. This image appears to be blank!')
+        skipimgs(i) = 2;
+    end
+    
     
 %     cytoseg = (regions>0)-nucseg;
 %     imwrite(cytoseg,cytowritelist{i});

@@ -383,10 +383,11 @@ for index = 1:length(label_subdirectories)
             save([curr_out_folder,filesep,'feature_names.mat'],'feature_names');
             csvwrite([curr_out_folder,'/','features.csv'], cell_feat);
             
-        elseif sum(skipimage{:}>0)==length(dir_png) || sum(segskips==1)==length(dir_png)
+        elseif sum(skipimage{:}>0)==length(dir_png) || sum(segskips>=1)==length(dir_png)
             fprintf(['There was no fluorescence for any images in ',in_folder, '. We will not bother saving the features.\n'])
             cell_feat = [];
             faillist = [faillist,image_subdirectory];
+            exit_code(index) = 1;
         elseif sum(segskips>1)==length(dir_png)
             fprintf(['There was no cell regions for any images in ',in_folder, '. Position stats will be blank.\n'])
             cell_feat  = [position_results regions_results];
@@ -398,10 +399,10 @@ for index = 1:length(label_subdirectories)
             faillist = [faillist,image_subdirectory];
         else
             cell_feat = 0;
-            exit_code = 1;
+            exit_code(i) = 122;
             disp('Segmentation error occuring during feature extraction 63x/40x');
             faillist = [faillist,image_subdirectory];
-            exit(exit_code);
+%             exit(exit_code);
         end
         
         save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
@@ -414,9 +415,9 @@ for index = 1:length(label_subdirectories)
         %
         %disp('An error occuring during feature extraction 63x/40x');
         %exit(exit_code);
-        %end
-        
         end
+        
+%         end
         % save([out_folder,filesep,'listOfFailed_tot.mat'],'faillist')
     end
     %% create segmentation masks

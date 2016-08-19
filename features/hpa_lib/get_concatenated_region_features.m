@@ -42,6 +42,13 @@ disp('segmenting fields')
 %DPS 10/08/15 - adding field for tracking blank images
 %   [cell_regions, nuc_regions] = segmentFields(image_path, mask_path, base_naming_convention,resolution);
 [cell_regions, nuc_regions,skipimgs] = segmentFields(image_path, mask_path, base_naming_convention,resolution);
+
+% if sum(cell_regions(:))==0
+%     features = inf;
+%     feature_computation_time = inf;
+%     
+% end
+
 % nuc_regions = imfill(nuc_regions,'holes');
 %   figure;imshow(label2rgb(bwlabel(cell_regions)));
 %   figure;imshow(label2rgb(bwlabel(nuc_regions)));
