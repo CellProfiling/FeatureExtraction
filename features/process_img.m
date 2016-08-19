@@ -211,6 +211,7 @@ end
 
 
 %% Remaining script to run image-segmentation and feature extraction
+exit_code = zeros(1,length(label_subdirectories));
 for index = 1:length(label_subdirectories)
     if(step2)
         
@@ -281,7 +282,7 @@ for index = 1:length(label_subdirectories)
         %image_subdirectory
         %storage_subdirectory
         %disp('In 63x code')
-        %try
+        try
         
         %DPS 06/08/15 - adding support for partially scanned images
         %Check if images need to be trimmed, trim them and updated the
@@ -290,6 +291,11 @@ for index = 1:length(label_subdirectories)
         %DPS 10/08/15 - After discussing with Emma, we will now mark images
         %that are partial scans and not trim images
         [nucfiles{index}, skipimage{index}] = preprocessImages(image_subdirectory,base_naming_convention,curr_out_folder)
+        if any(skipimage{index})
+            cell_feat = [];
+            exit_code(index) = 1;
+            continue
+        end
         %DPS 11/08/15 - Need to eliminate folders that don't have any files in
         %them (that match our naming convention).
         %         if skipimage{index}==inf
@@ -297,6 +303,7 @@ for index = 1:length(label_subdirectories)
         %             exit_code = 1;
         %             return
         %         end
+        
         [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed,segskips] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
         %DPS 20150924 - added support for cell array within our for loop of
         %subfolders (fields)
@@ -398,17 +405,18 @@ for index = 1:length(label_subdirectories)
         end
         
         save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
-        %catch
-        %             faillist = [faillist,image_subdirectory];
-        %             save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
-        %             cell_feat = 0;
-        %             exit_code = 1;
+        catch
+                    faillist = [faillist,image_subdirectory];
+                    %save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
+                    cell_feat = [];
+                    exit_code(index) = 122;
+                    continue
         %
         %disp('An error occuring during feature extraction 63x/40x');
         %exit(exit_code);
         %end
         
-        %end
+        end
         % save([out_folder,filesep,'listOfFailed_tot.mat'],'faillist')
     end
     %% create segmentation masks
@@ -451,4 +459,4 @@ for index = 1:length(label_subdirectories)
         % run at the plate level)
     end
 end
-% exit(exit_code);
+%exit(exit_code);
