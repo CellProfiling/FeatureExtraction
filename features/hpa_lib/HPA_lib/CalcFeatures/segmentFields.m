@@ -279,7 +279,9 @@ for i=1:length(readlist)
     disp(['writing image ',writelist{i}])
     %DPS - I'm using uint16 here so we can have 65,000 objects (cells) per image. 
     regions = uint16(bwlabel(regions,4));
-    nucseg = uint16(nucseeds==max(nucseeds(:))).*(regions);
+    %DPS - 20,08,16 added the extra max requiring the value chosen to be at
+    %least 1. This prevents the image from being totally black.
+    nucseg = uint16(nucseeds==max([max(nucseeds(:)),1])).*(regions);
     nucseg = imfill(nucseg,'holes');
     
     
