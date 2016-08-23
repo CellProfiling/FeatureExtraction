@@ -90,6 +90,7 @@ for i = 1:length(nucfiles)
         skipimage(i,4) = NaN;
         erim = nan(size(nucim));
     else
+        erfiles
         erim = imread(erfiles{i});
     end
    
