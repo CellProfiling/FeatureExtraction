@@ -297,6 +297,7 @@ for index = 1:length(label_subdirectories)
             continue
         end
         
+        %temporarily splitting this out to allow images to pass
         if any(any(skipimage{index}==2))
             warning('potential partial scan, continue at your own risk')
         end
