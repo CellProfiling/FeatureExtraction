@@ -282,7 +282,7 @@ for index = 1:length(label_subdirectories)
         %image_subdirectory
         %storage_subdirectory
         %disp('In 63x code')
-        try
+%         try
         
         %DPS 06/08/15 - adding support for partially scanned images
         %Check if images need to be trimmed, trim them and updated the
@@ -291,11 +291,17 @@ for index = 1:length(label_subdirectories)
         %DPS 10/08/15 - After discussing with Emma, we will now mark images
         %that are partial scans and not trim images
         [nucfiles{index}, skipimage{index}] = preprocessImages(image_subdirectory,base_naming_convention,curr_out_folder)
-        if any(skipimage{index})
+        if any(any(skipimage{index}==1))
             cell_feat = [];
             exit_code(index) = 1;
             continue
         end
+        
+        if any(any(skipimage{index}==2))
+            warning('potential partial scan, continue at your own risk')
+        end
+        
+        
         %DPS 11/08/15 - Need to eliminate folders that don't have any files in
         %them (that match our naming convention).
         %         if skipimage{index}==inf
@@ -406,16 +412,16 @@ for index = 1:length(label_subdirectories)
         end
         
         save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
-        catch
-                    faillist = [faillist,image_subdirectory];
-                    %save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
-                    cell_feat = [];
-                    exit_code(index) = 122;
-                    continue
+%         catch
+%                     faillist = [faillist,image_subdirectory];
+%                     %save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
+%                     cell_feat = [];
+%                     exit_code(index) = 122;
+%                     continue
         %
         %disp('An error occuring during feature extraction 63x/40x');
         %exit(exit_code);
-        end
+%         end
         
 %         end
         % save([out_folder,filesep,'listOfFailed_tot.mat'],'faillist')
