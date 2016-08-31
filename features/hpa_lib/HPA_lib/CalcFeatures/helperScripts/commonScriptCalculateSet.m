@@ -156,13 +156,17 @@ switch fsetnames{zed}
   
     prot_int = sum(protstruct.channel_fg(:));
     bg_prot = protstruct.channel;
-    bg_prot(protstruct.channel>protstruct.channel_thr) = 0;
-    prot_int_large = sum(protstruct.channel_large_fg(:));
-
-    prot_int_mthr = sum(protstruct.channel_mfg(:));
-    bg_prot_mthr = protstruct.channel;
-    bg_prot_mthr(protstruct.channel>protstruct.channel_mthr) = 0;
-    prot_int_large_mthr = sum(protstruct.channel_large_mfg(:));
+    %if the channel is blank, the whole image is bg_prot and the features
+    %will be set to NaN. 
+    if ~protein_channel_blank
+        bg_prot(protstruct.channel>protstruct.channel_thr) = 0;
+        prot_int_large = sum(protstruct.channel_large_fg(:));
+        
+        prot_int_mthr = sum(protstruct.channel_mfg(:));
+        bg_prot_mthr = protstruct.channel;
+        bg_prot_mthr(protstruct.channel>protstruct.channel_mthr) = 0;
+        prot_int_large_mthr = sum(protstruct.channel_large_mfg(:));
+    end
 
     commonScriptNOF
 

@@ -296,6 +296,12 @@ for index = 1:length(label_subdirectories)
             exit_code(index) = 1;
             continue
         end
+      
+        %temporarily splitting this out to allow images to pass
+        if any(any(skipimage{index}==2))
+            warning('potential partial scan, continue at your own risk')
+        end
+
         %DPS 11/08/15 - Need to eliminate folders that don't have any files in
         %them (that match our naming convention).
         %         if skipimage{index}==inf
@@ -448,12 +454,13 @@ for index = 1:length(label_subdirectories)
         merge_mask     = alpha_ch;
         max_alpha      = 5000;
         
-        alpha_ch(cell_seed>0)                       = 3;
+        %alpha_ch(cell_seed>0)                       = 3;
         alpha_ch(cyto_seed>0)                       = 2;
         alpha_ch(nucleus_seed>0&cell_seed>0)        = 1;
         alpha_ch(plasmaMem)                         = 4;
         
-        imwrite(double(merge_mask),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
+%         imwrite(double(merge_mask),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
+        imwrite(cell_seed.*uint16(alpha_ch<4),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
         
         % merge the output from the image set with other ABs image set data
         % previously analysed (if multiple ABs are included or if analysis is
