@@ -283,147 +283,161 @@ for index = 1:length(label_subdirectories)
         %storage_subdirectory
         %disp('In 63x code')
         try
-        
-        %DPS 06/08/15 - adding support for partially scanned images
-        %Check if images need to be trimmed, trim them and updated the
-        %directory field.
-        %     [image_subdirectory] = trimImages(image_subdirectory,base_naming_convention,out_folder);
-        %DPS 10/08/15 - After discussing with Emma, we will now mark images
-        %that are partial scans and not trim images
-        [nucfiles{index}, skipimage{index}] = preprocessImages(image_subdirectory,base_naming_convention,curr_out_folder)
-        if any(skipimage{index})
-            cell_feat = [];
-            exit_code(index) = 1;
-            continue
-        end
-      
-        %temporarily splitting this out to allow images to pass
-        if any(any(skipimage{index}==2))
-            warning('potential partial scan, continue at your own risk')
-        end
-
-        %DPS 11/08/15 - Need to eliminate folders that don't have any files in
-        %them (that match our naming convention).
-        %         if skipimage{index}==inf
-        %             cell_feat = [];
-        %             exit_code = 1;
-        %             return
-        %         end
-        
-        [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed,segskips] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
-        %DPS 20150924 - added support for cell array within our for loop of
-        %subfolders (fields)
-        %         regions_results     =   cell2mat(label_features);
-        regions_results = cat(1,label_features{:});
-        
-        % read cell (x,y) centers and bounding box values
-        infiletype = [];
-        if findstr(base_naming_convention.nuclear_channel,'.tif');
-            infiletype = 'tif';
-        elseif findstr(base_naming_convention.nuclear_channel,'.TIF');
-            infiletype = 'TIF';
-        else
-            warning('This image does not appear to be a tif (or TIF). Trying to separate file type. Assuming fileparts will give correct answer.')
-            [~,~,nucext] = fileparts(base_naming_convention.nuclear_channel);
-            infiletype = nucext(2:end);
-        end
-        
-        
-        
-        pngsuff = strrep(base_naming_convention.protein_channel,infiletype,'png');
-        nucpngsuff = strrep(base_naming_convention.protein_channel,['.',infiletype],'_nuc.png');
-        dir_png         = dir([storage_subdirectory,filesep,'*',pngsuff]);
-        
-        %%%DPS 2015/07/09 - I don't understand how this ever worked without a for loop unless they were running on one image at a time. I am changing now
-        position_stats{index} = zeros(size(label_features{index},1),7);
-        %DPS 30,07,2015 - Adding variable to track variable names; 7 position
-        %stats are calculated
-        pos_stats_names = cell(1,7);
-        %area
-        pos_stats_names{1} = 'position_stats:Area';
-        %center of mass location
-        pos_stats_names{2} = 'position_stats:Centroid_x';
-        pos_stats_names{3} = 'position_stats:Centroid_y';
-        %bounding box
-        pos_stats_names{4} = 'position_stats:BoundingBox_ulx';
-        pos_stats_names{5} = 'position_stats:BoundingBox_uly';
-        pos_stats_names{6} = 'position_stats:BoundingBox_wx';
-        pos_stats_names{7} = 'position_stats:BoundingBox_wy';
-        currstart = 1;
-        for i = 1:length(dir_png)
-            %bw_seg          = imread([storage_subdirectory,'/',char(dir_png(1).name)]);
-            bw_seg = imread([storage_subdirectory,'/',char(dir_png(i).name)]);
-            if sum(bw_seg(:))==0 || length(unique(bw_seg))==1
-                warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
+            
+            %DPS 06/08/15 - adding support for partially scanned images
+            %Check if images need to be trimmed, trim them and updated the
+            %directory field.
+            %     [image_subdirectory] = trimImages(image_subdirectory,base_naming_convention,out_folder);
+            %DPS 10/08/15 - After discussing with Emma, we will now mark images
+            %that are partial scans and not trim images
+            [nucfiles{index}, skipimage{index}] = preprocessImages(image_subdirectory,base_naming_convention,curr_out_folder)
+            if any(skipimage{index}==1)
+                
+                cell_feat = [];
+                exit_code(index) = 1;
                 continue
             end
-            cell_seg    = regionprops(bwlabel(bw_seg,4),'Centroid','BoundingBox','Area');
             
-            if(length(cell_seg)>0)
-                
-                %num_cells = size(regions_results);
-                %num_cells = num_cells(1,1);
-                num_cells = length(cell_seg);
-                %position_stats(1:num_cells,1) = [nucstats_seg(1:num_cells).Area]';
-                position_stats{index}(currstart:currstart+num_cells-1,1)      =   [cell_seg.Area]';
-                position_stats{index}(currstart:currstart+num_cells-1,2:3)    =   reshape([cell_seg(1:num_cells).Centroid],2,num_cells)';
-                position_stats{index}(currstart:currstart+num_cells-1,4:7)    =   reshape([cell_seg(1:num_cells).BoundingBox],4,num_cells)';
-                
-                time_so_far = toc(start_time);
-                currstart = currstart+num_cells;
-                %size(regions_results)
-                %size(position_stats)
-                
-            else
-                warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
-            end
-        end
-        
-        position_results = cat(1,position_stats{:});
-        
-        if sum(position_results(:))>0
-            cell_feat  = [position_results regions_results];
-            %DPS 30,07,2015 - added feature name save and concatenation of
-            %position stats to feature names
-            feature_names = [pos_stats_names feature_names];
-            save([curr_out_folder,filesep,'feature_names.mat'],'feature_names');
-            csvwrite([curr_out_folder,'/','features.csv'], cell_feat);
-            
-        elseif sum(skipimage{:}>0)==length(dir_png) || sum(segskips>=1)==length(dir_png)
-            fprintf(['There was no fluorescence for any images in ',in_folder, '. We will not bother saving the features.\n'])
-            cell_feat = [];
-            faillist = [faillist,image_subdirectory];
-            exit_code(index) = 1;
-        elseif sum(segskips>1)==length(dir_png)
-            fprintf(['There was no cell regions for any images in ',in_folder, '. Position stats will be blank.\n'])
-            cell_feat  = [position_results regions_results];
-            %DPS 30,07,2015 - added feature name save and concatenation of
-            %position stats to feature names
-            feature_names = [pos_stats_names feature_names];
-            save([curr_out_folder,filesep,'feature_names.mat'],'feature_names');
-            csvwrite([curr_out_folder,'/','features.csv'], cell_feat);
-            faillist = [faillist,image_subdirectory];
-        else
-            cell_feat = 0;
-            exit_code(i) = 122;
-            disp('Segmentation error occuring during feature extraction 63x/40x');
-            faillist = [faillist,image_subdirectory];
-%             exit(exit_code);
-        end
-        
-        save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
-        catch
-                    faillist = [faillist,image_subdirectory];
-                    %save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
+            %After discussion with Emma Lundberg, we will allow a partial
+            %nuclear scan iff the ER scan appears full. If any other channel
+            %has a partial scan, or both ER and nuc do, fail the image.
+            %Note, order goes [nuc,prot,mt,er]
+            if any(any(skipimage{index}==2))
+                if (skipimage{index}(1)==2 && ~skipimage{index}(4)) || (~skipimage{index}(1)==2 && skipimage{index}(4))
+                    warning('potential partial scan for either Nuc or ER, however the other appears ok. Continue at your own risk.');
+                else
                     cell_feat = [];
-                    exit_code(index) = 122;
+                    exit_code(index) = 1;
                     continue
-        %
-        %disp('An error occuring during feature extraction 63x/40x');
-        %exit(exit_code);
+                end
+            end
+            %         %temporarily splitting this out to allow images to pass
+            %         if any(any(skipimage{index}==2))
+            %             warning('potential partial scan, continue at your own risk')
+            %         end
+            
+            %DPS 11/08/15 - Need to eliminate folders that don't have any files in
+            %them (that match our naming convention).
+            %         if skipimage{index}==inf
+            %             cell_feat = [];
+            %             exit_code = 1;
+            %             return
+            %         end
+            
+            [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed,segskips] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
+            %DPS 20150924 - added support for cell array within our for loop of
+            %subfolders (fields)
+            %         regions_results     =   cell2mat(label_features);
+            regions_results = cat(1,label_features{:});
+            
+            % read cell (x,y) centers and bounding box values
+            infiletype = [];
+            if findstr(base_naming_convention.nuclear_channel,'.tif');
+                infiletype = 'tif';
+            elseif findstr(base_naming_convention.nuclear_channel,'.TIF');
+                infiletype = 'TIF';
+            else
+                warning('This image does not appear to be a tif (or TIF). Trying to separate file type. Assuming fileparts will give correct answer.')
+                [~,~,nucext] = fileparts(base_naming_convention.nuclear_channel);
+                infiletype = nucext(2:end);
+            end
+            
+            
+            
+            pngsuff = strrep(base_naming_convention.protein_channel,infiletype,'png');
+            nucpngsuff = strrep(base_naming_convention.protein_channel,['.',infiletype],'_nuc.png');
+            dir_png         = dir([storage_subdirectory,filesep,'*',pngsuff]);
+            
+            %%%DPS 2015/07/09 - I don't understand how this ever worked without a for loop unless they were running on one image at a time. I am changing now
+            position_stats{index} = zeros(size(label_features{index},1),7);
+            %DPS 30,07,2015 - Adding variable to track variable names; 7 position
+            %stats are calculated
+            pos_stats_names = cell(1,7);
+            %area
+            pos_stats_names{1} = 'position_stats:Area';
+            %center of mass location
+            pos_stats_names{2} = 'position_stats:Centroid_x';
+            pos_stats_names{3} = 'position_stats:Centroid_y';
+            %bounding box
+            pos_stats_names{4} = 'position_stats:BoundingBox_ulx';
+            pos_stats_names{5} = 'position_stats:BoundingBox_uly';
+            pos_stats_names{6} = 'position_stats:BoundingBox_wx';
+            pos_stats_names{7} = 'position_stats:BoundingBox_wy';
+            currstart = 1;
+            for i = 1:length(dir_png)
+                %bw_seg          = imread([storage_subdirectory,'/',char(dir_png(1).name)]);
+                bw_seg = imread([storage_subdirectory,'/',char(dir_png(i).name)]);
+                if sum(bw_seg(:))==0 || length(unique(bw_seg))==1
+                    warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
+                    continue
+                end
+                cell_seg    = regionprops(bwlabel(bw_seg,4),'Centroid','BoundingBox','Area');
+                
+                if(length(cell_seg)>0)
+                    
+                    %num_cells = size(regions_results);
+                    %num_cells = num_cells(1,1);
+                    num_cells = length(cell_seg);
+                    %position_stats(1:num_cells,1) = [nucstats_seg(1:num_cells).Area]';
+                    position_stats{index}(currstart:currstart+num_cells-1,1)      =   [cell_seg.Area]';
+                    position_stats{index}(currstart:currstart+num_cells-1,2:3)    =   reshape([cell_seg(1:num_cells).Centroid],2,num_cells)';
+                    position_stats{index}(currstart:currstart+num_cells-1,4:7)    =   reshape([cell_seg(1:num_cells).BoundingBox],4,num_cells)';
+                    
+                    time_so_far = toc(start_time);
+                    currstart = currstart+num_cells;
+                    %size(regions_results)
+                    %size(position_stats)
+                    
+                else
+                    warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
+                end
+            end
+            
+            position_results = cat(1,position_stats{:});
+            
+            if sum(position_results(:))>0
+                cell_feat  = [position_results regions_results];
+                %DPS 30,07,2015 - added feature name save and concatenation of
+                %position stats to feature names
+                feature_names = [pos_stats_names feature_names];
+                save([curr_out_folder,filesep,'feature_names.mat'],'feature_names');
+                csvwrite([curr_out_folder,'/','features.csv'], cell_feat);
+                
+            elseif sum(skipimage{:}>0)==length(dir_png) || sum(segskips>=1)==length(dir_png)
+                fprintf(['There was no fluorescence for any images in ',in_folder, '. We will not bother saving the features.\n'])
+                cell_feat = [];
+                faillist = [faillist,image_subdirectory];
+                exit_code(index) = 1;
+            elseif sum(segskips>1)==length(dir_png)
+                fprintf(['There was no cell regions for any images in ',in_folder, '. Position stats will be blank.\n'])
+                cell_feat  = [position_results regions_results];
+                %DPS 30,07,2015 - added feature name save and concatenation of
+                %position stats to feature names
+                feature_names = [pos_stats_names feature_names];
+                save([curr_out_folder,filesep,'feature_names.mat'],'feature_names');
+                csvwrite([curr_out_folder,'/','features.csv'], cell_feat);
+                faillist = [faillist,image_subdirectory];
+            else
+                cell_feat = 0;
+                exit_code(i) = 122;
+                disp('Segmentation error occuring during feature extraction 63x/40x');
+                faillist = [faillist,image_subdirectory];
+                %             exit(exit_code);
+            end
+            
+            save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
+        catch
+            faillist = [faillist,image_subdirectory];
+            %save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
+            cell_feat = [];
+            exit_code(index) = 122;
+            continue
+            %
+            %disp('An error occuring during feature extraction 63x/40x');
+            %exit(exit_code);
         end
         
-%         end
+        %         end
         % save([out_folder,filesep,'listOfFailed_tot.mat'],'faillist')
     end
     %% create segmentation masks
@@ -459,7 +473,7 @@ for index = 1:length(label_subdirectories)
         alpha_ch(nucleus_seed>0&cell_seed>0)        = 1;
         alpha_ch(plasmaMem)                         = 4;
         
-%         imwrite(double(merge_mask),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
+        %         imwrite(double(merge_mask),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
         imwrite(cell_seed.*uint16(alpha_ch<4),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
         
         % merge the output from the image set with other ABs image set data
