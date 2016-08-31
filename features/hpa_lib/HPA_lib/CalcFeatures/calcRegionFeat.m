@@ -210,15 +210,28 @@ cleanobject.channel_filtered = [];
 cleanobject.channel_thr = [];
 cleanobject.channel_mthr = [];
 cleanobject.channel_fg = [];
+cleanobject.channel_mfg = [];%added uninitialized parameter
+cleanobject.channel_large_fg = [];%added uninitialized parameter
+cleanobject.channel_large_mfg = [];%added uninitialized parameter
+cleanobject.downsampled2x_mfg = [];%added uninitialized parameter
+cleanobject.downsampled2x_large_fg = [];%added uninitialized parameter
+cleanobject.downsampled2x_large_mfg = [];%added uninitialized parameter
 cleanobject.channel_regions = [];
 cleanobject.channel_objectsizes = [];
+cleanobject.channel_large_objectsizes = [];%added uninitialized parameter
+cleanobject.channel_mobjectsizes = [];%added uninitialized parameter
+cleanobject.channel_large_mobjectsizes = [];%added uninitialized parameter
 cleanobject.downsampled2x = [];
 cleanobject.downsampled2x_filtered = [];
 cleanobject.downsampled2x_thr = [];
 cleanobject.downsampled2x_mthr = [];
 cleanobject.downsampled2x_fg = [];
 cleanobject.downsampled2x_objectsizes = [];
+cleanobject.downsampled2x_large_objectsizes = [];%added uninitialized parameter
+cleanobject.downsampled2x_mobjectsizes = [];%added uninitialized parameter
+cleanobject.downsampled2x_large_mobjectsizes = [];%added uninitialized parameter
 cleanobject.downsampled4x = [];
+cleanobject.channel_largest_object = [];%added uninitialized parameter
 %DPS - 28,07,2015 Adding field to track if the channel is empty for when we
 %are reading it in (see maskAllChannels.m)
 cleanobject.isempty = [];
@@ -289,7 +302,7 @@ for i=1:length(readlist)
 %         tubfieldstruct,erfieldstruct,maskfieldstruct);
     
     %DPS 28,07,2015 - update the blank image fields
-    protein_channel_blank = protfieldstruct.isempty;
+    protein_channel_blank = protfieldstruct.isempty
     nuclear_channel_blank = nucfieldstruct.isempty;
     tubulin_channel_blank = tubfieldstruct.isempty;
     er_channel_blank = erfieldstruct.isempty;
@@ -451,11 +464,11 @@ for i=1:length(readlist)
 %                 holdup = 1
 %             end
 
-           try
+%            try
             commonScriptCalculateSet
-           catch 
-               waitup = 1
-           end
+%            catch 
+%                waitup = 1
+%            end
 
 
             allfeats = [allfeats; feats];

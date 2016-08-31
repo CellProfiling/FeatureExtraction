@@ -13,6 +13,9 @@ region_properties_features_names = {...
                    };
 %feats = zeros(1, 0);
 feats = nan(1, 3 + number_moments + length(region_properties_features_names));
+%DPS 31,08,2016 - moved this outside the if statement so the code doesn't
+%break when the channel is blank
+moment_orders = 1 + (1:number_moments);
 if optimize && nuclear_channel_blank
   %feats(:) = nan;
   %feats = [nan(1, length(feats) + length(region_properties_features_names))];
@@ -20,7 +23,9 @@ elseif ~isempty(nucobjs)
   feats(1) = max(nucobjs);
   feats(2) = sum(largest_object_intensity);
   feats(3) = mean(largest_object_intensity);
-  moment_orders = 1 + (1:number_moments);
+  %DPS 31,08,2016 - moved this outside the if statement so the code doesn't
+  %break when the channel is blank
+%   moment_orders = 1 + (1:number_moments);
   %feats(length(feats) + (1:number_moments)) = arrayfun(@(x)moment(largest_object_intensity, x), moment_orders);
   feats(3 + (1:number_moments)) = arrayfun(@(x)moment(largest_object_intensity, x), moment_orders);
 
