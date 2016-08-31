@@ -455,12 +455,13 @@ for index = 1:length(label_subdirectories)
         merge_mask     = alpha_ch;
         max_alpha      = 5000;
         
-        alpha_ch(cell_seed>0)                       = 3;
+        %alpha_ch(cell_seed>0)                       = 3;
         alpha_ch(cyto_seed>0)                       = 2;
         alpha_ch(nucleus_seed>0&cell_seed>0)        = 1;
         alpha_ch(plasmaMem)                         = 4;
         
-        imwrite(double(merge_mask),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
+%         imwrite(double(merge_mask),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
+        imwrite(cell_seed.*uint16(alpha_ch<4),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
         
         % merge the output from the image set with other ABs image set data
         % previously analysed (if multiple ABs are included or if analysis is
