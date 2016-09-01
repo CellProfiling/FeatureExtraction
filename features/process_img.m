@@ -1,4 +1,4 @@
-function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,color,extensions,pattern,mstype,seg_channels)
+function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,color,extensions,pattern,mstype,seg_channels,steps)
 %This function is used to process images for production in the Subcellular
 %Human Protein Atlas.
 %
@@ -49,6 +49,7 @@ function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,co
 
 segskips= [];
 skipimage = [];
+cell_feat = [];
 
 
 addpath(genpath('./hpa_lib'),'-begin');
@@ -57,7 +58,7 @@ addpath(genpath('./adaptive_watersheed_seg'),'-begin');
 faillist = [];
 exit_code   = 0;
 
-if nargin<8
+if nargin<8 || isempty(seg_channels)
     seg_channels = {'er','mt'};
 end
 
@@ -71,7 +72,7 @@ end
 
 %DPS 22,09,2015 - added 'pattern' var so we can handle sub-patterns in
 %addition to extensions.
-if nargin<6
+if nargin<6 || isempty(pattern)
     pattern = '';
 end
 
@@ -123,9 +124,14 @@ end
 %     resolution = 0;
 % end
 
-step1   = true;
-step2   = true;
-step3   = true;
+if nargin<9 || isempty(steps)
+    steps(1) = true;
+    steps(2) = true;
+    steps(3) = true;
+%     step1   = true;
+%     step2   = true;
+%     step3   = true;
+end
 
 warning('off', 'MATLAB:MKDIR:DirectoryExists');
 warning('off', 'Images:imfeature:obsoleteFunction');
@@ -157,7 +163,7 @@ mkdir(filename);
 
 %% Init
 
-if(step1)
+if(steps(1))
     
     image_path = in_folder;
     dirlist    = dir(image_path);
@@ -213,12 +219,16 @@ end
 %% Remaining script to run image-segmentation and feature extraction
 exit_code = zeros(1,length(label_subdirectories));
 for index = 1:length(label_subdirectories)
-    if(step2)
+%     if(step2)
         
         
         
         %set up the subfolder stuff
         curr_out_folder = [out_folder,filesep,label_subdirectories{index}];
+        if ~isdir(curr_out_folder)
+            mkdir(curr_out_folder)
+        end
+        
         
         %DPS 10/08/15 - Defining key words and adding auto detection of
         %channels left blank by the user.
@@ -282,6 +292,7 @@ for index = 1:length(label_subdirectories)
         %image_subdirectory
         %storage_subdirectory
         %disp('In 63x code')
+        if(steps(2))
         try
             
             %DPS 06/08/15 - adding support for partially scanned images
@@ -442,7 +453,7 @@ for index = 1:length(label_subdirectories)
     end
     %% create segmentation masks
     
-    if(step3)
+    if(steps(3))
         %%%DPS 2015-07-09  Not sure where I is supposed to be coming from without a for loop!
         % Read images - this step is not necessary. %DPS 2016-06-07
         
@@ -452,6 +463,10 @@ for index = 1:length(label_subdirectories)
         %     im_er       =   imread(list_er(i).name);
         
         % Segment the nucleus and cell extent mask
+        
+        if ~exist('cell_seed','var')
+            [cell_seed, nucleus_seed, segskips] = segmentFields(image_subdirectory, storage_subdirectory, base_naming_convention,resolution);
+        end
         
         cyto_seed   =   cell_seed & (~(nucleus_seed>0));
         
@@ -474,7 +489,7 @@ for index = 1:length(label_subdirectories)
         alpha_ch(plasmaMem)                         = 4;
         
         %         imwrite(double(merge_mask),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
-        imwrite(cell_seed.*uint16(alpha_ch<4),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
+        imwrite(cell_seed.*uint16(alpha_ch<4),[curr_out_folder,filesep,'segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch./65535);
         
         % merge the output from the image set with other ABs image set data
         % previously analysed (if multiple ABs are included or if analysis is
