@@ -33,7 +33,9 @@ else
     nuc = imerode(dna>b(ind),strel('disk',round(MINNUCLEUSDIAMETER/IMAGEPIXELSIZE/8)));
 end
 
-seeds = nuc>0;
+%seeds = nuc>0;
+seeds = activecontour(tmp,nuc,30);
+seeds = imfill(seeds,'holes');
 
 % filter away very small objects
 bwl = bwlabel(seeds, 4);
@@ -42,21 +44,22 @@ stats = zeros(size(props));
 for i=1:length(props)
     stats(i) = props(i).Area;
 end
+% mean_packing = ((size(bwl,1)-(2*mean(sqrt(stats./pi)))*sqrt(length(stats))))/length(stats)
 idx = find(stats>minarea/2);
 seeds = ismember(bwl,idx);
 seeds = 255*uint8(seeds);
-
+% 
 idx = find(stats>maxarea | stats<minarea);
 idx2 = unique([bwl(:,1)' bwl(:,end)' bwl(1,:) bwl(end,:)]);
 idx2(idx2==0) = [];
 idx = unique([idx' idx2]);
 seeds_edge = seeds - 127*uint8(ismember(bwl,idx));
-
-%DPS 2015,10,22
-%This actually fills holes and makes nuclei more contiguous 
-dilation = round((MINNUCLEUSDIAMETER/IMAGEPIXELSIZE)/2)+1;
-fgs2 = bwmorph(seeds,'dilate',dilation);
-seeds = bwmorph(fgs2,'erode',dilation);
+% 
+% %DPS 2015,10,22
+% %This actually fills holes and makes nuclei more contiguous 
+% dilation = round((MINNUCLEUSDIAMETER/IMAGEPIXELSIZE)/2)+1;
+% fgs2 = bwmorph(seeds,'dilate',dilation);
+% seeds = bwmorph(fgs2,'erode',dilation);
 
 %% double check if nuclei are within the size limits. If not, delete them. 
 %this makes sure we didn't accidently make things that are really big or
