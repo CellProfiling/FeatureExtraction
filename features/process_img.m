@@ -47,6 +47,8 @@ function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,co
 %replicate code to one code base for high efficiency, reliability and
 %easier code managment.
 
+disp('~~You are running the HPA production feature extraction version 2.0~~')
+
 segskips= [];
 skipimage = [];
 cell_feat = [];
