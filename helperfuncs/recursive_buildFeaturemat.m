@@ -1,4 +1,4 @@
-function [featmat,expnames,badpaths] = recursive_buildFeaturemat(inpath,featfilename,recursiveind)
+function [featmat,expnames,badpaths] = recursive_buildFeaturemat(inpath,featfilename,recursiveind,includecellindex)
 %This function takes a file output structure, finds the features.csv files
 %for each experiment, splits the features and compiles the desired features
 %into a single feature matrix
@@ -10,6 +10,7 @@ function [featmat,expnames,badpaths] = recursive_buildFeaturemat(inpath,featfile
 %for is. Here we expect a .csv file as outputed by the feature extraction.
 %The default is 'features.csv'
 %recursiveind - this is a simple housekeeping argument and can be ignored. 
+%includecellindex - if true, the expnames will include a cell index as well
 %
 %OUTPUTS:
 %featmat - a single feature matrix with an index list per-experiment in the
@@ -21,6 +22,8 @@ function [featmat,expnames,badpaths] = recursive_buildFeaturemat(inpath,featfile
 %Edited by:
 %D. Sullivan 03,04,2016 - added "badpath" output for experiments that have
 %a bad feature matrix size
+%
+%C. Winsnes 12,09,2016 - Added includecellindex input to have cell ids.
 
 if strcmpi(inpath,'/Volumes/DevinsStorage/recalc_features/1003/1003_C12_1/')
     holdup = 1;
@@ -34,6 +37,10 @@ end
 
 if nargin<3
     recursiveind = 1;
+end
+
+if nargin<4
+    includecellindex = 0
 end
 
 listdirs = ml_ls(inpath);
@@ -60,7 +67,15 @@ for i = 1:length(featfilelist)
 
       currfeats = csvread(currpath);
       featmat = [featmat;currfeats];
-      expnames = [expnames;repmat({[currinfolders{end-2},'_',currimgname]},size(featmat,1),1)];
+      if includecellindex
+        f = @(index) strcat(currinfolders{end-2}, '_', currimgname, '_', num2str(index));
+
+        cellnames = arrayfun(f, transpose(1:size(featmat,1)), 'UniformOutput', 0);
+        expnames = [expnames; cellnames];
+      else
+        expnames = [expnames;repmat({[currinfolders{end-2},'_',currimgname]},size(featmat,1),1)];
+      end
+
 end
 
 
@@ -85,6 +100,4 @@ for j = 1:numexperiments
         featmat = [featmat;featmattmp];
         expnames = [expnames;expnamestmp];
     end
-    
-
 end
