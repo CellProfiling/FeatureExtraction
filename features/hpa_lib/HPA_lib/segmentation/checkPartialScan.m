@@ -49,7 +49,7 @@ if ystart~=1
 end
 
 yend = find(yrange,1,'last');
-if yend~=size(img,2)
+if yend~=size(img,1)
 %     warning('no fluorescence in end of y image. Skipping to second to last column with fluorescence.')
     %here we use the 2nd to last column instead of the first since there was an
     %error in acquisition and we want to be sure to eliminate the last

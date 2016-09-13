@@ -116,6 +116,7 @@ else
     else
         extension_er = '';
     end
+    color = extension_er;
 end
 
 
@@ -295,7 +296,7 @@ for index = 1:length(label_subdirectories)
         %storage_subdirectory
         %disp('In 63x code')
         if(steps(2))
-        try
+%         try
             
             %DPS 06/08/15 - adding support for partially scanned images
             %Check if images need to be trimmed, trim them and updated the
@@ -439,16 +440,16 @@ for index = 1:length(label_subdirectories)
             end
             
             save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
-        catch
-            faillist = [faillist,image_subdirectory];
-            %save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
-            cell_feat = [];
-            exit_code(index) = 122;
-            continue
+%         catch
+%             faillist = [faillist,image_subdirectory];
+%             %save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
+%             cell_feat = [];
+%             exit_code(index) = 122;
+%             continue
             %
             %disp('An error occuring during feature extraction 63x/40x');
             %exit(exit_code);
-        end
+%         end
         
         %         end
         % save([out_folder,filesep,'listOfFailed_tot.mat'],'faillist')
