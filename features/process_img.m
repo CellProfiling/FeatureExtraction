@@ -492,7 +492,7 @@ for index = 1:length(label_subdirectories)
         alpha_ch(plasmaMem)                         = 4;
         
         %         imwrite(double(merge_mask),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
-        imwrite(cell_seed.*uint16(alpha_ch<4),[curr_out_folder,filesep,'segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch./65535);
+        imwrite(cell_seed.*uint16(alpha_ch<4),[curr_out_folder,filesep,label_subdirectories{index},'_segmentation.png'],'Alpha',alpha_ch./65535);
         
         % merge the output from the image set with other ABs image set data
         % previously analysed (if multiple ABs are included or if analysis is
