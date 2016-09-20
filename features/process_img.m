@@ -415,7 +415,7 @@ for index = 1:length(label_subdirectories)
                 %position stats to feature names
                 feature_names = [pos_stats_names feature_names];
                 save([curr_out_folder,filesep,'feature_names.mat'],'feature_names');
-                csvwrite([curr_out_folder,'/','features.csv'], cell_feat);
+                csvwrite([curr_out_folder,filesep,label_subdirectories{index},'_features.csv'], cell_feat);
                 
             elseif sum(skipimage{:}>0)==length(dir_png) || sum(segskips>=1)==length(dir_png)
                 fprintf(['There was no fluorescence for any images in ',in_folder, '. We will not bother saving the features.\n'])
@@ -429,7 +429,7 @@ for index = 1:length(label_subdirectories)
                 %position stats to feature names
                 feature_names = [pos_stats_names feature_names];
                 save([curr_out_folder,filesep,'feature_names.mat'],'feature_names');
-                csvwrite([curr_out_folder,'/','features.csv'], cell_feat);
+                csvwrite([curr_out_folder,filesep,label_subdirectories{index},'_features.csv'], cell_feat);
                 faillist = [faillist,image_subdirectory];
             else
                 cell_feat = 0;
