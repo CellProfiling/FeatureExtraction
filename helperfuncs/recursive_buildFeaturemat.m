@@ -42,7 +42,7 @@ end
 
 listdirs = ml_ls(inpath);
 
-[~,~,filetype] = fileparts(featfilename);
+% [~,~,filetype] = fileparts(featfilename);
 
 %first check if any of the files found are the images we are looking for
 featfilelist = listdirs(~cellfun(@isempty,strfind(listdirs,featfilename)));

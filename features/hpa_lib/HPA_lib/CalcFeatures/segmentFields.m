@@ -299,7 +299,10 @@ for i=1:length(readlist)
     if max(nucseg(:))==0
         warning('No nuclei found in the image after segmentation. This image appears to be blank!')
         skipimgs(i) = 1;
-    elseif max(regions(:))==0
+%     elseif max(regions(:))==0
+    %modified slightly to be more robust. Sometimes all 1 segmentation is
+    %returned.
+    elseif length(unique(regions(:)))==1
         warning('No cell regions found in the image after segmentation. This image appears to be blank!')
         skipimgs(i) = 2;
     end

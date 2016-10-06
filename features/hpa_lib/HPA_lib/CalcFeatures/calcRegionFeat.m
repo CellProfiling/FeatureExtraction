@@ -387,6 +387,8 @@ for i=1:length(readlist)
         %imagesc(protfieldstruct.channel);pause;
         
         allfeats = [];
+        names = [];
+        slfnames = [];
         for j=1:length(protfieldstruct.channel_regions)
             protstruct = cleanobject;
             nucstruct = cleanobject;

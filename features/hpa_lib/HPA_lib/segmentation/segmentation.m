@@ -123,11 +123,8 @@ else
     end
     
     %use voronoi segmentation to approximate cells
-    try
     regions = ~(ml_getvoronoi(regions_nuc));
-    catch
-        whoops = 1
-    end
+
     
     %because we use all the nuclei to get more accurate cell shapes we now
     %have to eliminate "cells" where nuclei are touching the border to be

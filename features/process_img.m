@@ -442,7 +442,7 @@ for index = 1:length(label_subdirectories)
             save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
 %         catch
 %             faillist = [faillist,image_subdirectory];
-%             %save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
+            %save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
 %             cell_feat = [];
 %             exit_code(index) = 122;
 %             continue
