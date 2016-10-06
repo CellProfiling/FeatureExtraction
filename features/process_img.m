@@ -1,4 +1,4 @@
-function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,color,extensions,pattern,mstype,seg_channels,steps)
+function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,color,extensions,pattern,mstype,seg_channels,steps,run_partial_scans)
 %This function is used to process images for production in the Subcellular
 %Human Protein Atlas.
 %
@@ -134,6 +134,10 @@ if nargin<9 || isempty(steps)
 %     step1   = true;
 %     step2   = true;
 %     step3   = true;
+end
+
+if nargin<10 || isempty(run_partial_scans)
+    run_partial_scans = 0;
 end
 
 warning('off', 'MATLAB:MKDIR:DirectoryExists');
@@ -316,7 +320,7 @@ for index = 1:length(label_subdirectories)
             %nuclear scan iff the ER scan appears full. If any other channel
             %has a partial scan, or both ER and nuc do, fail the image.
             %Note, order goes [nuc,prot,mt,er]
-            if any(any(skipimage{index}==2))
+            if any(any(skipimage{index}==2)) && ~run_partial_scans
                 if (skipimage{index}(1)==2 && ~skipimage{index}(4)) || (~skipimage{index}(1)==2 && skipimage{index}(4))
                     warning('potential partial scan for either Nuc or ER, however the other appears ok. Continue at your own risk.');
                 else
@@ -324,6 +328,8 @@ for index = 1:length(label_subdirectories)
                     exit_code(index) = 1;
                     continue
                 end
+            elseif any(any(skipimage{index}==2)) && run_partial_scans
+                warning('You are running an image that may contain a partial scan. proceed at your own risk!!')
             end
             %         %temporarily splitting this out to allow images to pass
             %         if any(any(skipimage{index}==2))
