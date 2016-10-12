@@ -229,6 +229,9 @@ for i=1:length(readlist)
     disp(readlist_nuc{i})
     nucim = imread(strtrim(readlist_nuc{i}));
     
+    %check nuc might be rgb
+    nucim = removergb(nucim);
+    
     %Devin S. 2015,07,13 - Added voronoi segmentation when ER channel is
     %not present. This is for Peter Thul's golgi project
     %Checks both whether the path has been left blank or if the
@@ -252,6 +255,11 @@ for i=1:length(readlist)
 %         erim = zeros(size(nucim));
         erim = nucim.*0;
     end
+    
+    %check er might be rgb
+    erim = removergb(erim);
+
+    
     %Then check MT
 %     if ~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt'))
     if any(strcmpi(naming_convention.seg_channel,'mt')) && (~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt')))
@@ -261,6 +269,10 @@ for i=1:length(readlist)
 %         mtim = zeros(size(nucim));
         mtim = nucim.*0;
     end
+    
+    %check mt might be rgb
+    mtim = removergb(mtim);
+    
     %Then combine them
     cellim = imadd(double(erim),double(mtim));
     

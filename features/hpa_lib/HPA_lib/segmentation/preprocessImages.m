@@ -71,6 +71,10 @@ for i = 1:length(nucfiles)
     else
         nucim = imread(nucfiles{i});
     end
+    %check nuc might be rgb
+    nucim = removergb(nucim);
+
+    
     %Prot
     if any(strcmpi(namingconvention.blank_channels,'protein'))
         skipimage(i,2) = NaN;
@@ -79,6 +83,10 @@ for i = 1:length(nucfiles)
         protim = imread(protfiles{i});
     end
     
+    %check prot might be rgb
+    protim = removergb(protim);
+
+    
     if any(strcmpi(namingconvention.blank_channels,'tubulin'))
         skipimage(i,3) = NaN;
         mtim = nan(size(nucim));
@@ -86,13 +94,18 @@ for i = 1:length(nucfiles)
         mtim = imread(mtfiles{i});
     end
     
+    %check mt might be rgb
+    mtim = removergb(mtim);
+    
     if any(strcmpi(namingconvention.blank_channels,'er'))
         skipimage(i,4) = NaN;
         erim = nan(size(nucim));
     else
-        erfiles
         erim = imread(erfiles{i});
     end
+    
+    %check er might be rgb
+    erim = removergb(erim);
    
    %Check if any are totally empty
    %Nuc

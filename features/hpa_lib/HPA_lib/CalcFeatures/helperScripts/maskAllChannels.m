@@ -77,7 +77,7 @@ end
 % if isempty(protfieldstruct.channel) 
 if isempty(protfieldstruct.channel) && ~protfieldstruct.isempty
     disp(['Protein field structure path is: ',protfieldstruct.channel_path]);
-    protfieldstruct.channel = imread(protfieldstruct.channel_path);
+    protfieldstruct.channel = removergb(imread(protfieldstruct.channel_path));
 elseif protfieldstruct.isempty
     warning('You are using a blank "protein" channel! Are you sure you want to do this?')
     protfieldstruct.channel = zeros(size(maskfieldstruct.channel));
@@ -85,21 +85,21 @@ end
 
 % if isempty(nucfieldstruct.channel)
 if isempty(nucfieldstruct.channel) && ~nucfieldstruct.isempty
-    nucfieldstruct.channel = imread(nucfieldstruct.channel_path);
+    nucfieldstruct.channel = removergb(imread(nucfieldstruct.channel_path));
 elseif nucfieldstruct.isempty
     nucfieldstruct.channel = zeros(size(maskfieldstruct.channel));
 end
 
 % if isempty(tubfieldstruct.channel)
 if isempty(tubfieldstruct.channel) && ~tubfieldstruct.isempty
-    tubfieldstruct.channel = imread(tubfieldstruct.channel_path);
+    tubfieldstruct.channel = removergb(imread(tubfieldstruct.channel_path));
 elseif tubfieldstruct.isempty
     tubfieldstruct.channel = zeros(size(maskfieldstruct.channel));
 end
 
 % if isempty(erfieldstruct.channel)
 if isempty(erfieldstruct.channel) && ~erfieldstruct.isempty
-    erfieldstruct.channel = imread(erfieldstruct.channel_path);
+    erfieldstruct.channel = removergb(imread(erfieldstruct.channel_path));
 elseif erfieldstruct.isempty
     erfieldstruct.channel = zeros(size(maskfieldstruct.channel));
 end
