@@ -1,4 +1,4 @@
-function [featmat,expnames,badpaths] = recursive_buildFeaturemat(inpath,featfilename,recursiveind,includecellindex)
+function [featmat,expnames,badpaths] = recursive_buildFeaturemat(inpath,featfilename,recursiveind,includecellindex,removeedgecells)
 %This function takes a file output structure, finds the features.csv files
 %for each experiment, splits the features and compiles the desired features
 %into a single feature matrix
@@ -36,8 +36,12 @@ if nargin<3
     recursiveind = 1;
 end
 
-if nargin<4
-    includecellindex = 0
+if nargin<4 || isempty(includecellindex)
+    includecellindex = 0;
+end
+
+if nargin<5 || isempty(removeedgecells)
+    removeedgecells = 1;
 end
 
 listdirs = ml_ls(inpath);
@@ -63,6 +67,9 @@ for i = 1:length(featfilelist)
       end
 
       currfeats = csvread(currpath);
+      currsegpath = [inpath,filesep,strrep(featfilelist{i},'features.csv','segmentation.png');
+      [currseg,map,currtrans] = imread(currsegpath);
+      
       featmat = [featmat;currfeats];
       if includecellindex
         f = @(index) strcat(currinfolders{end-2}, '_', currimgname, '_', num2str(index));
@@ -87,7 +94,7 @@ newrecursiveind = recursiveind+1;
 for j = 1:numexperiments
     currpath = [inpath,filesep,listdirs{j}]
    
-    [featmattmp,expnamestmp,badpathstmp] = recursive_buildFeaturemat(currpath,featfilename,newrecursiveind);
+    [featmattmp,expnamestmp,badpathstmp] = recursive_buildFeaturemat(currpath,featfilename,newrecursiveind,includecellindex,removeedgecells);
     if size(featmattmp,2)~=size(featmat,2) && (size(featmat,2)~=0 && size(featmattmp,2)~=0)
         warning(['something is wrong with the matrix for image ',currpath,...
             ' its size is ',size(featmattmp)])
