@@ -69,14 +69,14 @@ values = [] ;
 %
 % Features from imfeature()
 %
-%features = imfeature(double(im2bw(imageproc)), 'EulerNumber') ;
+%features = imfeature(double(imbinarize(imageproc)), 'EulerNumber') ;
 % Fix for newer (2011) Matlab version:
-features = regionprops(double(im2bw(imageproc)), 'EulerNumber') ;
+features = regionprops(double(imbinarize(imageproc)), 'EulerNumber') ;
 
 %
 % Calculate the number of objects in IMAGE
 %
-imagelabeled = bwlabel(im2bw(imageproc)) ;
+imagelabeled = bwlabel(imbinarize(imageproc)) ;
 obj_number = max(imagelabeled(:)) ;
 
 names = [names cellstr('object:number') cellstr('object:EulerNumber')] ;
@@ -171,7 +171,7 @@ obj_sizes = obj_size(1,2:end);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-for (i=1:obj_number)
+for i=1:obj_number
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % GP 07/11/01b
@@ -279,6 +279,7 @@ values = [values obj_size_avg obj_size_var obj_size_ratio] ;
 
 obj_dist_avg = mean(obj_distances) ;
 obj_dist_var = var(obj_distances) ;
+
 if obj_mindist ~= 0 
 	obj_dist_ratio = obj_maxdist/obj_mindist ;
 else
@@ -321,12 +322,12 @@ if ~isempty(dnaproc)
 	dna_image_distance = sqrt((imageproc_center-dnaproc_center)... 
                                *eye(2)*(imageproc_center-dnaproc_center)') ;
 
-	dna_area = size(find(im2bw(dnaproc)),1) ;
-	image_area = size(find(im2bw(imageproc)),1) ;
+	dna_area = size(find(imbinarize(dnaproc)),1) ;
+	image_area = size(find(imbinarize(imageproc)),1) ;
 	%
 	% what fraction of the image fluorescence area overlaps the dna image?
 	%
-	image_overlap = size(find(roifilt2(0,imageproc,~im2bw(dnaproc))),1) ;
+	image_overlap = size(find(roifilt2(0,imageproc,~imbinarize(dnaproc))),1) ;
 
 	if image_area == 0
 		dna_image_area_ratio = 0 ;

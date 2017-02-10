@@ -1,5 +1,9 @@
-function imgrgb = showrgb(r_img,g_img,b_img)
+function imgrgb = showrgb(r_img,g_img,b_img,show)
 %small helper to display rgb image
+
+if nargin<4
+    show = 1;
+end
 
 %if not images, load them
 if isstr(r_img)
@@ -44,7 +48,9 @@ imgrgb(:,:,1) = double(r_img)./max(double(r_img(:)));
 imgrgb(:,:,2) = double(g_img)./max(double(g_img(:)));
 imgrgb(:,:,3) = double(b_img)./max(double(b_img(:)));
 
-imshow(imgrgb,[])
+if show
+    imshow(imgrgb,[])
+end
 
 if nargout==0
     imgrgb = [];

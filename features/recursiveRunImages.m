@@ -33,7 +33,12 @@ end
 
 inpath = submitstruct.indir;
 
-extensions_default = {'C01','C00','C03','C02'};
+extensions_default = {'blue','green','red','yellow'}%{'C01','C00','C03','C02'};
+%     extension_dapi  = extensions{1};%e.g. 'blue.tif'
+%     extension_ab    = extensions{2};%e.g. 'green.tif'
+%     extension_mtub  = extensions{3};%e.g. 'red.tif'
+%     extension_er    = extensions{4};%e.g. 'yellow.tif'
+
 segchannels_default = {'mt','er'};
 submitstruct = ml_initparam(submitstruct,struct('indir',pwd,'outdir',pwd,'resolution',0.08,'color',[],'extensions',{extensions_default},'pattern','','mstype','confocal','seg_channels',{segchannels_default}));
 
@@ -74,7 +79,7 @@ for i = 1:length(imgslist)
     extensions = strcat(submitstruct.extensions,imgtype);
     %submit a job
     tstart = tic;
-    [~,exit_code] = process_img(submitstruct.indir,submitstruct.outdir,submitstruct.resolution,submitstruct.color,extensions,submitstruct.pattern,submitstruct.mstype,submitstruct.seg_channels);
+    [~,exit_code] = process_img(submitstruct.indir,submitstruct.outdir,submitstruct.resolution,submitstruct.color,extensions,submitstruct.pattern,submitstruct.mstype,submitstruct.seg_channels,[],1);
     telapsed = toc(tstart)
     telapsed
 end

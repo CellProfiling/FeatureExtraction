@@ -67,8 +67,8 @@ for i = 1:length(featfilelist)
       end
 
       currfeats = csvread(currpath);
-      currsegpath = [inpath,filesep,strrep(featfilelist{i},'features.csv','segmentation.png');
-      [currseg,map,currtrans] = imread(currsegpath);
+%       currsegpath = [inpath,filesep,strrep(featfilelist{i},'features.csv','segmentation.png'];
+%       [currseg,map,currtrans] = imread(currsegpath);
       
       featmat = [featmat;currfeats];
       if includecellindex

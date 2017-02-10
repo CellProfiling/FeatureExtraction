@@ -172,7 +172,7 @@ mkdir(filename);
 
 if(steps(1))
     
-    image_path = in_folder;
+    image_path = fullfile(in_folder);
     dirlist    = dir(image_path);
     %dirlist
     start_time = tic;
@@ -192,7 +192,7 @@ if(steps(1))
     for i=1:length(dirlist)
         %         currdir = dirlist(i+padnumb).name;
         currdir = dirlist(i).name;
-        currpath = [image_path,filesep,currdir];
+        currpath = fullfile([image_path,filesep,currdir]);
         if any(strcmpi(currdir,{'.','..','.DS_Store','tmp'})) || ~isdir(currpath)
             continue
         end
@@ -215,7 +215,7 @@ if(steps(1))
     number_labels = length(label_subdirectories);
     label_features = cell(1, number_labels);
     
-    processed_path = [out_folder,'/featextraction_rawdata/'];
+    processed_path = fullfile([out_folder,'/featextraction_rawdata/']);
     mkdir(processed_path);
     
     feature_names = [];
@@ -231,7 +231,7 @@ for index = 1:length(label_subdirectories)
         
         
         %set up the subfolder stuff
-        curr_out_folder = [out_folder,filesep,label_subdirectories{index}];
+        curr_out_folder = fullfile([out_folder,filesep,label_subdirectories{index}]);
         if ~isdir(curr_out_folder)
             mkdir(curr_out_folder)
         end
@@ -366,7 +366,7 @@ for index = 1:length(label_subdirectories)
             
             pngsuff = strrep(base_naming_convention.protein_channel,infiletype,'png');
             nucpngsuff = strrep(base_naming_convention.protein_channel,['.',infiletype],'_nuc.png');
-            dir_png         = dir([storage_subdirectory,filesep,'*',pngsuff]);
+            dir_png         = dir(fullfile([storage_subdirectory,filesep,'*',pngsuff]));
             
             %%%DPS 2015/07/09 - I don't understand how this ever worked without a for loop unless they were running on one image at a time. I am changing now
             position_stats{index} = zeros(size(label_features{index},1),7);
@@ -386,7 +386,7 @@ for index = 1:length(label_subdirectories)
             currstart = 1;
             for i = 1:length(dir_png)
                 %bw_seg          = imread([storage_subdirectory,'/',char(dir_png(1).name)]);
-                bw_seg = imread([storage_subdirectory,'/',char(dir_png(i).name)]);
+                bw_seg = imread(fullfile([storage_subdirectory,'/',char(dir_png(i).name)]));
                 if sum(bw_seg(:))==0 || length(unique(bw_seg))==1
                     warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
                     continue
@@ -420,8 +420,8 @@ for index = 1:length(label_subdirectories)
                 %DPS 30,07,2015 - added feature name save and concatenation of
                 %position stats to feature names
                 feature_names = [pos_stats_names feature_names];
-                save([curr_out_folder,filesep,'feature_names.mat'],'feature_names');
-                csvwrite([curr_out_folder,filesep,label_subdirectories{index},'_features.csv'], cell_feat);
+                save(fullfile([curr_out_folder,filesep,'feature_names.mat']),'feature_names');
+                csvwrite(fullfile([curr_out_folder,filesep,label_subdirectories{index},'_features.csv']), cell_feat);
                 
             elseif sum(skipimage{:}>0)==length(dir_png) || sum(segskips>=1)==length(dir_png)
                 fprintf(['There was no fluorescence for any images in ',in_folder, '. We will not bother saving the features.\n'])
@@ -434,8 +434,8 @@ for index = 1:length(label_subdirectories)
                 %DPS 30,07,2015 - added feature name save and concatenation of
                 %position stats to feature names
                 feature_names = [pos_stats_names feature_names];
-                save([curr_out_folder,filesep,'feature_names.mat'],'feature_names');
-                csvwrite([curr_out_folder,filesep,label_subdirectories{index},'_features.csv'], cell_feat);
+                save(fullfile([curr_out_folder,filesep,'feature_names.mat']),'feature_names');
+                csvwrite(fullfile([curr_out_folder,filesep,label_subdirectories{index},'_features.csv']), cell_feat);
                 faillist = [faillist,image_subdirectory];
             else
                 cell_feat = 0;
@@ -445,7 +445,7 @@ for index = 1:length(label_subdirectories)
                 %             exit(exit_code);
             end
             
-            save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')
+            save(fullfile([curr_out_folder,filesep,'listOfFailed.mat']),'faillist','skipimage','segskips')
 %         catch
 %             faillist = [faillist,image_subdirectory];
             %save([curr_out_folder,filesep,'listOfFailed.mat'],'faillist','skipimage','segskips')

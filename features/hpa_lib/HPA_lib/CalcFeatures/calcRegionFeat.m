@@ -271,11 +271,11 @@ for i=1:length(readlist)
     end
     
     %DPS 28,07,2015 - Moved to outer for loop.
-    protfieldstruct.channel_path = readlist{i};
-    nucfieldstruct.channel_path = readlist_nuc{i};
-    tubfieldstruct.channel_path = readlist_tub{i};
-    erfieldstruct.channel_path = readlist_er{i};
-    maskfieldstruct.channel_path = readlist_mask{i};
+    protfieldstruct.channel_path = strrep(readlist{i},[filesep,filesep],filesep);
+    nucfieldstruct.channel_path = strrep(readlist_nuc{i},[filesep,filesep],filesep);
+    tubfieldstruct.channel_path = strrep(readlist_tub{i},[filesep,filesep],filesep);
+    erfieldstruct.channel_path = strrep(readlist_er{i},[filesep,filesep],filesep);
+    maskfieldstruct.channel_path = strrep(readlist_mask{i},[filesep,filesep],filesep);
     
     %if we want to do cyto. 
     if isstruct(naming_convention.segmentation_suffix)
@@ -481,7 +481,7 @@ for i=1:length(readlist)
 
         % saving results
         computation_time = toc(start_time);
-        save( writepath,'feats','names','slfnames','impath', 'computation_time');
+        save( fullfile(writepath),'feats','names','slfnames','impath', 'computation_time');
 
         fclose(fid2);
         delete(tmpfile2);

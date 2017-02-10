@@ -37,7 +37,7 @@ values = [] ;
 
 % Find objects in the image
 %
-imagelabeled = bwlabel(im2bw(imageproc)) ;
+imagelabeled = bwlabel(imbinarize(imageproc)) ;
 obj_number = max(imagelabeled(:)) ;
 
 % For each object ...

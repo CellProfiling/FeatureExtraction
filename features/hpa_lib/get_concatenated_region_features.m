@@ -114,7 +114,7 @@ for feature_set_index = 1:number_feature_sets
     specificity = ones(size(label_list));
     cellabels = ones(size(label_list));
     antibodyids = -ones(size(label_list));
-    save([metadata_path, 'hpalistsall.mat'], ...
+    save(fullfile([metadata_path, 'hpalistsall.mat']), ...
         'imagelist','antibodyids','classlabels','cellabels','specificity','staining');
     
     % Combine features into one file:
@@ -170,7 +170,7 @@ for feature_set_index = 1:number_feature_sets
     end
     
     % Load features:
-    data = load(data_filename);
+    data = load(fullfile(data_filename));
     features{1, feature_set_index} = data.allfeatures;
     feature_names = [feature_names, strcat(num2str(feature_set_index, 'feature_set%d:'), data.names)];
     %whos feature*

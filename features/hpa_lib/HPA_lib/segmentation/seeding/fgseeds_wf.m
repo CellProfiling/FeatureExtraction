@@ -54,7 +54,7 @@ idx = find(stats>maxarea | stats<minarea);
 idx2 = unique([bwl(:,1)' bwl(:,end)' bwl(1,:) bwl(end,:)]);
 idx2(idx2==0) = [];
 idx = unique([idx' idx2]);
-seeds = seeds - 127*uint8(ismember(bwl,idx));
+seeds_edge = seeds - 127*uint8(ismember(bwl,idx));
 
 %DPS 2015,10,22
 %This actually fills holes and makes nuclei more contiguous 
@@ -78,10 +78,16 @@ idx = find(stats>minarea/2);
 seeds = ismember(bwl,idx);
 seeds = 255*uint8(seeds);
 
-idx = find(stats>maxarea | stats<minarea);
-idx2 = unique([bwl(:,1)' bwl(:,end)' bwl(1,:) bwl(end,:)]);
-idx2(idx2==0) = [];
-idx = unique([idx' idx2]);
-seeds = seeds - 127*uint8(ismember(bwl,idx));
+%eliminate things on the edges 
+edgenums = unique(bwl.*(double(seeds_edge)==128));
+for ecell = 1:length(edgenums)
+    seeds = seeds-uint8((bwl==edgenums(ecell)).*128);
+end
+
+% idx = find(stats>maxarea | stats<minarea);
+% idx2 = unique([bwl(:,1)' bwl(:,end)' bwl(1,:) bwl(end,:)]);
+% idx2(idx2==0) = [];
+% idx = unique([idx' idx2]);
+% seeds = seeds - 127*uint8(ismember(bwl,idx));
 
 

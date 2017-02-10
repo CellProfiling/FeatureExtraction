@@ -65,7 +65,7 @@ values = [] ;
 %
 % Total area of the image that is edges
 %
-A = bwarea(edge(imageproc,'canny',[]))/bwarea(im2bw(imageproc)) ;
+A = bwarea(edge(imageproc,'canny',[]))/bwarea(imbinarize(imageproc)) ;
 
 %
 % Directional edge filters

@@ -59,7 +59,7 @@ end
 % $$$ end
 
 
-load([rootmeta,'hpalistsall.mat']);
+load(fullfile([rootmeta,'hpalistsall.mat']));
 
 tmpidx = strfind(imagelist,rootdir); %%
 tmpidx = cellfun(@isempty,tmpidx,'UniformOutput',false);
@@ -310,7 +310,7 @@ end
 if ~isempty(feature_set_hash)
   outfilename = [outfilename(1:end - 4), '_', feature_set_hash, outfilename(end - 3:end)];
 end
-save( outfilename,...
+save( fullfile(outfilename),...
     'allfeatures','classlabels','antibodyids','imagelist','specificity',...
     'classes','staining','cellabels','names','slfnames');
 

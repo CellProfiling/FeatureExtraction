@@ -191,7 +191,7 @@ if sum(tmp_indexer==0)~=length(tmp_indexer)
     %ensure that we always have the same number of cells
     %See calcRegionFeat for where we add this field to the struct
     if isfield(maskfieldstruct,'channel_path_nuc')
-        nucimg = imread(maskfieldstruct.channel_path_nuc);
+        nucimg = imread(fullfile(maskfieldstruct.channel_path_nuc));
         bwl = bwl.*double(~nucimg);
         clear nucimg
     end

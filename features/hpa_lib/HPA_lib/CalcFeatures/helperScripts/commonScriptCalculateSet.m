@@ -214,7 +214,7 @@ switch fsetnames{zed}
 
     normEuN = bweuler(protstruct.channel_fg>0,8)/length(nucobjs);
     normEuN_mthr = bweuler(protstruct.channel_mfg>0,8)/length(nucobjs);
-
+    
     commonScriptObject;
 
   case 'objx2'
@@ -301,3 +301,4 @@ switch fsetnames{zed}
   otherwise
     error('improper feature set specified');
 end
+
