@@ -34,7 +34,7 @@ Data=Get_Cell_stack(handles,n,Vs) ; Data_out=[];
 for ii=1:size(Data,2)
     temp=Data(ii).cdata;
     bwareaopen_value=80;
-    matrix_bw=im2bw(temp);
+    matrix_bw=imbinarize(temp);
     L=bwlabel_max( matrix_bw,4);
     data =  regionprops(L,  'Orientation' );
     temp=   flipdim( imrotate( temp ,-data.Orientation),1);

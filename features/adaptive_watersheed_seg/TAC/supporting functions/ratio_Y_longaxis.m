@@ -43,7 +43,7 @@ try
     matrix =zeros(size(matrix_temp,1)+4,size(matrix_temp,2)+4);
     matrix (2:end-3,2:end-3)=matrix_temp;
     temp_Threshold2=matrix./matrix;
-    temp_Threshold2=im2bw(temp_Threshold2);
+    temp_Threshold2=imbinarize(temp_Threshold2);
     
     temp_Threshold2=imfill(temp_Threshold2,'holes');
     temp_Threshold3=bwlabel_max(temp_Threshold2,4);

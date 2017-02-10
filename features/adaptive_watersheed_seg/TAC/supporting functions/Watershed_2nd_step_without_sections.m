@@ -68,7 +68,7 @@ for iii=1:size(XY_data,1)
     
     
     % %  4. segmentation method:
-    %         level = graythresh(ROI);      matrix_bw=im2bw(ROI,level);   matrix_bw=imfill(matrix_bw,'holes');
+    %         level = graythresh(ROI);      matrix_bw=imbinarize(ROI,level);   matrix_bw=imfill(matrix_bw,'holes');
     
     try
         ROI  =watershed_split(ROI)  ;

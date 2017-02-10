@@ -81,7 +81,7 @@ try
             ROI = uint8(256*(ROI ./(max(max(ROI ))))) ;    %norm matrix
             
             %  4. segmentation method:
-            level = graythresh(ROI);      ROI2=im2bw(ROI,level);
+            level = graythresh(ROI);      ROI2=imbinarize(ROI,level);
             
             %Critiria: 0. minimum size of segment larger than critical area 1. must
             %be only one segment. 2. Circularity higher than 0.45

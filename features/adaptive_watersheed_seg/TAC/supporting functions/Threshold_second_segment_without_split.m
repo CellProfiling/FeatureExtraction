@@ -150,7 +150,7 @@ for iii=1:size(XY_data,1)
     %         pause
     %
     
-    level = graythresh(ROI);      ROI2=im2bw(ROI,level);
+    level = graythresh(ROI);      ROI2=imbinarize(ROI,level);
     
     
     

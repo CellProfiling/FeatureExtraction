@@ -64,7 +64,7 @@ for  kkk=1:size(Data_in,2)
             
             
             temp_Threshold2=matrix./matrix;
-            temp_Threshold2=im2bw(temp_Threshold2);
+            temp_Threshold2=imbinarize(temp_Threshold2);
             
             
             

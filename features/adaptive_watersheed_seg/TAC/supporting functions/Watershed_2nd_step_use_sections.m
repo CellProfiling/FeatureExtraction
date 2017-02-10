@@ -83,7 +83,7 @@ try
             ROI = uint8(256*(ROI ./(max(max(ROI ))))) ;    %norm matrix
             
             %  4. segmentation method:
-            level = graythresh(ROI);      matrix_bw=im2bw(ROI,level);   matrix_bw=imfill(matrix_bw,'holes');
+            level = graythresh(ROI);      matrix_bw=imbinarize(ROI,level);   matrix_bw=imfill(matrix_bw,'holes');
             ROI2=watershed_split(matrix_bw)  ;
             
             %Critiria: 0. minimum size of segment larger than critical area 1. must

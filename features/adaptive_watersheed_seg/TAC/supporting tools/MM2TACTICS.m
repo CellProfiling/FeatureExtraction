@@ -1171,7 +1171,7 @@ end
 
 
 temp= uint8(255*(temp ./(max(max(temp ))))) ;    %norm matrix
-level = graythresh(temp);      temp=im2bw(temp,level);
+level = graythresh(temp);      temp=imbinarize(temp,level);
 
 
 
