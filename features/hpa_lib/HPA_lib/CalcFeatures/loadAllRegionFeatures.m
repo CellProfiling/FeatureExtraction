@@ -1,4 +1,4 @@
-function [features_filename, feature_computation_time] = loadAllRegionFeatures(readdir,rootmeta,rootdir,outfilename, featsets, featsuffix)
+function [features_filename, feature_computation_time] = loadAllRegionFeatures(readdir,rootmeta,rootdir,outfilename, featsets, featsuffix,base_naming_convention)
 %function [features_filename] = loadAllRegionFeatures(readdir,rootmeta,rootdir,outfilename, featsets, old_feature_set_behavior)
 %%function [features_filename] = loadAllRegionFeatures(readdir,rootmeta,rootdir,outfilename, channel_as_protein, featsets, old_feature_set_behavior)
 
@@ -61,11 +61,11 @@ end
 
 load(fullfile([rootmeta,'hpalistsall.mat']));
 
-tmpidx = strfind(imagelist,rootdir); %%
+tmpidx = strfind(base_naming_convention.imagelist,rootdir); %%
 tmpidx = cellfun(@isempty,tmpidx,'UniformOutput',false);
 tmpidx = cell2mat(tmpidx);
 tmpidx = ~tmpidx;
-imagelist = imagelist(tmpidx);
+imagelist = base_naming_convention.imagelist(tmpidx);
 antibodyids = antibodyids(tmpidx);
 classlabels = classlabels(tmpidx);
 cellabels = cellabels(tmpidx);
@@ -157,21 +157,25 @@ stcount = [1 encount(1:end-1)+1];
 tmplist = cell(length(imagelist),1);
 for i = 1:length(imagelist)
     [origfolder,tmplist{i},ext] = fileparts(imagelist{i});
+    %D. Sullivan 06,03,2017 - made more flexible for different types of
+    %extensions
+    tmplist{i} = strsplit(tmplist{i},strtok(base_naming_convention.segmentation_suffix,'.'));
+    tmplist{i} = tmplist{i}{1};
     %need to remove the 'green' (or other channel) suffix from file name
-    delim = '_';
-    nameparts = strsplit(tmplist{i},delim);
-    if length(nameparts)==1
-        warning('Empty file base list. trying -- instead of _ ')
-        delim = '--';
-        nameparts = strsplit(tmplist{i},delim);
-        tmplist{i} = strjoin(nameparts(1:end-1),delim);
-        
-        if ~strcmpi(featsuffix(1:2),'--')            
-            tmplist{i} = [tmplist{i},delim];
-        end
-    else
-        tmplist{i} = [strjoin(nameparts(1:end-1),delim)];
-    end    
+%     delim = '_';
+%     nameparts = strsplit(tmplist{i},delim);
+%     if length(nameparts)==1
+%         warning('Empty file base list. trying -- instead of _ ')
+%         delim = '--';
+%         nameparts = strsplit(tmplist{i},delim);
+%         tmplist{i} = strjoin(nameparts(1:end-1),delim);
+%         
+%         if ~strcmpi(featsuffix(1:2),'--')            
+%             tmplist{i} = [tmplist{i},delim];
+%         end
+%     else
+%         tmplist{i} = [strjoin(nameparts(1:end-1),delim)];
+%     end    
     
     
     

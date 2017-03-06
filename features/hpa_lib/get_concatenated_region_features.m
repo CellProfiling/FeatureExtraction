@@ -65,6 +65,8 @@ else
 end
 label_list = repmat({label_name}, length(imagelist), 1);
 
+%D. Sullivan 6,03,2017 - added flexibility for suffix
+base_naming_convention.imagelist = imagelist;
 
 %If we have below a certain resolution, it doesn't make sense for us to
 %compute the texture features and all that. 
@@ -152,7 +154,7 @@ for feature_set_index = 1:number_feature_sets
     %%
     
     data_filename = [feature_set_subdirectory, '/features/regionfeatures_all.mat'];
-    featrootdir = [feature_set_subdirectory, '/features/region/'];
+    featrootdir = fullfile([feature_set_subdirectory, '/features/region/']);
     if isempty(ls(featrootdir))
         thereisaproblem=1
     end
@@ -160,7 +162,7 @@ for feature_set_index = 1:number_feature_sets
     [data_filename, computation_time] = ...
         loadAllRegionFeatures(...
         featrootdir, metadata_path, image_path, ...
-        data_filename, feature_set_feature_names{feature_set_index},featsuffix);
+        data_filename, feature_set_feature_names{feature_set_index},featsuffix,base_naming_convention);
     %     [data_filename, computation_time] = ...
     %         loadAllRegionFeatures(...
     %           [feature_set_subdirectory, '/features/region/'], metadata_path, image_path, ...

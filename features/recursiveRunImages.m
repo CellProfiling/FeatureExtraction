@@ -33,7 +33,7 @@ end
 
 inpath = submitstruct.indir;
 
-extensions_default = {'blue','green','red','yellow'}%{'C01','C00','C03','C02'};
+extensions_default = {'blue','green','red','yellow'};%{'C01','C00','C03','C02'};
 %     extension_dapi  = extensions{1};%e.g. 'blue.tif'
 %     extension_ab    = extensions{2};%e.g. 'green.tif'
 %     extension_mtub  = extensions{3};%e.g. 'red.tif'
