@@ -462,17 +462,11 @@ for i=1:length(readlist)
               end
             end
   
-%             if strcmpi(protstruct.channel_path,'/Users/devinsullivan/Documents/golgi/images/Golgi_partly_overlap//image--U11--V00--X00--Y01--C00.tif')
-%                 holdup = 1
-%             end
-
-%            try
+            %enter feature calculation script 
             commonScriptCalculateSet
-%            catch 
-%                waitup = 1
-%            end
+            
 
-
+            %concatenate all features 
             allfeats = [allfeats; feats];
         end
 

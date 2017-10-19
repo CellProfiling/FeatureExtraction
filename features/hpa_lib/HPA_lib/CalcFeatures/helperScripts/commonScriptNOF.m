@@ -15,4 +15,4 @@ end
 names = {'non_object_fluorescence','non_large_object_fluorescence',...
          'non_object_fluorescence_mthr','non_large_object_fluorescence_mthr'};
          
-slfnames = {'7.79',''};
+slfnames = {'SLF7.79','SLF7.79.2','SLF7.79.3','SLF7.79.4'};

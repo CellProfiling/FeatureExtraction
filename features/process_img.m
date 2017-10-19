@@ -344,7 +344,7 @@ for index = 1:length(label_subdirectories)
             %             return
             %         end
             
-            [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed,segskips] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
+            [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed,segskips,slf_names] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
             %DPS 20150924 - added support for cell array within our for loop of
             %subfolders (fields)
             %         regions_results     =   cell2mat(label_features);
@@ -420,7 +420,8 @@ for index = 1:length(label_subdirectories)
                 %DPS 30,07,2015 - added feature name save and concatenation of
                 %position stats to feature names
                 feature_names = [pos_stats_names feature_names];
-                save(fullfile([curr_out_folder,filesep,'feature_names.mat']),'feature_names');
+                slf_names = [pos_stats_names, slf_names];
+                save(fullfile([curr_out_folder,filesep,'feature_names.mat']),'feature_names','slf_names');
                 csvwrite(fullfile([curr_out_folder,filesep,label_subdirectories{index},'_features.csv']), cell_feat);
                 
             elseif sum(skipimage{:}>0)==length(dir_png) || sum(segskips>=1)==length(dir_png)
