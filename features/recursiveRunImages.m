@@ -33,7 +33,8 @@ end
 
 inpath = submitstruct.indir;
 
-extensions_default = {'blue','green','red','yellow'};%{'C01','C00','C03','C02'};
+extensions_default = {'blue','green','red','yellow'};
+%extensions_default = {'C01','C00','C03','C02'};
 %     extension_dapi  = extensions{1};%e.g. 'blue.tif'
 %     extension_ab    = extensions{2};%e.g. 'green.tif'
 %     extension_mtub  = extensions{3};%e.g. 'red.tif'
@@ -45,9 +46,10 @@ submitstruct = ml_initparam(submitstruct,struct('indir',pwd,'outdir',pwd,'resolu
 listdirs = ml_ls(inpath);
 
 %first check if any of the files found are the images we are looking for
-imgslist = listdirs(~cellfun(@isempty,strfind(listdirs,imgtype)));
-
+imgslist = listdirs(~cellfun(@isempty,strfind(listdirs,imgtype)))
+numimgs = length(imgslist)
 imgslist = imgslist(~cellfun(@isempty,strfind(imgslist,submitstruct.extensions{2})));
+numimgs_ext = length(imgslist)
 
 %for all the images we have in this level
 for i = 1:length(imgslist)

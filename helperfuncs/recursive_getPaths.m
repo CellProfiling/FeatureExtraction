@@ -22,7 +22,6 @@ function [pathlist] = recursive_getPaths(inpath,featfilename,recursiveind)
 %D. Sullivan 03,04,2016 - added "badpath" output for experiments that have
 %a bad feature matrix size
 
-
 badpaths = {};
 badpathstmp2 = {};
 if nargin<2
@@ -79,7 +78,7 @@ numexperiments = length(listdirs);
 newrecursiveind = recursiveind+1;
 for j = 1:numexperiments
     currpath = [inpath,filesep,listdirs{j}];
-   
+ 
     [currpathlist] = recursive_getPaths(currpath,featfilename,newrecursiveind);
     
     pathlist = [pathlist,currpathlist];

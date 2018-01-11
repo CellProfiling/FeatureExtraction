@@ -64,47 +64,15 @@ end
 for i = 1:length(nucfiles)
     %load images
     %Nuc
-    if any(strcmpi(namingconvention.blank_channels,'nuclear'))
-        error('Blank nuclear channel requested. The current code does not support blank nuclear channels');
-        skipimage(i,1) = NaN;
-        nucim = zeros(size(nucim));
-    else
-        nucim = imread(nucfiles{i});
-    end
-    %check nuc might be rgb
+    nucim = readmyimg(nucfiles{i},'nuclear',namingconvention);
+    protim = readmyimg(protfiles{i},'protein',namingconvention);
+    mtim = readmyimg(mtfiles{i},'tubulin',namingconvention);
+    erim = readmyimg(erfiles{i},'er',namingconvention);
+
+    %check if rgb
     nucim = removergb(nucim);
-
-    
-    %Prot
-    if any(strcmpi(namingconvention.blank_channels,'protein'))
-        skipimage(i,2) = NaN;
-        protim = nan(size(nucim));
-    else
-        protim = imread(protfiles{i});
-    end
-    
-    %check prot might be rgb
     protim = removergb(protim);
-
-    
-    if any(strcmpi(namingconvention.blank_channels,'tubulin'))
-        skipimage(i,3) = NaN;
-        mtim = nan(size(nucim));
-    else
-        mtim = imread(mtfiles{i});
-    end
-    
-    %check mt might be rgb
     mtim = removergb(mtim);
-    
-    if any(strcmpi(namingconvention.blank_channels,'er'))
-        skipimage(i,4) = NaN;
-        erim = nan(size(nucim));
-    else
-        erim = imread(erfiles{i});
-    end
-    
-    %check er might be rgb
     erim = removergb(erim);
    
    %Check if any are totally empty
@@ -204,4 +172,35 @@ end
 %     newimgdir = imagedir;
 % end
 
+end
+
+function myimg = readmyimg(imgpath,channelname,namingconvention,imgsize)
+  
+    [~,filepath,ext] = fileparts(imgpath);
+    if nargin<2 || isempty(channelname)
+       channelname = 'nothing';
+    end
+    if nargin<3 || isempty(imgsize)
+      imgsize = [2048, 2048];
+    end
+
+    if any(strcmpi(namingconvention.blank_channels,channelname))
+	if strcmp(channelname,'nuclear')
+          error('Blank nuclear channel requested. The current code does not support blank nuclear channels');
+	end
+        skipimage(i,1) = NaN;
+        myim = nan(imgsize);
+    else
+	myimg = ml_readimage(filepath);
+	%if strcmp(ext,'.gz')
+          %gunzip(imgpath);
+          %myimg = imread(filepath);%don't include .gz
+          %delete(filepath);
+	%else
+	  %myimg = imread(imgpath);
+	%end
+	
+    end
+
+end
 

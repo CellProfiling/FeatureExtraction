@@ -364,8 +364,8 @@ for index = 1:length(label_subdirectories)
             
             
             
-            pngsuff = strrep(base_naming_convention.protein_channel,infiletype,'png');
-            nucpngsuff = strrep(base_naming_convention.protein_channel,['.',infiletype],'_nuc.png');
+            pngsuff = strrep(base_naming_convention.protein_channel,infiletype,'png.gz');
+            %nucpngsuff = strrep(base_naming_convention.protein_channel,['.',infiletype],'_nuc.png.gz');
             dir_png         = dir(fullfile([storage_subdirectory,filesep,'*',pngsuff]));
             
             %%%DPS 2015/07/09 - I don't understand how this ever worked without a for loop unless they were running on one image at a time. I am changing now
@@ -386,9 +386,13 @@ for index = 1:length(label_subdirectories)
             currstart = 1;
             for i = 1:length(dir_png)
                 %bw_seg          = imread([storage_subdirectory,'/',char(dir_png(1).name)]);
-                bw_seg = imread(fullfile([storage_subdirectory,'/',char(dir_png(i).name)]));
+		currpath = [storage_subdirectory,filesep,char(dir_png(i).name)];
+		gunzip(currpath);
+		currpath = currpath(1:end-3);%remove the '.gz' from the path
+                bw_seg = imread(fullfile(currpath));
+		delete(currpath);
                 if sum(bw_seg(:))==0 || length(unique(bw_seg))==1
-                    warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
+                    warning(['Image ', currpath,' seems to be blank!']);
                     continue
                 end
                 cell_seg    = regionprops(bwlabel(bw_seg,4),'Centroid','BoundingBox','Area');
@@ -409,7 +413,7 @@ for index = 1:length(label_subdirectories)
                     %size(position_stats)
                     
                 else
-                    warning(['Image ', storage_subdirectory,'/',char(dir_png(i).name),' seems to be blank!'])
+                    warning(['Image ', currpath,' seems to be blank!'])
                 end
             end
             
@@ -498,8 +502,10 @@ for index = 1:length(label_subdirectories)
         alpha_ch(plasmaMem)                         = 4;
         
         %         imwrite(double(merge_mask),[curr_out_folder,'/segmentation_',label_subdirectories{index},'.png'],'Alpha',alpha_ch/255);
-        imwrite(cell_seed.*uint16(alpha_ch<4),[curr_out_folder,filesep,label_subdirectories{index},'_segmentation.png'],'Alpha',alpha_ch./65535);
-        
+        outpath = [curr_out_folder,filesep,label_subdirectories{index},'_segmentation.png'];
+	imwrite(cell_seed.*uint16(alpha_ch<4),outpath,'Alpha',alpha_ch./65535);
+        gzip(outpath)
+	delete(outpath)
         % merge the output from the image set with other ABs image set data
         % previously analysed (if multiple ABs are included or if analysis is
         % run at the plate level)
