@@ -1,4 +1,4 @@
-function [features, feature_names, feature_computation_time, cell_regions , nuc_regions, skipimgs] = get_concatenated_region_features(...
+function [features, feature_names, feature_computation_time, cell_regions , nuc_regions, skipimgs, slf_names] = get_concatenated_region_features(...
     image_path, storage_path, base_naming_convention, label_name, optimize, use_segmentation_suffix_in_list,resolution)
 %
 %Written by: Unknown
@@ -81,6 +81,7 @@ else
 end
 features = cell(1, 0);
 feature_names = cell(1, 0);
+slf_names = cell(1, 0);
 
 number_feature_sets = length(feature_set_naming_conventions)
 
@@ -175,6 +176,7 @@ for feature_set_index = 1:number_feature_sets
     data = load(fullfile(data_filename));
     features{1, feature_set_index} = data.allfeatures;
     feature_names = [feature_names, strcat(num2str(feature_set_index, 'feature_set%d:'), data.names)];
+    slf_names = [slf_names, strcat(num2str(feature_set_index, 'feature_set%d:'),data.slfnames)];
     %whos feature*
     
 end

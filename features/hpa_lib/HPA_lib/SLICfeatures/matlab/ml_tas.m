@@ -38,6 +38,9 @@ function [names, values, slfnames] = ml_tas(img,original_version)
 % For additional information visit http://murphylab.web.cmu.edu or
 % send email to murphy@cmu.edu
 
+%EDITED BY:
+%2017 08,22     D. Sullivan - added actual slf names.
+
 if nargin < 2,
     original_version = 1;
 end
@@ -67,8 +70,11 @@ values=[values calculatetas(bimg)];
 
 names = {'tas_0', 'tas_1', 'tas_2', 'tas_3', 'tas_4', 'tas_5', 'tas_6', 'tas_7', 'tas_8', ...
     'ntas_0', 'ntas_1', 'ntas_2', 'ntas_3', 'ntas_4', 'ntas_5', 'ntas_6', 'ntas_7', 'ntas_8' };
-slfnames = {'tas_0', 'tas_1', 'tas_2', 'tas_3', 'tas_4', 'tas_5', 'tas_6', 'tas_7', 'tas_8', ...
-    'ntas_0', 'ntas_1', 'ntas_2', 'ntas_3', 'ntas_4', 'ntas_5', 'ntas_6', 'ntas_7', 'ntas_8' };
+%D. Sullivan 2017 08,22 - modifying to reflect actual slf names. 
+%slfnames = {'tas_0', 'tas_1', 'tas_2', 'tas_3', 'tas_4', 'tas_5', 'tas_6', 'tas_7', 'tas_8', ...
+%    'ntas_0', 'ntas_1', 'ntas_2', 'ntas_3', 'ntas_4', 'ntas_5', 'ntas_6', 'ntas_7', 'ntas_8' };
+slfnames = {'SLF31.1', 'SLF31.2', 'SLF31.3', 'SLF31.4', 'SLF31.5', 'SLF31.6', 'SLF31.7', 'SLF31.8', 'SLF31.9', ...
+    'SLF31.10', 'SLF31.11', 'SLF31.12', 'SLF31.13', 'SLF31.14', 'SLF31.15', 'SLF31.16', 'SLF31.17', 'SLF31.18' };
 end
 
 function [values] = calculatetas(bimg)

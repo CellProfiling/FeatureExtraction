@@ -1,4 +1,4 @@
-function [ofeat,oname] = features_overlap( prot, procprot, procref, refname)
+function [ofeat,oname,slfname] = features_overlap( prot, procprot, procref, refname)
 % Takes uint8 images, already thresholded but with intensity
 
 if ~exist('refname','var')
@@ -20,13 +20,13 @@ areaOverlap = sum(overlap(:));
 if area_prot==0
     warning('No objects in filtered protein channel. intersect_area_to_prot_area and prot_nuc_pixel_distance_to_prot_area will be NaN.')
 end
-
+%slf_34.165
 intersect_area_to_prot_area = areaOverlap / area_prot;
-
+%slf_34.166
 intersect_area_to_ref_area = areaOverlap / area_ref;
-
+%slf_34.167
 intersect_inten_to_prot_inten = sum(prot(obj_ref)) / sum(prot(:));
-
+%slf_34.173
 dist_ref = bwdist(obj_ref);
 prot_nuc_pixel_distance_to_prot_area = sum(dist_ref(obj_prot))/area_prot;
 
@@ -36,12 +36,14 @@ ofeat = [intersect_area_to_prot_area intersect_area_to_ref_area ...
     prot_nuc_pixel_distance_to_prot_area];
 
 oname = {'Fraction of protein object area that overlaps the reference area', ...
-         'Fraction of referece area that overlaps the protein area', ...
-         'Fraction of protein intensity that overlaps the reference area', ...
-         'Avg distace of protein containing pixel to nearest pixel of reference'};
+    'Fraction of referece area that overlaps the protein area', ...
+    'Fraction of protein intensity that overlaps the reference area', ...
+    'Avg distace of protein containing pixel to nearest pixel of reference'};
+slfname = {'slf_34.165','slf_34.166','slf_34.167','slf_34.173'};
 
 for i=1:length(oname)
     oname{i} = [refname ':' oname{i}];
+    slfname{i} = [refname ':' slfname{i}];
 end
 
 
