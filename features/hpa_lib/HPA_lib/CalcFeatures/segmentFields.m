@@ -227,7 +227,7 @@ for i=1:length(readlist)
 %     fid = fopen(tmpfile,'w');
 
     disp(readlist_nuc{i})
-    nucim = imread(strtrim(readlist_nuc{i}));
+    nucim = ml_readimage(strtrim(readlist_nuc{i}));
     
     %check nuc might be rgb
     nucim = removergb(nucim);
@@ -249,7 +249,7 @@ for i=1:length(readlist)
     %DPS 25/11/2015 - Adding 'seg_channel' to naming_convention struct to
     %specify what channels we want to use 
     if any(strcmpi(naming_convention.seg_channel,'er')) && (~isempty(naming_convention.er_channel) && ~any(strcmpi(naming_convention.blank_channels,'er')))
-        erim = imread(strtrim(readlist_er{i}));
+        erim = ml_readimage(strtrim(readlist_er{i}));
     else
         %Use .*0 here to ensure we match the expected data type (class)
 %         erim = zeros(size(nucim));
@@ -263,7 +263,7 @@ for i=1:length(readlist)
     %Then check MT
 %     if ~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt'))
     if any(strcmpi(naming_convention.seg_channel,'mt')) && (~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt')))
-        mtim = imread(strtrim(readlist_tub{i}));
+        mtim = ml_readimage(strtrim(readlist_tub{i}));
     else
         %Use .*0 here to ensure we match the expected data type (class)
 %         mtim = zeros(size(nucim));

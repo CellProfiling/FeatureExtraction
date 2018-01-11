@@ -387,10 +387,7 @@ for index = 1:length(label_subdirectories)
             for i = 1:length(dir_png)
                 %bw_seg          = imread([storage_subdirectory,'/',char(dir_png(1).name)]);
 		currpath = [storage_subdirectory,filesep,char(dir_png(i).name)];
-		gunzip(currpath);
-		currpath = currpath(1:end-3);%remove the '.gz' from the path
-                bw_seg = imread(fullfile(currpath));
-		delete(currpath);
+                bw_seg = ml_readimage(fullfile(currpath));
                 if sum(bw_seg(:))==0 || length(unique(bw_seg))==1
                     warning(['Image ', currpath,' seems to be blank!']);
                     continue
