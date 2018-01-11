@@ -78,8 +78,6 @@ if ~isfield(naming_convention, 'segmentation_suffix')
   naming_convention.segmentation_suffix = naming_convention.protein_channel; 
 end
 
-filetype = 'tif';
-
 %DPS 05,08,2015 - adding support for naming_conventions to begin with a "-"
 dashlocs = strfind(naming_convention.protein_channel,'-')
 if any(dashlocs==1)

@@ -43,9 +43,9 @@ nucmasksuffix = base_naming_convention.protein_channel;
 % cytomasksuffix = strrep(nucmasksuffix,'.tif','_cyto.png');
 
 if strfind(nucmasksuffix,'.tif');
-    nucmasksuffix = strrep(nucmasksuffix,'.tif','_nuc.png');
+    nucmasksuffix = strrep(nucmasksuffix,'.tif','_nuc.png.gz');
 elseif strfind(nucmasksuffix,'.TIF');
-    nucmasksuffix = strrep(nucmasksuffix,'.TIF','_nuc.png');
+    nucmasksuffix = strrep(nucmasksuffix,'.TIF','_nuc.png.gz');
 else 
     warning('This image does not appear to be a tif (or TIF). Trying to separate file type. Assuming fileparts will give correct answer.')
     [~,~,nucext] = fileparts(nucmasksuffix);

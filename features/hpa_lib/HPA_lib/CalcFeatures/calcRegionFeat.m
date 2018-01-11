@@ -192,7 +192,7 @@ end
 %mout = findreplacestring( mout, '/', '_');
 mout = strrep(mout,'/', '_');
 %mout = findreplacestring( mout, '.tif', '.png');
-mout = strrep(mout,filetype, 'png');
+mout = strrep(mout,filetype, 'png.gz');
 %mout = findreplacestring( mout, rootdir_, ['./data/masks/']);
 maskdir_ = [maskdir '/']
 % mout
@@ -279,7 +279,7 @@ for i=1:length(readlist)
     
     %if we want to do cyto. 
     if isstruct(naming_convention.segmentation_suffix)
-        maskfieldstruct.channel_path_nuc = strrep(readlist_mask{i},'.png','_nuc.png');
+        maskfieldstruct.channel_path_nuc = strrep(readlist_mask{i},'.png.gz','_nuc.png.gz');
         
     end
     

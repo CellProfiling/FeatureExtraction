@@ -183,11 +183,11 @@ writedir_ = [writedir '/']
 mout = strrep(mout,readdir,writedir);
 %mout = findreplacestring( mout, '.tif','.png');
 
-nucwritelist = strrep(mout,['.',filetype],'_nuc.png');
-cytowritelist = strrep(mout,['.',filetype],'_cyto.png');
+nucwritelist = strrep(mout,['.',filetype],'_nuc.png.gz');
+cytowritelist = strrep(mout,['.',filetype],'_cyto.png.gz');
 
 
-mout = strrep(mout,filetype,'png');
+mout = strrep(mout,filetype,'png.gz');
 
 writelist = mout;%listmatlabformat( mout);
 writelist'
@@ -322,10 +322,15 @@ for i=1:length(readlist)
     
 %     cytoseg = (regions>0)-nucseg;
 %     imwrite(cytoseg,cytowritelist{i});
-    imwrite( regions, writelist{i});
+    currwrite = strsplit(writelist{i},'.gz');
+    imwrite( regions, currwrite{1});
+    unix(['gzip ' currwrite{1}]);
+
     
     %2015/10/19 DPS - save the nuclear segmentations too! 
-    imwrite( nucseg, nucwritelist{i});
+    currwrite = strsplit(nucwritelist{i},'.gz');
+    imwrite( nucseg, currwrite{1});
+    unix(['gzip ' currwrite{1}]);
     
 %     fclose(fid);
 %     delete(tmpfile);

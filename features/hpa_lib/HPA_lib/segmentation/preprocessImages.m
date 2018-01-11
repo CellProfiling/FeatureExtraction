@@ -176,11 +176,11 @@ end
 
 function myimg = readmyimg(imgpath,channelname,namingconvention,imgsize)
   
-    [~,filepath,ext] = fileparts(imgpath);
+    %[~,filepath,ext] = fileparts(imgpath);
     if nargin<2 || isempty(channelname)
        channelname = 'nothing';
     end
-    if nargin<3 || isempty(imgsize)
+    if nargin<4 || isempty(imgsize)
       imgsize = [2048, 2048];
     end
 
@@ -191,7 +191,7 @@ function myimg = readmyimg(imgpath,channelname,namingconvention,imgsize)
         skipimage(i,1) = NaN;
         myim = nan(imgsize);
     else
-	myimg = ml_readimage(filepath);
+	myimg = ml_readimage(imgpath);
 	%if strcmp(ext,'.gz')
           %gunzip(imgpath);
           %myimg = imread(filepath);%don't include .gz

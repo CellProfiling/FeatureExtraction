@@ -71,13 +71,13 @@ quant_thresh = 0.999;
 %be a mask image and it will give the size for other blank images.
 % if isempty(maskfieldstruct.channel)
 if isempty(maskfieldstruct.channel) && ~maskfieldstruct.isempty
-    maskfieldstruct.channel = imread(maskfieldstruct.channel_path);
+    maskfieldstruct.channel = ml_readimage(maskfieldstruct.channel_path);
 end
 
 % if isempty(protfieldstruct.channel) 
 if isempty(protfieldstruct.channel) && ~protfieldstruct.isempty
     disp(['Protein field structure path is: ',protfieldstruct.channel_path]);
-    protfieldstruct.channel = removergb(imread(protfieldstruct.channel_path));
+    protfieldstruct.channel = removergb(ml_readimage(protfieldstruct.channel_path));
 elseif protfieldstruct.isempty
     warning('You are using a blank "protein" channel! Are you sure you want to do this?')
     protfieldstruct.channel = zeros(size(maskfieldstruct.channel));
@@ -85,21 +85,21 @@ end
 
 % if isempty(nucfieldstruct.channel)
 if isempty(nucfieldstruct.channel) && ~nucfieldstruct.isempty
-    nucfieldstruct.channel = removergb(imread(nucfieldstruct.channel_path));
+    nucfieldstruct.channel = removergb(ml_readimage(nucfieldstruct.channel_path));
 elseif nucfieldstruct.isempty
     nucfieldstruct.channel = zeros(size(maskfieldstruct.channel));
 end
 
 % if isempty(tubfieldstruct.channel)
 if isempty(tubfieldstruct.channel) && ~tubfieldstruct.isempty
-    tubfieldstruct.channel = removergb(imread(tubfieldstruct.channel_path));
+    tubfieldstruct.channel = removergb(ml_readimage(tubfieldstruct.channel_path));
 elseif tubfieldstruct.isempty
     tubfieldstruct.channel = zeros(size(maskfieldstruct.channel));
 end
 
 % if isempty(erfieldstruct.channel)
 if isempty(erfieldstruct.channel) && ~erfieldstruct.isempty
-    erfieldstruct.channel = removergb(imread(erfieldstruct.channel_path));
+    erfieldstruct.channel = removergb(ml_readimage(erfieldstruct.channel_path));
 elseif erfieldstruct.isempty
     erfieldstruct.channel = zeros(size(maskfieldstruct.channel));
 end
@@ -191,7 +191,7 @@ if sum(tmp_indexer==0)~=length(tmp_indexer)
     %ensure that we always have the same number of cells
     %See calcRegionFeat for where we add this field to the struct
     if isfield(maskfieldstruct,'channel_path_nuc')
-        nucimg = imread(fullfile(maskfieldstruct.channel_path_nuc));
+        nucimg = ml_readimage(fullfile(maskfieldstruct.channel_path_nuc));
         bwl = bwl.*double(~nucimg);
         clear nucimg
     end
