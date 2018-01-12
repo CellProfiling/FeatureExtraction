@@ -49,7 +49,10 @@ elseif strfind(nucmasksuffix,'.TIF');
 else 
     warning('This image does not appear to be a tif (or TIF). Trying to separate file type. Assuming fileparts will give correct answer.')
     [~,~,nucext] = fileparts(nucmasksuffix);
-    nucmasksuffix = strrep(nucmasksuffix,nucext,'_nuc.png');
+    nucmasksuffix = strrep(nucmasksuffix,nucext,'_nuc.png.gz');
+end
+if strcmp(base_naming_convention.protein_channel(end-2:end),'.gz')
+    nucmasksuffix = nucmasksuffix(1:end-3);%if it already had a gz, remove the extra one
 end
     
 feature_set_naming_conventions{8}.segmentation_suffix = nucmasksuffix;
