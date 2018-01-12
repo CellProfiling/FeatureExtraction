@@ -361,6 +361,9 @@ for index = 1:length(label_subdirectories)
                 [~,~,nucext] = fileparts(base_naming_convention.nuclear_channel);
                 infiletype = nucext(2:end);
             end
+            if strcmp(base_naming_convention.nuclear_channel(end-2:end),'.gz')
+                infiletype = [infiletype,'.gz'];
+            end
             
             
             
