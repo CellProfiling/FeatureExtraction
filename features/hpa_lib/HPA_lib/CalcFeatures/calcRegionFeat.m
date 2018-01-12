@@ -133,14 +133,21 @@ if ~exist('optimize','var')
 end
 
 
-if findstr(naming_convention.nuclear_channel,'.tif');
-    filetype = 'tif';
-elseif findstr(naming_convention.nuclear_channel,'.TIF');
+if strfind(naming_convention.nuclear_channel,'.tif')
+        filetype = 'tif';
+elseif findstr(naming_convention.nuclear_channel,'.TIF')
     filetype = 'TIF';
-else 
+elseif strfind(naming_convention.nuclear_channel,'.gz')
+    warning('This image does not appear to be a tif (or TIF). Trying to separate file type. Assuming fileparts will give correct answer.')
+    [~,nucext1,nucext] = fileparts(naming_convention.nuclear_channel);
+    filetype = nucext1(2:end);
+else
     warning('This image does not appear to be a tif (or TIF). Trying to separate file type. Assuming fileparts will give correct answer.')
     [~,~,nucext] = fileparts(naming_convention.nuclear_channel);
     filetype = nucext(2:end);
+end
+if strfind(naming_convention.nuclear_channel,'.gz')
+    filetype = [filetype,'.gz'];
 end
 % filetype = 'tif';
 
@@ -293,9 +300,13 @@ for i=1:length(readlist)
     %DPS 28,07,2015 - switched to function to document what's happening
     %I hate invisible variable passing!
     %maskAllChannels
+    try
     [protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct,maskfieldstruct]...
         = maskAllChannels(protfieldstruct,nucfieldstruct,...
         tubfieldstruct,erfieldstruct,maskfieldstruct);
+    catch
+        huh = 1;
+    end
 %     
 %     [protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct]...
 %         = maskAllChannels(protfieldstruct,nucfieldstruct,...
