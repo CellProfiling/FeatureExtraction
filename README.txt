@@ -6,6 +6,7 @@ v1.0 - 2016 Devin P. Sullivan: Fixed major bugs including; feature overwriting, 
 v2.0 - 06,Sept,2016 Devin P. Sullivan: Implemented full active contour segmentation for nuclei. Prevents merging of nuclei when crowded. 
 
 General Use:
+**See example_scripts folder for example use scripts**
 infolder='/path/to/folder/with/imgs/';
 outfolder='/path/to/save/results/';
 resolution=0.08;%for the production 63x images.(microns/pixel)
