@@ -1,4 +1,4 @@
-function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,color,extensions,pattern,mstype,seg_channels,steps,run_partial_scans)
+function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,color,channels,pattern,mstype,steps,run_partial_scans)
 %This function is used to process images for production in the Subcellular
 %Human Protein Atlas.
 %
@@ -14,12 +14,18 @@ function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,co
 %
 %color - optional antiquated field. Leave blank []
 %
-%extensions - cell array of suffixes identifying each channel. The program
-%expects the following order separated from the main body by '_' or '--'.
+%channels (old 'extensions') - nx2 cell array of suffixes identifying each channel (column 1)
+% and what segmentation process to use the channel in (column 2)
+%The program expects the following order separated from the main body by '_' or '--'
+%in column 1 of the cell array
 %     extension_dapi  = extensions{1};%e.g. 'blue.tif'
 %     extension_ab    = extensions{2};%e.g. 'green.tif'
 %     extension_mtub  = extensions{3};%e.g. 'red.tif'
 %     extension_er    = extensions{4};%e.g. 'yellow.tif'
+%column 2 of the channels is either 
+%     0/empty - not used in segmentation
+%     1       - used to segment nucleus
+%     2       - used to segment cell shape
 %
 %pattern - a string specifying a part of a file name you wish to use. This
 %field may be used in the case where you have multiple files in a folder
@@ -29,11 +35,6 @@ function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,co
 %mstype - string specifying the microscope type. Currently 'confocal' or
 %'widefield' are supported. This impacts segmentation. The default is
 %'confocal' if this is not specified.
-%
-%seg_channels - a cell array specifying which channels to use for
-%segmentation. This field is default seg_channels = {'er','mt'}; for
-%production. Only change if you wish to use different channels. For Voronoi
-%segmentation specify an empty cell array: seg_channels = {}.
 
 %OUTPUTS:
 %This code generates several outputs in a set of folders. The output
@@ -46,6 +47,9 @@ function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,co
 %Devin P Sullivan 20,10,2015 - merging multiple resolutions that have
 %replicate code to one code base for high efficiency, reliability and
 %easier code managment.
+%D. P. Sullivan 08,02,2018 - changed 'extensions' to include seg_channels
+%info in an nx2 cell array and renamed to 'channels' to be more consistent. 
+%Eliminated seg_channels input.
 
 disp('~~You are running the HPA production feature extraction version 3.0~~')
 
@@ -78,9 +82,11 @@ if nargin<6 || isempty(pattern)
     pattern = '';
 end
 
+%DPS 08,02,2018 - renamed 'extensions' to 'channels' and merged with
+%segmentation info
 %DPS 04,08,2015 - added 'extensions' field so that we can handle multiple
 %file-naming conventions. This should not break the former pipeline
-if (nargin<5 || isempty(extensions)) && ~iscell(color)
+if (nargin<5 || isempty(channels)) && ~iscell(color)
     fprintf(['You have not passed an "extensions" variable or full list of colors. We will assume you are using the HPA production channels.\n ',...
         'please make sure your files are names accordingly:\n',...
         '1."*_blue.tif" - nucleus \n 2."*_green.tif" - protein of interest \n',...
@@ -102,6 +108,7 @@ elseif iscell(color)
 else
     fprintf(['You have passed a cell array for the "extensions" variable. Make sure it is in the correct order',...
         'It will be parsed as follows:\n 1.nucleus \n 2.protein of interest \n 3.microtubules \n 4.segmentation channel (usually er or tubules)\n'])
+    %%%Need to fix this!! 08,02,2018
     extension_dapi  = extensions{1};
     extension_ab    = extensions{2};
     extension_mtub  = extensions{3};

@@ -31,34 +31,53 @@ if nargin<4
     recursiveind = 1;
 end
 
+%Define parameters 
+nucseg_val = 1;
+
 inpath = submitstruct.indir;
 
-extensions_default = {'blue','green','red','yellow'};
-%extensions_default = {'C01','C00','C03','C02'};
-%     extension_dapi  = extensions{1};%e.g. 'blue.tif'
-%     extension_ab    = extensions{2};%e.g. 'green.tif'
-%     extension_mtub  = extensions{3};%e.g. 'red.tif'
-%     extension_er    = extensions{4};%e.g. 'yellow.tif'
+%%DPS 08,02,2018 - extensions and segchannels are now done via the 'channels' variable
+channels_default = cell(4,2);
+%specify reference channel(s) for nucleus 
+channels_default(1,:) = {'_blue',1};
+%specify reference channel(s) for cell shape
+channels_default(2,1) = {'_red',2};
+channels_default(3,1) = {'_yellow',2};
+%specify protein of interest
+channels_default(4,1) = {'_green',0};
 
-segchannels_default = {'mt','er'};
-submitstruct = ml_initparam(submitstruct,struct('indir',pwd,'outdir',pwd,'resolution',0.08,'color',[],'extensions',{extensions_default},'pattern','','mstype','confocal','seg_channels',{segchannels_default}));
+submitstruct = ml_initparam(submitstruct,struct('indir',pwd,'outdir',pwd,'resolution',0.08,'color',[],'channels',{channels_default},'pattern','','mstype','confocal'));
 
 listdirs = ml_ls(inpath);
 
 %first check if any of the files found are the images we are looking for
-imgslist = listdirs(~cellfun(@isempty,strfind(listdirs,imgtype)))
-numimgs = length(imgslist)
-imgslist = imgslist(~cellfun(@isempty,strfind(imgslist,submitstruct.extensions{2})));
-numimgs_ext = length(imgslist)
+imgslist = listdirs(~cellfun(@isempty,strfind(listdirs,imgtype)));
+%%DPS 08,02,2018 - changing to paired 'channels' variable to make what
+%channels are used for segmentation more flexible
+try
+    %look up the nuclear images since that is the one channel that is required
+    %to have at least one specified for segmentation
+    nucseg_inds = cell2mat(cellfun(@(x) ~isempty(x)&&x==nucseg_val,submitstruct.channels(:,2),'UniformOutput',0));
+    %If more than 1 nuclear seg channel is specified, make sure we only take 1.
+    %Here we arbitrarily choose the first. It doesn't matter
+    first_nucseg_ind = find(nucseg_inds,1,'first');
+    %create the list of images
+    imgslist = imgslist(~cellfun(@isempty,strfind(imgslist,submitstruct.channels{first_nucseg_ind,1})));
+catch
+    error('no nuclear segmentation channel found. Nuclear channel required for running. Please see submitstruct.channels')
+end
+%%
 
 %for all the images we have in this level
 for i = 1:length(imgslist)
     currinpath = [inpath,filesep,imgslist{i}(1:end-length(imgtype))];
-    imgfilebase = currinpath(1:end-length(submitstruct.extensions{2}));
+    imgfilebase = currinpath(1:end-length(submitstruct.channels{first_nucseg_ind,1}));
+    %%
     %double check that all the requested channels are present.
     allthere = 1;
-    for j = 1:length(submitstruct.extensions)
-        currextfile = [imgfilebase,submitstruct.extensions{j},imgtype];
+    for j = 1:size(submitstruct.channels,1)
+        %DPS 08,02,2018 - change to use channels
+        currextfile = [imgfilebase,submitstruct.channels{j,1},imgtype];
         if ~exist(currextfile)
             currextfile
             allthere = 0;
@@ -78,7 +97,7 @@ for i = 1:length(imgslist)
     
 %     currinpath = [inpath,filesep,imgslist{i}];
     submitstruct.indir = imgfilebase;
-    extensions = strcat(submitstruct.extensions,imgtype);
+    extensions = strcat(submitstruct.channels,imgtype);
     %submit a job
     tstart = tic;
     [~,exit_code] = process_img(submitstruct.indir,submitstruct.outdir,submitstruct.resolution,submitstruct.color,extensions,submitstruct.pattern,submitstruct.mstype,submitstruct.seg_channels,[],1);
