@@ -160,24 +160,7 @@ for i = 1:length(imagelist)
     %D. Sullivan 06,03,2017 - made more flexible for different types of
     %extensions
     tmplist{i} = strsplit(tmplist{i},strtok(base_naming_convention.segmentation_suffix,'.'));
-    tmplist{i} = tmplist{i}{1};
-    %need to remove the 'green' (or other channel) suffix from file name
-%     delim = '_';
-%     nameparts = strsplit(tmplist{i},delim);
-%     if length(nameparts)==1
-%         warning('Empty file base list. trying -- instead of _ ')
-%         delim = '--';
-%         nameparts = strsplit(tmplist{i},delim);
-%         tmplist{i} = strjoin(nameparts(1:end-1),delim);
-%         
-%         if ~strcmpi(featsuffix(1:2),'--')            
-%             tmplist{i} = [tmplist{i},delim];
-%         end
-%     else
-%         tmplist{i} = [strjoin(nameparts(1:end-1),delim)];
-%     end    
-    
-    
+    tmplist{i} = tmplist{i}{1};    
     
 end
 

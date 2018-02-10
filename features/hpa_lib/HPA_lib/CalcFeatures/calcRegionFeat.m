@@ -95,7 +95,10 @@ elseif exist('naming_convention', 'var') && strcmpi(naming_convention, 'IFconfoc
 end
 
 if ~isfield(naming_convention, 'segmentation_suffix')
-  naming_convention.segmentation_suffix = naming_convention.protein_channel; 
+  nucseg_val = 1;
+  nucseg_inds = get_naming_inds(base_naming_convention.channels,nucseg_val);
+  firstnuc_ind = find(nucseg_inds,1,'first');
+  naming_convention.segmentation_suffix = naming_convention.channels{firstnuc_ind,1};%protein_channel; 
 end
 if ~isfield(naming_convention, 'blank_channels')
   naming_convention.blank_channels = {}; 
@@ -120,12 +123,6 @@ for blank_channel_index = 1:length(naming_convention.blank_channels)
     error('blank_channels must be a cell array of zero or more of the strings ''nuclear'', ''tubulin'', ''er'', or ''protein''')
   end
 end
-
-
-
-% $$$ if ~exist('channel_as_protein','var')
-% $$$     channel_as_protein = 'protein';
-% $$$ end
 
 
 if ~exist('optimize','var')
@@ -168,47 +165,28 @@ ind = find(rootdir=='/');
 rootdir_ = rootdir;
 rootdir_(ind) = '_';
 
-%uout = unixfind( rootdir, filetype, greparg);
-%readlist = listmatlabformat( uout);
 readlist = ml_ls([rootdir,'*',naming_convention.pattern,'*',naming_convention.protein_channel])
 %DPS - add fix if the parent dir is not the directory where the images are since unixfind.m performs recursive searches
 [folder,file,exttype] = fileparts(readlist{1})
 rootdir = [folder,filesep]
 rootdir_ = strrep(rootdir,'/','_')
 
-%uout_nuc = findreplacestring(uout, naming_convention.protein_channel, naming_convention.nuclear_channel)
-%uout_tub = findreplacestring(uout, naming_convention.protein_channel, naming_convention.tubulin_channel)
-%uout_er = findreplacestring(uout, naming_convention.protein_channel, naming_convention.er_channel)
-%readlist_nuc = listmatlabformat( uout_nuc)
 readlist_nuc = strrep(readlist,naming_convention.protein_channel, naming_convention.nuclear_channel);
-%readlist_tub = listmatlabformat( uout_tub)
 readlist_tub = strrep(readlist,naming_convention.protein_channel, naming_convention.tubulin_channel);
-%readlist_er = listmatlabformat( uout_er)
 readlist_er = strrep(readlist,naming_convention.protein_channel, naming_convention.er_channel);
 
-
-
-%mout = uout;
-%mout = findreplacestring( mout, naming_convention.protein_channel, naming_convention.segmentation_suffix);
 if isstruct(naming_convention.segmentation_suffix)
     mout = strrep(readlist,naming_convention.protein_channel, naming_convention.segmentation_suffix.cell);
 else
     mout = strrep(readlist,naming_convention.protein_channel, naming_convention.segmentation_suffix);
 end
-%mout = findreplacestring( uout, '/', '_');
-%mout = findreplacestring( mout, '/', '_');
 mout = strrep(mout,'/', '_');
-%mout = findreplacestring( mout, '.tif', '.png');
 mout = strrep(mout,filetype, 'png.gz');
-%mout = findreplacestring( mout, rootdir_, ['./data/masks/']);
 maskdir_ = [maskdir '/']
-% mout
-% rootdir_
-% maskdir_
-%mout = findreplacestring( mout, rootdir_, maskdir_);
+
 readlist_mask = strrep(mout,rootdir_,maskdir_);
-%readlist_mask = listmatlabformat( mout)'
-% readlist'
+
+
 
 cleanobject.channel_path = [];
 cleanobject.channel = [];
@@ -246,23 +224,6 @@ cleanobject.isempty = [];
 DSF = 2;
 mkdir(rootdir,'/tmp')
 for i=1:length(readlist)
-    %i
-    % 2011-12-31 tebuck: commented because it would interfere with
-    % paraellel computation of multiple calls with the same
-    % temporary directory:
-% $$$     % Nevermind, just assume, e.g.,
-% $$$     % get_concatenated_region_features is only called once per
-% $$$     % directory of images (with many directories with few images
-% $$$     % per directory, this should be a safe way to parallelize?):
-% $$$     tmpfile = [readlist{i} '_' datasettype];
-% $$$     tmpfile(find(tmpfile=='/')) = [];
-% $$$     tmpfile(find(tmpfile=='.')) = [];
-% $$$     tmpfile = ['./tmp/' tmpfile '_REGION.txt'];
-% $$$ 
-% $$$     if exist(tmpfile,'file')
-% $$$         continue;
-% $$$     end
-% $$$     fid = fopen(tmpfile,'w');
 
     protfieldstruct = cleanobject;
     nucfieldstruct = cleanobject;
@@ -307,10 +268,6 @@ for i=1:length(readlist)
     catch
         huh = 1;
     end
-%     
-%     [protfieldstruct,nucfieldstruct,tubfieldstruct,erfieldstruct]...
-%         = maskAllChannels(protfieldstruct,nucfieldstruct,...
-%         tubfieldstruct,erfieldstruct,maskfieldstruct);
     
     %DPS 28,07,2015 - update the blank image fields
     protein_channel_blank = protfieldstruct.isempty
@@ -321,7 +278,6 @@ for i=1:length(readlist)
 
     for zed = 1:length(fsetnames)
         zed
-% $$$         mout = findreplacestring( readlist{i}, '/', '_');
         mout = readlist{i};
         feature_set_suffix = ['_', fsetnames{zed}];
         %D. Sullivan 10/09/2015 - can't use segmentation_suffix for this
@@ -342,9 +298,6 @@ for i=1:length(readlist)
         mout = findreplacestring( mout, naming_convention.protein_channel, [protsuff,nucsuff,tubsuff,ersuff,segsuff,feature_set_suffix,'.mat']);
         mout = findreplacestring( mout, '/', '_');
         
-% $$$         if ~strcmpi(channel_as_protein, 'protein')
-% $$$           feature_set_suffix = [feature_set_suffix, '_', channel_as_protein, '-focus'];
-% $$$         end
           %No longer need this line since we explicitly make a .mat file
           %above. 
 %         mout = findreplacestring( mout, '.tif', [feature_set_suffix, '.mat']);
@@ -356,20 +309,13 @@ for i=1:length(readlist)
         
         %DPS 20150924 - had to change this to make the paths shorter. If
         %the path is too long then fopen will fail. 
-%         tmpfile2 = writepath;
         [resultdir,writefile,writetype] = fileparts(writepath);
-%         tmpfile2(find(tmpfile2=='/')) = [];
-%         tmpfile2(find(tmpfile2=='.')) = [];
-%         tmpfile2 = [writedir '/tmp/' tmpfile2 '_REGION.txt']; %%
           tmpfile2 = [writedir '/tmp/' writefile '_REGION.txt']; %%
-%tmpfile2
+        %tmpfile2
         %DPS 20150924 - I don't think we want to skip it if the file
         %exists. This is only if we are running multiple jobs on the same
         %image in parralel, but that is not going to happen because things
         %can get messy and it doesn't take that long...
-%         if exist(tmpfile2,'file')
-%             continue;
-%         end
         
         fid2 = fopen(tmpfile2,'w');
         
@@ -491,6 +437,5 @@ for i=1:length(readlist)
         fclose(fid2);
         delete(tmpfile2);
     end
-% $$$     fclose(fid);
-% $$$     delete(tmpfile);
+
 end

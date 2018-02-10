@@ -41,10 +41,10 @@ channels_default = cell(4,2);
 %specify reference channel(s) for nucleus 
 channels_default(1,:) = {'_blue',1};
 %specify reference channel(s) for cell shape
-channels_default(2,1) = {'_red',2};
-channels_default(3,1) = {'_yellow',2};
+channels_default(2,:) = {'_red',2};
+channels_default(3,:) = {'_yellow',2};
 %specify protein of interest
-channels_default(4,1) = {'_green',0};
+channels_default(4,:) = {'_green',0};
 
 submitstruct = ml_initparam(submitstruct,struct('indir',pwd,'outdir',pwd,'resolution',0.08,'color',[],'channels',{channels_default},'pattern','','mstype','confocal'));
 
@@ -97,10 +97,11 @@ for i = 1:length(imgslist)
     
 %     currinpath = [inpath,filesep,imgslist{i}];
     submitstruct.indir = imgfilebase;
-    extensions = strcat(submitstruct.channels,imgtype);
+    extensions = submitstruct.channels;
+    extensions(:,1) = strcat(extensions(:,1),imgtype);
     %submit a job
     tstart = tic;
-    [~,exit_code] = process_img(submitstruct.indir,submitstruct.outdir,submitstruct.resolution,submitstruct.color,extensions,submitstruct.pattern,submitstruct.mstype,submitstruct.seg_channels,[],1);
+    [~,exit_code] = process_img(submitstruct.indir,submitstruct.outdir,submitstruct.resolution,extensions,submitstruct.pattern,submitstruct.mstype,[],1);
     telapsed = toc(tstart)
     telapsed
 end

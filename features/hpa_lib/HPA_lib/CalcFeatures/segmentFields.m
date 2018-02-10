@@ -41,7 +41,9 @@ function [regions, nucseeds,skipimgs] = segmentFields(readdir, writedir, naming_
 %starts with a "-", this previously would fail because grep would try to
 %use it as an option field rather than a search term.
 %2015,08,10 DPSullivan - added field for tracking blank images. 
+%2018,09,02 DPSullivan - changed to flexible channels... lots of changes
 
+nucseg_val = 1;%immutable code for which channel(s) to use as seg. for nucleus
 regions = [];
 
 if ~exist('readdir','var')
@@ -76,17 +78,14 @@ if ~isfield(naming_convention,'seg_channel')
 end
 
 if (resolution==63)
-    warning('You appear to be using an outdated version. Resolution should now be specified as um/pixel.');
-    IMAGEPIXELSIZE = 0.08; % um/px
-%     MINNUCLEUSDIAMETER = 4; %um
-%     MAXNUCLEUSDIAMETER = 40; %um
+    error('You appear to be using an outdated version. Resolution should now be specified as um/pixel.');
+%     IMAGEPIXELSIZE = 0.08; % um/px
 elseif ~isempty(resolution)
     disp('We are assuming you entered your resolution in um/px')
     IMAGEPIXELSIZE = resolution; % um/px
 else
+    warning('flying resolution blind is not smart. using 0.1 um/px.')
     IMAGEPIXELSIZE = 0.1; % um/px
-%     MINNUCLEUSDIAMETER = 4; %um
-%     MAXNUCLEUSDIAMETER = 40; %um
 end
 
 %This may change if the cell type changes, but probably not too much. For
@@ -96,13 +95,16 @@ warning('We assume that nuclei in your image are between 4 and 40 um. If this is
     MINNUCLEUSDIAMETER = 4; %um
     MAXNUCLEUSDIAMETER = 40; %um
 
-if findstr(naming_convention.nuclear_channel,'.tif');
+nucseg_inds = cell2mat(cellfun(@(x) ~isempty(x)&&x==nucseg_val,naming_convention.channels(:,2),'UniformOutput',0));
+firstnuc_ind = find(nucseg_inds,1,'first');
+nuc_naming = naming_convention.channels{firstnuc_ind,1};
+if strfind(nuc_naming,'.tif');
     filetype = 'tif';
-elseif findstr(naming_convention.nuclear_channel,'.TIF');
+elseif strfind(nuc_naming,'.TIF');
     filetype = 'TIF';
 else 
     warning('This image does not appear to be a tif (or TIF). Trying to separate file type. Assuming fileparts will give correct answer.')
-    [~,~,nucext] = fileparts(naming_convention.nuclear_channel);
+    [~,~,nucext] = fileparts(nuc_naming);
     filetype = nucext(2:end);
 end
     
@@ -110,7 +112,11 @@ end
 
 %greparg = '| grep green';
 %DPS 05,08,2015 - adding support for naming_conventions to begin with a "-"
-dashlocs = strfind(naming_convention.protein_channel,'-')
+try
+    dashlocs = cell2mat(strfind(naming_convention.channels(:,1),'-'));
+catch
+    dashlocs = [];
+end
 if any(dashlocs==1)
     %adding two slashes escapes the special character '-' at the beginning
     %of the pattern. This only needs to be done if the dash is at the start
@@ -121,20 +127,12 @@ else
     %greparg = ['| grep ', naming_convention.protein_channel]
 end
 
-
-
 ind = find(readdir=='/');
 readdir_ = readdir;
 readdir_(ind) = '_';
-%uout = unixfind( readdir, filetype, greparg);
-readdir
-naming_convention.protein_channel
+
 %filetype is now added before in process_63x.m
-% uout = ml_ls([readdir,filesep,'*',naming_convention.pattern,'*',naming_convention.protein_channel])
-uout = ml_ls([readdir,'*',naming_convention.pattern,'*',naming_convention.protein_channel])
-%uout = [readdir,filesep,uout]
-%readlist = listmatlabformat( uout);
-readlist = uout;
+readlist = ml_ls([readdir,'*',naming_convention.pattern,'*',naming_convention.channels{firstnuc_ind,1}]);
 
 %adjust readdir in case it's not right
 [readdir,filename,exttype] = fileparts(readlist{1});
@@ -146,42 +144,11 @@ if strcmpi(readdir,'.')
 end
 readdir_ = strrep(readdir,'/','_');
 
-%uout_nuc = findreplacestring(uout, naming_convention.protein_channel, naming_convention.nuclear_channel);
-uout_nuc = strrep(uout,naming_convention.protein_channel,naming_convention.nuclear_channel);
-%uout_tub = findreplacestring(uout, naming_convention.protein_channel, naming_convention.tubulin_channel);
-uout_tub = strrep(uout,naming_convention.protein_channel,naming_convention.tubulin_channel);
-%uout_er = findreplacestring(uout, naming_convention.protein_channel, naming_convention.er_channel);
-uout_er = strrep(uout,naming_convention.protein_channel,naming_convention.er_channel);
-%readlist_nuc = listmatlabformat( uout_nuc);
-readlist_nuc = uout_nuc;
-%readlist_tub = listmatlabformat( uout_tub);
-readlist_tub = uout_tub;
-%readlist_er = listmatlabformat( uout_er);
-readlist_er = uout_er;
-% $$$ if strcmpi(naming_convention.nuclear_channel, 'ignore_channel')
-% $$$   readlist_nuc = repmat({''}, size(readlist)); 
-% $$$ else
-% $$$   uout_nuc = findreplacestring(uout, naming_convention.protein_channel, naming_convention.nuclear_channel);
-% $$$   readlist_nuc = listmatlabformat( uout_nuc);
-% $$$ end
-% $$$ uout_tub = findreplacestring(uout, naming_convention.protein_channel, naming_convention.tubulin_channel);
-% $$$ uout_er = findreplacestring(uout, naming_convention.protein_channel, naming_convention.er_channel);
-% $$$ readlist_tub = listmatlabformat( uout_tub);
-% $$$ readlist_er = listmatlabformat( uout_er);
-
-% uout
-mout = uout;
-%mout
-%mout = findreplacestring( mout, naming_convention.protein_channel, naming_convention.segmentation_suffix);
-mout = strrep(mout,naming_convention.protein_channel,naming_convention.segmentation_suffix);
-%mout = findreplacestring( uout, '/', '_');
-%mout = findreplacestring( mout, '/', '_');
+mout = readlist;
+mout = strrep(mout,naming_convention.channels{firstnuc_ind,1},naming_convention.segmentation_suffix);
 writedir_ = [writedir '/']
-%readdir_
-%mout
-%mout = findreplacestring( mout, readdir_,writedir_);
 mout = strrep(mout,readdir,writedir);
-%mout = findreplacestring( mout, '.tif','.png');
+
 
 nucwritelist = strrep(mout,['.',filetype],'_nuc.png.gz');
 cytowritelist = strrep(mout,['.',filetype],'_cyto.png.gz');
@@ -203,11 +170,6 @@ for i=1:length(readlist)
         continue
     end
     
-%    i
-%     if exist(writelist{i},'file')
-%         continue;
-%     end
-
     tmpfile = writelist{i};
     tmpfile(find(tmpfile=='/')) = [];
     tmpfile(find(tmpfile=='.')) = [];
@@ -226,11 +188,29 @@ for i=1:length(readlist)
     end
 %     fid = fopen(tmpfile,'w');
 
-    disp(readlist_nuc{i})
-    nucim = ml_readimage(strtrim(readlist_nuc{i}));
+    %DPS 09,02,2018 - refactor for flexible channels
+    nucim = [];
+    for j = 1:length(nucseg_inds)
+        if ~nucseg_inds(j)
+            continue
+        end
+        currimg = strrep(readlist{i},naming_convention.channels{j,1},naming_convention.channels{firstnuc_ind,1});
+        disp(currimg)
+        curr_nucim = ml_readimage(strtrim(currimg));
     
-    %check nuc might be rgb
-    nucim = removergb(nucim);
+        %check nuc might be rgb
+        curr_nucim = removergb(curr_nucim);
+        
+        if isempty(nucim)
+            nucim = double(curr_nucim);
+        else 
+            nucim = imadd(double(nucim),double(curr_nucim));
+        end
+    
+    end
+    if isempty(nucim)
+        error('no nuclear segmentation image loaded. This is required')
+    end
     
     %Devin S. 2015,07,13 - Added voronoi segmentation when ER channel is
     %not present. This is for Peter Thul's golgi project
@@ -248,38 +228,27 @@ for i=1:length(readlist)
     %if ~isempty(naming_convention.er_channel) && ~any(strcmpi(naming_convention.blank_channels,'er'))
     %DPS 25/11/2015 - Adding 'seg_channel' to naming_convention struct to
     %specify what channels we want to use 
-    if any(strcmpi(naming_convention.seg_channel,'er')) && (~isempty(naming_convention.er_channel) && ~any(strcmpi(naming_convention.blank_channels,'er')))
-        erim = ml_readimage(strtrim(readlist_er{i}));
+    %DPS 09/02/2018 - Making flexible channels
+    %Use .*0 here to ensure we match the expected data type (class)
+    cellim = nucim.*0;
+    for j = 1:size(naming_convention.channels,1)
+    if (naming_convention.channels{j,2}==2 && (~isempty(naming_convention.channels{j,1}) && ~naming_convention.blank_channels(j)))
+        currimg = strrep(readlist{i},naming_convention.channels{firstnuc_ind,1},naming_convention.channels{j,1});
+        cellim = imadd(double(cellim),double(ml_readimage(strtrim(currimg))));
     else
-        %Use .*0 here to ensure we match the expected data type (class)
-%         erim = zeros(size(nucim));
-        erim = nucim.*0;
+        continue
     end
     
-    %check er might be rgb
-    erim = removergb(erim);
+    %check image, might be rgb
+    cellim = removergb(cellim);
 
-    
-    %Then check MT
-%     if ~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt'))
-    if any(strcmpi(naming_convention.seg_channel,'mt')) && (~isempty(naming_convention.tubulin_channel) && ~any(strcmpi(naming_convention.blank_channels,'mt')))
-        mtim = ml_readimage(strtrim(readlist_tub{i}));
-    else
-        %Use .*0 here to ensure we match the expected data type (class)
-%         mtim = zeros(size(nucim));
-        mtim = nucim.*0;
     end
-    
-    %check mt might be rgb
-    mtim = removergb(mtim);
-    
-    %Then combine them
-    cellim = imadd(double(erim),double(mtim));
+       
     
     %If neither existed, use Voronoi. If the sum is 0, there is no signal
     %for either ER or MT. 
     if sum(cellim(:)) == 0
-        warning(['No ER or MT naming convention given, or both are blank.',...
+        warning(['No cell segmentation channels given, or all are blank.',...
             'Defaulting to Voronoi segmentation using nuclei as seeds.'])
         cellim = [];
     end
@@ -321,7 +290,7 @@ for i=1:length(readlist)
     
     
 %     cytoseg = (regions>0)-nucseg;
-%     imwrite(cytoseg,cytowritelist{i});
+
     currwrite = strsplit(writelist{i},'.gz');
     imwrite( regions, currwrite{1});
     unix(['gzip ' currwrite{1}]);
@@ -332,6 +301,4 @@ for i=1:length(readlist)
     imwrite( nucseg, currwrite{1});
     unix(['gzip ' currwrite{1}]);
     
-%     fclose(fid);
-%     delete(tmpfile);
 end

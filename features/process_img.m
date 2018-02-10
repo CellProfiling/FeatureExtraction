@@ -1,4 +1,4 @@
-function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,color,channels,pattern,mstype,steps,run_partial_scans)
+function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,channels,pattern,mstype,steps,run_partial_scans)
 %This function is used to process images for production in the Subcellular
 %Human Protein Atlas.
 %
@@ -12,7 +12,6 @@ function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,co
 %resolution - double in units of microns/pixel. This is used for
 %segmentation, the default is 0.08 (63x)
 %
-%color - optional antiquated field. Leave blank []
 %
 %channels (old 'extensions') - nx2 cell array of suffixes identifying each channel (column 1)
 % and what segmentation process to use the channel in (column 2)
@@ -51,7 +50,7 @@ function [cell_feat, exit_code] = process_img(in_folder,out_folder,resolution,co
 %info in an nx2 cell array and renamed to 'channels' to be more consistent. 
 %Eliminated seg_channels input.
 
-disp('~~You are running the HPA production feature extraction version 3.0~~')
+disp('~~You are running the HPA production feature extraction version 4.0~~')
 
 segskips= [];
 skipimage = [];
@@ -64,21 +63,17 @@ addpath(genpath('./adaptive_watersheed_seg'),'-begin');
 faillist = [];
 exit_code   = 0;
 
-if nargin<8 || isempty(seg_channels)
-    seg_channels = {'er','mt'};
-end
-
 %DPS 25,11,2015 - added 'mstype' var so we can have types of microscopes
 %for segmentation. Widefield microscopes require less blurring for good
 %segmentation as they are already blurry.
 %Currently accepted values are 'confocal', and 'widefield'
-if nargin<7 || isempty(mstype)
+if nargin<6 || isempty(mstype)
     mstype = 'confocal';
 end
 
 %DPS 22,09,2015 - added 'pattern' var so we can handle sub-patterns in
 %addition to extensions.
-if nargin<6 || isempty(pattern)
+if nargin<5 || isempty(pattern)
     pattern = '';
 end
 
@@ -86,64 +81,30 @@ end
 %segmentation info
 %DPS 04,08,2015 - added 'extensions' field so that we can handle multiple
 %file-naming conventions. This should not break the former pipeline
-if (nargin<5 || isempty(channels)) && ~iscell(color)
-    fprintf(['You have not passed an "extensions" variable or full list of colors. We will assume you are using the HPA production channels.\n ',...
+if (nargin<4 || isempty(channels))
+    fprintf(['You have not passed a "channels" variable. We will assume you are using the HPA production channels.\n ',...
         'please make sure your files are names accordingly:\n',...
         '1."*_blue.tif" - nucleus \n 2."*_green.tif" - protein of interest \n',...
-        '3."*_red.tif" - microtubules \n lastly, the "color" variable is used as the segmentation channel usually "yellow" corresponding to er \n'])
-    extension_dapi  = '_blue.tif';
-    extension_ab    = '_green.tif';
-    extension_mtub  = '_red.tif';
-    %For historical reasons 'color' is separate and we are trying to make
-    %the script such that it breaks nothing in the current pipeline
-    extension_er    = strcat('_', color, '.tif');
-elseif iscell(color)
-    %if someone has passed a cell array of color, process it
-    fprintf(['You have passed a cell array for the "color" variable. Make sure it is in the correct order',...
-        'It will be parsed as follows:\n 1.nucleus \n 2.protein of interest \n 3.microtubules \n 4.segmentation channel (usually er or tubules)\n'])
-    extension_dapi  = color{1};
-    extension_ab    = color{2};
-    extension_mtub  = color{3};
-    extension_er    = color{4};
-else
-    fprintf(['You have passed a cell array for the "extensions" variable. Make sure it is in the correct order',...
-        'It will be parsed as follows:\n 1.nucleus \n 2.protein of interest \n 3.microtubules \n 4.segmentation channel (usually er or tubules)\n'])
-    %%%Need to fix this!! 08,02,2018
-    extension_dapi  = extensions{1};
-    extension_ab    = extensions{2};
-    extension_mtub  = extensions{3};
-    %For historical reasons 'color' is separate and we are trying to make
-    %the script such that it breaks nothing in the current pipeline
-    %extension_er    = strcat('_', color, '.tif');
-    if length(extensions)==4
-        extension_er = extensions{4};
-    elseif ~isempty(color)
-        warning('no 4th extension provided. Trying to use the outdated "color" parameter')
-        extension_er    = strcat(color, '.tif');
-    else
-        extension_er = '';
-    end
-    color = extension_er;
+        '3."*_red.tif" - microtubules \n "*_yellow.tif" - er \n'])
+    %Must specify at least 1 nuclear segmentation segmentation channel!
+    numchannels = 4;
+    channels = cell(numchannels,2);
+    %specify reference channel(s) for nucleus
+    channels(1,:) = {'_blue.tif',1};
+    %specify reference channel(s) for cell shape
+    channels(2,1) = {'_red.tif',2};
+    channels(3,1) = {'_yellow.tif',2};
+    %specify protein of interest
+    channels(4,1) = {'_green.tif',0};
 end
 
-
-%DPS 2015,10,20 - the resolution should now be passed in as um/pixel
-% if(resolution==63)
-%     resolution = 1;
-% else
-%     resolution = 0;
-% end
-
-if nargin<9 || isempty(steps)
+if nargin<7 || isempty(steps)
     steps(1) = true;
     steps(2) = true;
     steps(3) = true;
-%     step1   = true;
-%     step2   = true;
-%     step3   = true;
 end
 
-if nargin<10 || isempty(run_partial_scans)
+if nargin<8 || isempty(run_partial_scans)
     run_partial_scans = 0;
 end
 
@@ -152,28 +113,6 @@ warning('off', 'Images:imfeature:obsoleteFunction');
 
 filename = out_folder,'/feature_extraction_HPA';
 mkdir(filename);
-
-% extension_dapi  = '_blue.tif';
-% extension_ab    = '_green.tif';
-% extension_mtub  = '_red.tif';
-% extension_er    = strcat('_', color, '.tif');
-
-%
-% list_ab     = rdir_list(char([in_folder,'/*',pattern,extension_ab]));
-% list_dapi   = rdir_list(char([in_folder,'/*',pattern,extension_dapi]));
-% list_mtub   = rdir_list(char([in_folder,'/*',pattern,extension_mtub]));
-% list_er     = rdir_list(char([in_folder,'/*',pattern,extension_er]));
-
-% list_ab     = rdir_list(char([in_folder,'/*',extension_ab]));
-% list_dapi   = rdir_list(char([in_folder,'/*',extension_dapi]));
-% list_mtub   = rdir_list(char([in_folder,'/*',extension_mtub]));
-% list_er     = rdir_list(char([in_folder,'/*',extension_er]));
-
-%list_ab     = rdir_list(char([in_folder,'/*','/*',extension_ab]));
-%list_dapi   = rdir_list(char([in_folder,'/*','/*',extension_dapi]));
-%list_mtub   = rdir_list(char([in_folder,'/*','/*',extension_mtub]));
-%list_er     = rdir_list(char([in_folder,'/*','/*',extension_er]));
-
 
 %% Init
 
@@ -248,31 +187,16 @@ for index = 1:length(label_subdirectories)
         %channels left blank by the user.
         %Keywords allowed: 'nuclear','tubulin','er','protein'
         base_naming_convention.blank_channels = {};
+        base_naming_convention.blank_channels = cellfun(@isempty,channels(:,1));
+        base_naming_convention.channels = channels;
+%         *base_naming_convention.protein_channel  = extension_ab;
+%         *base_naming_convention.nuclear_channel  = extension_dapi;
+%         *base_naming_convention.tubulin_channel  = extension_mtub;
+%         *base_naming_convention.er_channel       = extension_er;
         
-        base_naming_convention.protein_channel  = extension_ab;
-        if isempty(extension_ab)
-            base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'protein'}];
-        end
-        base_naming_convention.nuclear_channel  = extension_dapi;
-        if isempty(extension_dapi)
-            base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'nuclear'}];
-        end
-        base_naming_convention.tubulin_channel  = extension_mtub;
-        if isempty(extension_mtub)
-            base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'tubulin'}];
-        end
-        base_naming_convention.er_channel       = extension_er;
-        if isempty(extension_er)
-            base_naming_convention.blank_channels = [base_naming_convention.blank_channels,{'er'}];
-        end
-        
-        
-        if isempty(color)
-            disp('No "color" variable passed for a segmentation channel suffix. Assuming this channel is not present')
-            base_naming_convention.blank_channels = {'er'};
-        end
-        
-        base_naming_convention.segmentation_suffix = base_naming_convention.protein_channel;
+        %DPS 09,02,2018 - not sure if it is important what channel you use
+        %here. Trying the first one as a test. 
+        base_naming_convention.segmentation_suffix = base_naming_convention.channels{1,1};
         %DPS 22,09,2015 - added pattern field to allow for wild card
         %specification
         base_naming_convention.pattern = pattern;
@@ -281,13 +205,10 @@ for index = 1:length(label_subdirectories)
         base_naming_convention.mstype = mstype;
         
         %DPS 25,11,2015 - added mstype field to allow for specific segmenation
-        base_naming_convention.seg_channel = seg_channels;
+%         base_naming_convention.seg_channel = channels(:,2);
         
-        
-        %         index  = 1;
-        
-        %         label_subdirectories
-        image_subdirectory      = [image_path, filesep, (label_subdirectories{index}), filesep]
+
+        image_subdirectory = [image_path, filesep, (label_subdirectories{index}), filesep];
         
         %DPS - 28,07,2015  Adding support for direct parent directories rather
         %than directories of directories
@@ -299,13 +220,9 @@ for index = 1:length(label_subdirectories)
                 image_subdirectory = image_path;
             end
         end
-        %         image_path
+        
         storage_subdirectory    = [processed_path, (label_subdirectories{index}), filesep];
-        %         storage_subdirectory    = processed_path;
-        %label_subdirectories{index}
-        %image_subdirectory
-        %storage_subdirectory
-        %disp('In 63x code')
+        
         if(steps(2))
 %         try
             
@@ -319,10 +236,15 @@ for index = 1:length(label_subdirectories)
             if any(skipimage{index}==1)
                 
                 cell_feat = [];
-                exit_code(index) = 1;
+                disp('skipimage was triggered. See error code in skipimage variable.')
+                skipimage
+                exit_code(index) = 1;%HPAIT requested only 1 error code...
                 continue
             end
             
+            %%DPS 09,02,2018 - sweet jesus. Terrible. I'm going to have to
+            %%think about how to handle this in the new channels
+            %%structure...
             %After discussion with Emma Lundberg, we will allow a partial
             %nuclear scan iff the ER scan appears full. If any other channel
             %has a partial scan, or both ER and nuc do, fail the image.
@@ -332,26 +254,22 @@ for index = 1:length(label_subdirectories)
                     warning('potential partial scan for either Nuc or ER, however the other appears ok. Continue at your own risk.');
                 else
                     cell_feat = [];
-                    exit_code(index) = 1;
+                    exit_code(index) = 1;%again, HPAIT requested only 1 error code...
                     continue
                 end
             elseif any(any(skipimage{index}==2)) && run_partial_scans
                 warning('You are running an image that may contain a partial scan. proceed at your own risk!!')
             end
-            %         %temporarily splitting this out to allow images to pass
-            %         if any(any(skipimage{index}==2))
-            %             warning('potential partial scan, continue at your own risk')
-            %         end
             
-            %DPS 11/08/15 - Need to eliminate folders that don't have any files in
-            %them (that match our naming convention).
-            %         if skipimage{index}==inf
-            %             cell_feat = [];
-            %             exit_code = 1;
-            %             return
-            %         end
-            
-            [label_features{index}, feature_names, feature_computation_time, cell_seed, nucleus_seed,segskips,slf_names] = get_concatenated_region_features(image_subdirectory, storage_subdirectory, base_naming_convention, label_names{index}, true, false, resolution);
+            [label_features{index}, feature_names,...
+                feature_computation_time, cell_seed, nucleus_seed,...
+                segskips,slf_names] = get_concatenated_region_features(...
+                image_subdirectory,storage_subdirectory, ...
+                base_naming_convention, label_names{index},...
+                true, false, resolution);
+            %image_path, storage_path,
+            %base_naming_convention, label_name,
+            %optimize, use_segmentation_suffix_in_list,resolution)
             %DPS 20150924 - added support for cell array within our for loop of
             %subfolders (fields)
             %         regions_results     =   cell2mat(label_features);
@@ -359,22 +277,22 @@ for index = 1:length(label_subdirectories)
             
             % read cell (x,y) centers and bounding box values
             infiletype = [];
-            if findstr(base_naming_convention.nuclear_channel,'.tif');
+            if findstr(base_naming_convention.channels{1,1},'.tif');
                 infiletype = 'tif';
-            elseif findstr(base_naming_convention.nuclear_channel,'.TIF');
+            elseif findstr(base_naming_convention.channels{1,1},'.TIF');
                 infiletype = 'TIF';
             else
                 warning('This image does not appear to be a tif (or TIF). Trying to separate file type. Assuming fileparts will give correct answer.')
-                [~,~,nucext] = fileparts(base_naming_convention.nuclear_channel);
+                [~,~,nucext] = fileparts(base_naming_convention.channel{1,1});
                 infiletype = nucext(2:end);
             end
-            if strcmp(base_naming_convention.nuclear_channel(end-2:end),'.gz')
+            if strcmp(base_naming_convention.channels{1,1}(end-2:end),'.gz')
                 infiletype = [infiletype,'.gz'];
             end
             
             
             
-            pngsuff = strrep(base_naming_convention.protein_channel,infiletype,'png.gz');
+            pngsuff = strrep(base_naming_convention.segmentation_suffix,infiletype,'png.gz');
             %nucpngsuff = strrep(base_naming_convention.protein_channel,['.',infiletype],'_nuc.png.gz');
             dir_png         = dir(fullfile([storage_subdirectory,filesep,'*',pngsuff]));
             

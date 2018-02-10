@@ -46,10 +46,10 @@ channels = cell(numchannels,2);
 %specify reference channel(s) for nucleus 
 channels(1,:) = {'_blue',1};
 %specify reference channel(s) for cell shape
-channels(2,1) = {'_red',2};
-channels(3,1) = {'_yellow',2};
+channels(2,:) = {'_red',2};
+channels(3,:) = {'_yellow',2};
 %specify protein of interest
-channels(4,1) = {'_green',0};
+channels(4,:) = {'_green',0};
 
 %Another possible example using only one cell shape segmentor
 %CCMarkers

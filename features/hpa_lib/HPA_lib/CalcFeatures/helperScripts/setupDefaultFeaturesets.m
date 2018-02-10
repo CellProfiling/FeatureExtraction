@@ -17,6 +17,40 @@ feature_set_directories = {...
 
 % number_feature_sets = length(feature_set_directories)
 disp('setting naming conventions')
+nucseg_val = 1;
+cellseg_val = 2; 
+prot_val = 0;
+usedinds = zeros(size(base_naming_convention.channels,1),1);
+blank_channels = base_naming_convention.blank_channels;
+base_naming_convention.blank_channels = {};
+
+prot_ind = get_naming_inds(base_naming_convention.channels,prot_val);
+base_naming_convention.protein_channel = base_naming_convention.channels{prot_ind,1};
+usedinds(prot_ind) = 1;
+if blank_channels(prot_ind)
+    base_naming_convention.blank_channels = {base_naming_convention.blank_channels{:};'protein'};
+end
+    
+
+nucseg_inds = get_naming_inds(base_naming_convention.channels,nucseg_val);
+firstnuc_ind = find(nucseg_inds,1,'first');
+base_naming_convention.nuclear_channel = base_naming_convention.channels{firstnuc_ind,1};
+usedinds(firstnuc_ind) = 1;
+if blank_channels(firstnuc_ind)
+    base_naming_convention.blank_channels = {base_naming_convention.blank_channels{:};'nuclear'};
+end
+cellseg_inds = get_naming_inds(base_naming_convention.channels,cellseg_val);
+firstcell_ind = find(cellseg_inds,1,'first');
+base_naming_convention.tubulin_channel = base_naming_convention.channels{firstcell_ind,1};
+usedinds(firstcell_ind) = 1;
+if blank_channels(firstcell_ind)
+    base_naming_convention.blank_channels = {base_naming_convention.blank_channels{:};'tubulin'};
+end
+base_naming_convention.er_channel = base_naming_convention.channels{~usedinds,1};
+if blank_channels(firstcell_ind)
+    base_naming_convention.blank_channels = {base_naming_convention.blank_channels{:};'er'};
+end
+
 feature_set_naming_conventions = repmat({base_naming_convention}, size(feature_set_directories));
 feature_set_naming_conventions = repmat({base_naming_convention}, size(feature_set_directories));
 feature_set_naming_conventions{2}.protein_channel = base_naming_convention.nuclear_channel;
@@ -39,7 +73,7 @@ feature_set_naming_conventions{6}.nuclear_channel = base_naming_convention.tubul
 %feature_set_naming_conventions{8}.protein_channel = base_naming_convention.nuclear_channel;
 
 %DPS 2015/10/19 - Protein within nucleus features 
-nucmasksuffix = base_naming_convention.protein_channel;
+nucmasksuffix = base_naming_convention.channels{firstnuc_ind,1};
 % cytomasksuffix = strrep(nucmasksuffix,'.tif','_cyto.png');
 
 if strfind(nucmasksuffix,'.tif');
@@ -85,7 +119,8 @@ feature_set_naming_conventions{:}
 feature_set_feature_names{:}
 
 
-% $$$   for index = 1:20
-% $$$     warning('DEBUG: feature_set_index = 5')
-% $$$   end
-% $$$   for feature_set_index = 5
+end
+
+function inds = get_naming_inds(channels,val)
+    inds = cell2mat(cellfun(@(x) ~isempty(x)&&x==val,channels(:,2),'UniformOutput',0));
+end

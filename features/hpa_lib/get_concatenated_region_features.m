@@ -40,7 +40,6 @@ if nargout > 2
 end
 disp('segmenting fields')
 %DPS 10/08/15 - adding field for tracking blank images
-%   [cell_regions, nuc_regions] = segmentFields(image_path, mask_path, base_naming_convention,resolution);
 [cell_regions, nuc_regions,skipimgs] = segmentFields(image_path, mask_path, base_naming_convention,resolution);
 
 % if sum(cell_regions(:))==0
@@ -87,7 +86,9 @@ number_feature_sets = length(feature_set_naming_conventions)
 
 for feature_set_index = 1:number_feature_sets
 
-    
+    if feature_set_index ==8
+        holdup = 1;
+    end
     %%The segmentation suffix determines the save path and whether the
     %%output will be computed. Here they are all set to 'green', meaning
     %%when we compute the shuffled channels, they will actually not
@@ -102,7 +103,7 @@ for feature_set_index = 1:number_feature_sets
     %feature_set_index
     % Compute features:
     %feature_set_subdirectory = [storage_path(1:end - 1), feature_set_directories{feature_set_index}, filesep];
-    feature_set_subdirectory = storage_path
+    feature_set_subdirectory = storage_path;
     %image_path
     %mask_path
     disp(['calculating features on set index ', num2str(feature_set_index),'.'])

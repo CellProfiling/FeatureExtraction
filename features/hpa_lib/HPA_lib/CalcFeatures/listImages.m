@@ -27,6 +27,7 @@ function [readlist] = listImages(rootdir, writedir, naming_convention)
 % list of images considered (just channel zero)
 % 2015-08-05 dpsullivan: added support for patterns starting with '-'
 
+nucseg_val = 1;%fixed value indicating to use that channel for nuclear segmentation
 
 fsetnames = {...
     'overlap', ...
@@ -79,7 +80,7 @@ if ~isfield(naming_convention, 'segmentation_suffix')
 end
 
 %DPS 05,08,2015 - adding support for naming_conventions to begin with a "-"
-dashlocs = strfind(naming_convention.protein_channel,'-')
+dashlocs = strfind(naming_convention.channels{1,1},'-')
 if any(dashlocs==1)
     %adding two slashes escapes the special character '-' at the beginning
     %of the pattern. This only needs to be done if the dash is at the start
@@ -99,4 +100,6 @@ rootdir_(ind) = '_';
 
 %uout = unixfind( rootdir, filetype, greparg);
 %readlist = listmatlabformat( uout);
-readlist = ml_ls([rootdir,'*',naming_convention.pattern,'*',naming_convention.protein_channel])
+nucseg_inds = cell2mat(cellfun(@(x) ~isempty(x)&&x==nucseg_val,naming_convention.channels(:,2),'UniformOutput',0));
+currpath = [rootdir,'*',naming_convention.pattern,'*',naming_convention.channels{find(nucseg_inds,1,'first'),1},'*'];
+readlist = ml_ls(currpath);

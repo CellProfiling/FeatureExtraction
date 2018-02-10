@@ -44,7 +44,10 @@ nucseg_inds = cell2mat(cellfun(@(x) ~isempty(x)&&x==nucseg_val,namingconvention.
 %Create an index of images skipped.
 %Also code if we have a partial scan using the number 2
 %If any column is labeled as blank use NaN
-skipimage = sparse(length(currfiles),numchannels);
+currpath = [imagedir,'*',namingconvention.pattern,'*',namingconvention.channels{nucseg_inds,1},'*'];
+nucfiles = ml_ls(currpath);
+
+skipimage = sparse(length(nucfiles),numchannels);
 
 for currchannel = 1:numchannels
     %first get all the paths
