@@ -73,7 +73,7 @@ feature_set_naming_conventions{6}.nuclear_channel = base_naming_convention.tubul
 %feature_set_naming_conventions{8}.protein_channel = base_naming_convention.nuclear_channel;
 
 %DPS 2015/10/19 - Protein within nucleus features 
-nucmasksuffix = base_naming_convention.channels{firstnuc_ind,1};
+nucmasksuffix = base_naming_convention.segmentation_suffix;
 % cytomasksuffix = strrep(nucmasksuffix,'.tif','_cyto.png');
 
 if strfind(nucmasksuffix,'.tif');
