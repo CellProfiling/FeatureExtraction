@@ -61,7 +61,7 @@ if ~exist('naming_convention', 'var') || strcmpi(naming_convention, 'IFconfocal'
   naming_convention.er_channel = 'yellow'; 
   naming_convention.segmentation_suffix = naming_convention.protein_channel;
   naming_convention.mstype = 'confocal';
-  naming_convention.seg_channel = {'er','mt'};
+%   naming_convention.seg_channel = {'er','mt'};
 elseif exist('naming_convention', 'var') && strcmpi(naming_convention, 'IFconfocal_CellCycle')
   naming_convention = struct(); 
   naming_convention.protein_channel = '_ch00'; 
@@ -70,12 +70,12 @@ elseif exist('naming_convention', 'var') && strcmpi(naming_convention, 'IFconfoc
   naming_convention.er_channel = '_ch02'; 
   naming_convention.segmentation_suffix = naming_convention.protein_channel; 
   naming_convention.mstype = 'confocal';
-  naming_convention.seg_channel = {'er','mt'};
+%   naming_convention.seg_channel = {'er','mt'};
 end
 
-if ~isfield(naming_convention,'seg_channel')
-    naming_convention.seg_channel = {'er','mt'};
-end
+% if ~isfield(naming_convention,'seg_channel')
+%     naming_convention.seg_channel = {'er','mt'};
+% end
 
 if (resolution==63)
     error('You appear to be using an outdated version. Resolution should now be specified as um/pixel.');
@@ -194,7 +194,7 @@ for i=1:length(readlist)
         if ~nucseg_inds(j)
             continue
         end
-        currimg = strrep(readlist{i},naming_convention.channels{j,1},naming_convention.channels{firstnuc_ind,1});
+        currimg = strrep(readlist{i},naming_convention.channels{firstnuc_ind,1},naming_convention.channels{j,1});
         disp(currimg)
         curr_nucim = ml_readimage(strtrim(currimg));
     
