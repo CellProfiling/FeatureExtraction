@@ -95,10 +95,10 @@ elseif exist('naming_convention', 'var') && strcmpi(naming_convention, 'IFconfoc
 end
 
 if ~isfield(naming_convention, 'segmentation_suffix')
-  nucseg_val = 1;
-  nucseg_inds = get_naming_inds(base_naming_convention.channels,nucseg_val);
-  firstnuc_ind = find(nucseg_inds,1,'first');
-  naming_convention.segmentation_suffix = naming_convention.channels{firstnuc_ind,1};%protein_channel; 
+%   nucseg_val = 1;
+%   nucseg_inds = get_naming_inds(base_naming_convention.channels,nucseg_val);
+%   firstnuc_ind = find(nucseg_inds,1,'first');
+  naming_convention.segmentation_suffix = naming_convention.channels{1,1};%firstnuc_ind,1};%protein_channel; 
 end
 if ~isfield(naming_convention, 'blank_channels')
   naming_convention.blank_channels = {}; 
