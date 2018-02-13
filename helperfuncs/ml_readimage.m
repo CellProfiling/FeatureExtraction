@@ -1,4 +1,4 @@
-function image = ml_readimage( filename, tmpdir )
+function [image,map,trans] = ml_readimage( filename, tmpdir )
 % IMAGE = ML_READIMAGE( FILENAME,TMPDIR)
 %
 % Reads a 2D image in any format, including TCL files.
@@ -71,7 +71,7 @@ else
             tempfullpath = [tmpdir tempfilename];
             fclose(f);
             unix(['gunzip -c ' filename ' > ' tempfullpath]);
-            image = imread( tempfullpath);
+            [image,map,trans] = imread( tempfullpath);
             unix(['rm ' tempfullpath]);
         case 'bz2'
             [f,tempfilename] = ml_fopentemp(tmpdir);
