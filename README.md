@@ -11,6 +11,11 @@ Your images must contain at least a nuclear channel. This is required for nuclea
 ## Running the code
 See *example_scripts* directory for an example setup and detailed documentation.
 
+Don't forget to add the repository path to your MATLAB workspace before running the code. 
+This can be done with 
+>>addpath(genpath('/path/to/my/FeatureExtraction/'));
+where the string argument is the path to where the FeatureExtraction code is on your machine. 
+
 ## License
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
