@@ -309,10 +309,10 @@ for index = 1:length(label_subdirectories)
             %DPS 10/08/15 - After discussing with Emma, we will now mark images
             %that are partial scans and not trim images
             [nucfiles{index}, skipimage{index}] = preprocessImages(image_subdirectory,base_naming_convention,curr_out_folder)
-            if any(skipimage{index}==1)
+            exit_code(index) = cat(str(skipimage{index}));
+	    if any(skipimage{index}==1)
                 
                 cell_feat = [];
-                exit_code(index) = 1;
                 continue
             end
             
@@ -325,7 +325,6 @@ for index = 1:length(label_subdirectories)
                     warning('potential partial scan for either Nuc or ER, however the other appears ok. Continue at your own risk.');
                 else
                     cell_feat = [];
-                    exit_code(index) = 1;
                     continue
                 end
             elseif any(any(skipimage{index}==2)) && run_partial_scans
