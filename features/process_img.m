@@ -309,7 +309,7 @@ for index = 1:length(label_subdirectories)
             %DPS 10/08/15 - After discussing with Emma, we will now mark images
             %that are partial scans and not trim images
             [nucfiles{index}, skipimage{index}] = preprocessImages(image_subdirectory,base_naming_convention,curr_out_folder)
-            exit_code(index) = cat(str(skipimage{index}));
+            exit_code(index) = num2str(skipimage{index});
 	    if any(skipimage{index}==1)
                 
                 cell_feat = [];
