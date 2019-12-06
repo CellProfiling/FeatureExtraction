@@ -1,0 +1,6 @@
+
+# Run analysis. ko1_H1_3_ is the prefix of the images to run the analysis on. Need the trailing _ to not copy too images for other samples
+./confocalanalyze.sh /image/directory/ko1_H1_3_ 0.160 yellow /output/directory 0 0
+
+# Works with both features.csv and features.csv.gz
+/usr/local/bin/matlab -nodisplay -nodesktop -nosplash -singleCompThread -r "cd ./feature_extraction/siRNA_scripts; create_oldfeats('ko1_H1_3_features.csv.gz', '/tmp/outtempdirectory');"
