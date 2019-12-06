@@ -1,41 +1,84 @@
 #!/bin/bash
 
-# Usage: confocalanalyze.sh <filename> <magnification> <color: yellow or magenta>
+# Usage: confocalanalyze.sh <filename> <resolution> <color: yellow or magenta>
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pid=$$
 basedir=/tmp/IFanalyze
 
-if [ $# -ne 3 ]
+if [ $# -ne 6 ]
 then
-	echo "Missing or extra arguments, 3 needed"
+	echo "Missing or extra arguments, 6 needed"
 	exit 120
 fi
 
 filename=$1
-magnification=$2
+resolution=$2
 special_color=$3
+datadir=$4
+override=$5
+runcellcycle=$6
 
-rm -rf $basedir/${pid}
-mkdir -p $basedir/${pid}/In/in
-mkdir -p $basedir/${pid}/Out
-ln -s -t $basedir/${pid}/In/in ${filename}*.tif
+outnameprefix=`basename ${filename}`
+analyzedir=${basedir}/${pid}
+
+rm -rf ${analyzedir}
+mkdir -p ${analyzedir}/In/in
+mkdir -p ${analyzedir}/Out
+cp -t ${analyzedir}/In/in ${filename}*.tif
+ret=$?
+if [ $ret -ne 0 ]
+then
+	cp -t ${analyzedir}/In/in ${filename}*.tif.gz
+	ret=$?
+	if [ $ret -ne 0 ]
+	then
+		exit 122
+	fi
+	gunzip ${analyzedir}/In/in/*.tif.gz
+fi
 
 # Call the script
-/usr/local/bin/matlab -nodisplay -nodesktop -nosplash -r "cd $dir/features; try; [arr exit_status] = process_img('${basedir}/${pid}/In','${basedir}/${pid}/Out', $magnification, '$special_color'); catch; exit(122); end; exit(exit_status);"
+/usr/local/bin/matlab -nodisplay -nodesktop -nosplash -singleCompThread -r "cd $dir; featextraction('$dir', '$analyzedir', $resolution, '$special_color', $override, $runcellcycle);"
+
 
 exitstatus=$?
-if [ $exitstatus -eq 0 ]
-then
-	mv ${basedir}/${pid}/Out/segmentation.png "${filename}segmentation.png"
 
-	if [ -f ${basedir}/${pid}/Out/features.csv ];
+if [ $exitstatus -eq 0 -o $exitstatus -eq 123 ]
+then
+	mkdir --mode=775 -p $datadir
+	cp ${analyzedir}/Out/in/in_segmentation.png "${datadir}/${outnameprefix}segmentation.png"
+	if [ -f ${analyzedir}/Out/in/in_features.csv ]
 	then
-		mv ${basedir}/${pid}/Out/features.csv "${filename}features.csv"
-		rm -rf $basedir/${pid}
-		exit 0
+		mv ${analyzedir}/Out/in/in_features.csv "${analyzedir}/Out/in/${outnameprefix}features.csv"
+		gzip -f "${analyzedir}/Out/in/${outnameprefix}features.csv"
+		cp "${analyzedir}/Out/in/${outnameprefix}features.csv.gz" "${datadir}/${outnameprefix}features.csv.gz"
+		ex=$?
+		if [ $ex -ne 0 ]
+		then
+			exitstatus=5
+		fi
 	else
-		exit 1
+		exitstatus=1
 	fi
-else
-	exit $exitstatus
 fi
+
+if [ $exitstatus -eq 0 -a $runcellcycle -eq 1 ]
+then
+	if [ -f ${analyzedir}/Out/in/in_ccPred.csv ];
+	then
+		set -e
+		cp ${analyzedir}/Out/in/in_ccPred.csv "${datadir}/${outnameprefix}ccPred.csv"
+		cp ${analyzedir}/Out/in/in_var.csv "${datadir}/${outnameprefix}var.csv"
+		set +e
+	else
+		exitstatus=123
+	fi
+fi
+
+if [ $exitstatus -eq 0 -o $exitstatus -eq 123 ]
+then
+	chmod 664 "${datadir}/${outnameprefix}"*
+fi
+
+rm -rf ${analyzedir}
+exit $exitstatus
