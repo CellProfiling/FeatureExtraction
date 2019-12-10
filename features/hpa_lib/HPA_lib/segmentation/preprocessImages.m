@@ -1,7 +1,7 @@
 function [nucfiles, skipimage] = preprocessImages(imagedir,namingconvention,outputdir)
 %This function checks that each channel has been scanned properly all the
 %way. If one channel has not, it throws a warning and then trims all the
-%channels to the smallest scanned area. 
+%channels to the smallest scanned area.
 %
 %INPUTS:
 %imagedir - string pointing to the directory where images are
@@ -10,7 +10,7 @@ function [nucfiles, skipimage] = preprocessImages(imagedir,namingconvention,outp
 %   protein_channel - suffix for protein channel e.g. '_green.tif'
 %   tubulin_channel - suffix for tubulin channel e.g. '_red.tif'
 %   er_channel - suffix for er channel e.g. '_yellow.tif'
-%outputdir - string pointing to where results should be saved. 
+%outputdir - string pointing to where results should be saved.
 %OUTPUTS:
 %
 %Written by: Devin P Sullivan 07,08,2015
@@ -21,26 +21,26 @@ function [nucfiles, skipimage] = preprocessImages(imagedir,namingconvention,outp
 %take the hit here and copy all the files to the new directory. This is the
 %cleanest way I can think to do this right now. I know this is a
 %significant performance hit for a rather rare issue, but otherwise we need
-%to replace all our original images - ASK EMMA about this. 
+%to replace all our original images - ASK EMMA about this.
 newimgdir = [outputdir,filesep,'failedimages'];
 
 if ~isdir(newimgdir)
     mkdir(newimgdir)
 end
 
-%first get all the paths 
+%first get all the paths
 % nucpath = [imagedir,filesep,'*',namingconvention.pattern,'*',namingconvention.nuclear_channel,'*'];
 nucpath = [imagedir,'*',namingconvention.pattern,'*',namingconvention.nuclear_channel,'*'];
 nucfiles = ml_ls(nucpath);
-% protpath = [imagedir,filesep,'*',namingconvention.pattern,'*',namingconvention.protein_channel,'*']; 
-protpath = [imagedir,'*',namingconvention.pattern,'*',namingconvention.protein_channel,'*']; 
+% protpath = [imagedir,filesep,'*',namingconvention.pattern,'*',namingconvention.protein_channel,'*'];
+protpath = [imagedir,'*',namingconvention.pattern,'*',namingconvention.protein_channel,'*'];
 protfiles = ml_ls(protpath);
-% mtpath = [imagedir,filesep,'*',namingconvention.pattern,'*',namingconvention.tubulin_channel,'*']; 
-mtpath = [imagedir,'*',namingconvention.pattern,'*',namingconvention.tubulin_channel,'*']; 
+% mtpath = [imagedir,filesep,'*',namingconvention.pattern,'*',namingconvention.tubulin_channel,'*'];
+mtpath = [imagedir,'*',namingconvention.pattern,'*',namingconvention.tubulin_channel,'*'];
 mtfiles = ml_ls(mtpath);
-% erpath = [imagedir,filesep,'*',namingconvention.pattern,'*',namingconvention.er_channel,'*'] 
-erpath = [imagedir,'*',namingconvention.pattern,'*',namingconvention.er_channel,'*'] 
-erfiles = ml_ls(erpath)
+% erpath = [imagedir,filesep,'*',namingconvention.pattern,'*',namingconvention.er_channel,'*']
+erpath = [imagedir,'*',namingconvention.pattern,'*',namingconvention.er_channel,'*'];
+erfiles = ml_ls(erpath);
 
 if any(strcmpi(namingconvention.blank_channels,'nuc'))
     error('The nuclear channel cannot be blank as it is needed for segmentation!')
@@ -74,7 +74,7 @@ for i = 1:length(nucfiles)
     protim = removergb(protim);
     mtim = removergb(mtim);
     erim = removergb(erim);
-   
+
    %Check if any are totally empty
    %Nuc
 %    if sum(nucim(:))==0
@@ -100,14 +100,14 @@ for i = 1:length(nucfiles)
        skipimage(i,4) = 1;
 %        namingconvention.blank_channels = [namingconvention.blank_channels,{'er'}];
    end
-   
+
    %Next check if any of the channels have partial scans
-   %Nuc 
+   %Nuc
    [xrangenuc,yrangenuc,partialnuc] = checkPartialScan(nucim);
    if partialnuc && ~skipimage(i,1)
        skipimage(i,1) = 2;
    end
-   %Prot 
+   %Prot
    [xrangeprot,yrangeprot,partialprot] = checkPartialScan(protim);
    if partialprot && ~skipimage(i,2)
        skipimage(i,2) = 2;
@@ -122,16 +122,16 @@ for i = 1:length(nucfiles)
    if partialer && ~skipimage(i,4)
        skipimage(i,4) = 2;
    end
-   
+
    %DPS 10/08/2015 - After talking to Emma, we decided to just discard
-   %partially scanned images rather than trim them. 
-%    %Find the smallest dimensions where we have fluorescence 
+   %partially scanned images rather than trim them.
+%    %Find the smallest dimensions where we have fluorescence
 %    xstart = max([min(xrangenuc),min(xrangeprot),min(xrangemt),min(xrangeer)]);
 %    xend = min([max(xrangenuc),max(xrangeprot),max(xrangemt),max(xrangeer)]);
 %    ystart = max([min(yrangenuc),min(yrangeprot),min(yrangemt),min(yrangeer)]);
 %    yend = min([max(yrangenuc),max(yrangeprot),max(yrangemt),max(yrangeer)]);
-% 
-% 
+%
+%
 %    %If our start or end is not the full image, make new images and save
 %    %them somewhere
 %    if (xstart || ystart)>1 || xend<size(nucim,1) || yend<size(nucim,2)
@@ -139,7 +139,7 @@ for i = 1:length(nucfiles)
 %        newprotim = nucim(ystart:yend,xstart:xend);
 %        newmtim = nucim(ystart:yend,xstart:xend);
 %        newerim = nucim(ystart:yend,xstart:xend);
-%        
+%
 %        %Nuc
 %        [oldpath,nucname,ext] = fileparts(nucfiles{i});
 %        imwrite(newnucim,[newimgdir,filesep,nucname,ext])
@@ -152,10 +152,10 @@ for i = 1:length(nucfiles)
 %        %ER
 %        [oldpath,ername,ext] = fileparts(erfiles{i});
 %        imwrite(newerim,[newimgdir,filesep,ername,ext])
-%        
+%
 %    end
-   
-   
+
+
 end
 
 %DPS 10/08/15 - Since we are no longer trimming images, this is
@@ -175,7 +175,7 @@ end
 end
 
 function myimg = readmyimg(imgpath,channelname,namingconvention,imgsize)
-  
+
     %[~,filepath,ext] = fileparts(imgpath);
     if nargin<2 || isempty(channelname)
        channelname = 'nothing';
@@ -199,7 +199,7 @@ function myimg = readmyimg(imgpath,channelname,namingconvention,imgsize)
 	%else
 	  %myimg = imread(imgpath);
 	%end
-	
+
     end
 
 end

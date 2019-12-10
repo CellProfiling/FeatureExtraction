@@ -5,9 +5,9 @@ dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pid=$$
 basedir=/tmp/IFanalyze
 
-if [ $# -ne 6 ]
+if [ $# -ne 8 ]
 then
-	echo "Missing or extra arguments, 6 needed"
+	echo "Missing or extra arguments, 8 needed"
 	exit 120
 fi
 
@@ -17,6 +17,8 @@ special_color=$3
 datadir=$4
 override=$5
 runcellcycle=$6
+pattern=$7
+mstype=$8
 
 outnameprefix=`basename ${filename}`
 analyzedir=${basedir}/${pid}
@@ -38,7 +40,7 @@ then
 fi
 
 # Call the script
-/usr/local/bin/matlab -nodisplay -nodesktop -nosplash -singleCompThread -r "cd $dir; featextraction('$dir', '$analyzedir', $resolution, '$special_color', $override, $runcellcycle);"
+/usr/local/bin/matlab -nodisplay -nodesktop -nosplash -singleCompThread -r "cd $dir; featextraction('$dir', '$analyzedir', $resolution, '$special_color', $override, $runcellcycle, '$pattern', '$mstype');"
 
 
 exitstatus=$?

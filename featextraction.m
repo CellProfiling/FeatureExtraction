@@ -1,8 +1,9 @@
-function featextraction(funcdir, analyzedir, resolution, special_color, override, runcellcycle)
-addpath(genpath(strcat(funcdir, '/feature_extraction')));
+function featextraction(funcdir, analyzedir, resolution, special_color, override, runcellcycle, pattern, mstype)
+addpath(genpath(strcat(funcdir, '/features')));
+addpath(genpath(strcat(funcdir, '/helperfuncs')));
 addpath(genpath(strcat(funcdir,'/cellcycle')));
 try
-	[arr exit_status] = process_img(strcat(analyzedir,'/In'),strcat(analyzedir,'/Out'), resolution, special_color, override);
+	[arr exit_status] = process_img(strcat(analyzedir,'/In'),strcat(analyzedir,'/Out'), resolution, special_color, override, pattern, mstype);
 catch e
     fprintf(2, 'Threw id: %s\n', e.identifier);
     fprintf(2, 'Threw message: %s\n', e.message);
