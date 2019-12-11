@@ -48,7 +48,7 @@ exitstatus=$?
 if [ $exitstatus -eq 0 -o $exitstatus -eq 123 ]
 then
 	mkdir --mode=775 -p $datadir
-	cp ${analyzedir}/Out/in/in_segmentation.png "${datadir}/${outnameprefix}segmentation.png"
+	cp "${analyzedir}/Out/in/in_segmentation.png.gz" "${datadir}/${outnameprefix}segmentation.png.gz"
 	if [ -f ${analyzedir}/Out/in/in_features.csv ]
 	then
 		mv ${analyzedir}/Out/in/in_features.csv "${analyzedir}/Out/in/${outnameprefix}features.csv"
