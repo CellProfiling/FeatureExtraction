@@ -82,5 +82,11 @@ then
 	chmod 664 "${datadir}/${outnameprefix}"*
 fi
 
+if [ $exitstatus -eq 123 ]
+then
+	echo "Cell cycle analysis failed"
+fi
+
+
 rm -rf ${analyzedir}
 exit $exitstatus
